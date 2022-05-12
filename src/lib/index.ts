@@ -28,6 +28,14 @@ import {
   getEIP712DomainSeparator,
 } from "../utils";
 
+/**
+ *
+ * @param {number} chainId  - Chain ID.
+ * @param {string} target   - Address of dApp's smart contract to call.
+ * @param {string} data     - Payload for `target`.
+ * @param {string} feeToken - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @returns {string} taskId - Task ID.
+ */
 const sendCallRequest = async (
   chainId: number,
   target: string,
@@ -54,6 +62,12 @@ const sendCallRequest = async (
   }
 };
 
+/**
+ *
+ * @param {ForwardRequest} request  - ForwardRequest to be relayed by Gelato Executors.
+ * @param {string} sponsorSignature - EIP-712 signature of sponsor (who pays Gelato Executors)
+ * @returns {string} taskId         - Task ID.
+ */
 const sendForwardRequest = async (
   request: ForwardRequest,
   sponsorSignature: BytesLike
@@ -76,6 +90,15 @@ const sendForwardRequest = async (
   }
 };
 
+/**
+ *
+ * @param {MetaTxRequest} request   - MetaTxRequest to be relayed by Gelato Executors.
+ * @param {string} userSignature    - EIP-712 signature from user:
+ *                                    EOA that interacts with target dApp's address.
+ * @param {string} sponsorSignature - EIP-712 signature from sponsor:
+ *                                    EOA that pays Gelato Executors, could be same as user.
+ * @returns {string} taskId         - Task ID.
+ */
 const sendMetaTxRequest = async (
   request: MetaTxRequest,
   userSignature: BytesLike,
@@ -100,6 +123,11 @@ const sendMetaTxRequest = async (
   }
 };
 
+/**
+ *
+ * @param {number} chainId - Chain ID
+ * @returns {boolean}
+ */
 const isChainSupported = async (chainId: number): Promise<boolean> => {
   try {
     const response = await axios.get(`${GELATO_RELAY_URL}/metabox-relays/`);
@@ -113,10 +141,20 @@ const isChainSupported = async (chainId: number): Promise<boolean> => {
   }
 };
 
+/**
+ *
+ * @param {number} chainId - Chain ID.
+ * @returns {PromiseLike<string[]>}
+ */
 const getFeeTokens = async (chainId: number): Promise<string[]> => {
   return await Oracle.getPaymentTokens(chainId);
 };
 
+/**
+ *
+ * @param {number} chainId - Chain ID.
+ * @returns
+ */
 const getMetaBoxAddressAndABI = (
   chainId: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,6 +164,11 @@ const getMetaBoxAddressAndABI = (
   return { address: metaBoxAddress, abi: metaBoxABI };
 };
 
+/**
+ *
+ * @param {number} chainId - Chain ID.
+ * @returns
+ */
 const getMetaBoxPullFeeAddressAndABI = (
   chainId: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -135,6 +178,11 @@ const getMetaBoxPullFeeAddressAndABI = (
   return { address: metaBoxPullFeeAddress, abi: metaBoxPullFeeABI };
 };
 
+/**
+ *
+ * @param {number} chainId - Chain ID.
+ * @returns
+ */
 const getRelayForwarderAddressAndABI = (
   chainId: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,6 +192,11 @@ const getRelayForwarderAddressAndABI = (
   return { address: relayForwarderAddress, abi: relayForwarderABI };
 };
 
+/**
+ *
+ * @param {number} chainId - Chain ID.
+ * @returns
+ */
 const getRelayForwarderPullFeeAddressAndABI = (
   chainId: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -156,6 +209,22 @@ const getRelayForwarderPullFeeAddressAndABI = (
   };
 };
 
+/**
+ *
+ * @param {number} chainId              - Chain ID.
+ * @param {string} target               - Address of dApp's smart contract to call.
+ * @param {string} data                 - Payload for `target`.
+ * @param {string} feeToken             - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {number} paymentType          - Type identifier for Gelato's payment. Can be 1, 2 or 3.
+ * @param {string} maxFee               - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {number} nonce                - Smart contract nonce for sponsor to sign.
+ *                                        Can be 0 if enforceSponsorNonce is always false.
+ * @param {boolean} enforceSponsorNonce - Whether or not to enforce replay protection using sponsor's nonce.
+ * @param {string} sponsor              - EOA address that pays Gelato Executors.
+ * @param {number} sponsorChainId       - Chain ID of where sponsor holds a Gas Tank balance with Gelato.
+ *                                        Relevant for paymentType=1
+ * @returns {ForwardRequest}
+ */
 const forwardRequest = (
   chainId: number,
   target: string,
@@ -182,6 +251,11 @@ const forwardRequest = (
   };
 };
 
+/**
+ *
+ * @param {ForwardRequest} request - `ForwardRequest`
+ * @returns {string} - EIP-712 compatible digest of `request` ready to be signed.
+ */
 const getForwardRequestDigestToSign = (request: ForwardRequest): string => {
   const isPullFee = request.paymentType === 3;
 
@@ -238,6 +312,23 @@ const getForwardRequestDigestToSign = (request: ForwardRequest): string => {
   return digest;
 };
 
+/**
+ *
+ * @param {number} chainId          - Chain ID.
+ * @param {string} target           - Address of dApp's smart contract to call.
+ * @param {string} data             - Payload for `target`.
+ * @param {string} feeToken         - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {number} paymentType      - Type identifier for Gelato's payment. Can be 1, 2 or 3.
+ * @param {string} maxFee           - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {string} user             - EOA of dApp's user
+ * @param {number} nonce            - user's smart contract nonce.
+ * @param {string} [sponsor]        - EOA that pays Gelato Executors.
+ * @param {number} [sponsorChainId] - Chain ID where sponsor holds a balance with Gelato.
+ *                                    Relevant for paymentType=1.
+ * @param {number} [deadline]       - Deadline for executing MetaTxRequest, UNIX timestamp in seconds.
+ *                                    Can also be 0 (not enforced).
+ * @returns
+ */
 const metaTxRequest = (
   chainId: number,
   target: string,
@@ -266,6 +357,11 @@ const metaTxRequest = (
   };
 };
 
+/**
+ *
+ * @param {MetaTxRequest} request - `MetaTxRequest`
+ * @returns {string} - EIP-712 compatible digest of `request` ready to be signed.
+ */
 const getMetaTxRequestDigestToSign = (request: MetaTxRequest): string => {
   const isPullFee = request.paymentType === 3;
 
@@ -324,6 +420,11 @@ const getMetaTxRequestDigestToSign = (request: MetaTxRequest): string => {
   return digest;
 };
 
+/**
+ *
+ * @param {ForwardRequest} request - `ForwardRequest`
+ * @returns {string} - Wallet compatible `request` ready to be signed.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getForwardRequestWalletPayloadToSign = (request: ForwardRequest): any => {
   const isPullFee = request.paymentType === 3;
@@ -346,6 +447,11 @@ const getForwardRequestWalletPayloadToSign = (request: ForwardRequest): any => {
   );
 };
 
+/**
+ *
+ * @param {MetaTxRequest} request - `MetaTxRequest`
+ * @returns {string} - Wallet compatible `request` ready to be signed.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getMetaTxRequestWalletPayloadToSign = (request: MetaTxRequest): any => {
   const isPullFee = request.paymentType === 3;
