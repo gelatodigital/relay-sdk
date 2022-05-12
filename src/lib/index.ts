@@ -34,7 +34,7 @@ import {
  * @param {string} target   - Address of dApp's smart contract to call.
  * @param {string} data     - Payload for `target`.
  * @param {string} feeToken - paymentToken for Gelato Executors. Use `0xeee...` for native token.
- * @returns {string} taskId - Task ID.
+ * @returns {PromiseLike<string>} taskId - Task ID.
  */
 const sendCallRequest = async (
   chainId: number,
