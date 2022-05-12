@@ -100,42 +100,97 @@ const sendCallRequest = async (
   target: string,
   data: string,
   feeToken: string
-): Promise<string>
+): Promise<string>;
 ```
 
 ## Sending ForwardRequest (Payments of type 1, 2 or 3)
+
+Firstly, we build a `ForwardRequest` object using the following method:
+
+```ts
+/**
+ *
+ * @param {number} chainId              - Chain ID.
+ * @param {string} target               - Address of dApp's smart contract to call.
+ * @param {string} data                 - Payload for `target`.
+ * @param {string} feeToken             - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {number} paymentType          - Type identifier for Gelato's payment. Can be 1, 2 or 3.
+ * @param {string} maxFee               - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {number} nonce                - Smart contract nonce for sponsor to sign.
+ *                                        Can be 0 if enforceSponsorNonce is always false.
+ * @param {boolean} enforceSponsorNonce - Whether or not to enforce replay protection using sponsor's nonce.
+ * @param {string} sponsor              - EOA address that pays Gelato Executors.
+ * @param {number} sponsorChainId       - Chain ID of where sponsor holds a Gas Tank balance with Gelato.
+ *                                        Relevant for paymentType=1
+ * @returns {ForwardRequest}
+ */
+const forwardRequest = (
+  chainId: number,
+  target: string,
+  data: BytesLike,
+  feeToken: string,
+  paymentType: number,
+  maxFee: string,
+  nonce: number,
+  enforceSponsorNonce: boolean,
+  sponsor: string,
+  sponsorChainId?: number
+): ForwardRequest;
+```
+
+Then we send `request` to Gelato Relay API. `sponsorSignature` is the EIP-712 signature from `sponsor`.
 
 ```ts
 /**
  *
  * @param {ForwardRequest} request  - ForwardRequest to be relayed by Gelato Executors.
- * @param {string} sponsorSignature - EIP-712 signature of sponsor (who pays Gelato Executors)
- * @returns {string} taskId         - Task ID.
+ * @param {string} sponsorSignature - EIP-712 signature of sponsor (who pays Gelato Executors).
+ * @returns {PromiseLike<string>} taskId - Task ID.
  */
 const sendForwardRequest = async (
   request: ForwardRequest,
   sponsorSignature: BytesLike
-): Promise<string> => {
-  try {
-    const response = await axios.post(
-      `${GELATO_RELAY_URL}/metabox-relays/${request.chainId}`,
-      {
-        typeId: "ForwardRequest",
-        ...request,
-        sponsorSignature,
-      }
-    );
-
-    return response.data.taskId;
-  } catch (error) {
-    const errorMsg = (error as Error).message ?? String(error);
-
-    throw new Error(`sendForwardRequest: Failed with error: ${errorMsg}`);
-  }
-};
+): Promise<string>;
 ```
 
 ## Sending MetaTxRequest (Payments of type 1, 2 or 3)
+
+Firstly we create `MetaTxRequest` object using the following SDK's method:
+
+```ts
+/**
+ *
+ * @param {number} chainId          - Chain ID.
+ * @param {string} target           - Address of dApp's smart contract to call.
+ * @param {string} data             - Payload for `target`.
+ * @param {string} feeToken         - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {number} paymentType      - Type identifier for Gelato's payment. Can be 1, 2 or 3.
+ * @param {string} maxFee           - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {string} user             - EOA of dApp's user
+ * @param {number} nonce            - user's smart contract nonce.
+ * @param {string} [sponsor]        - EOA that pays Gelato Executors.
+ * @param {number} [sponsorChainId] - Chain ID where sponsor holds a balance with Gelato.
+ *                                    Relevant for paymentType=1.
+ * @param {number} [deadline]       - Deadline for executing MetaTxRequest, UNIX timestamp in seconds.
+ *                                    Can also be 0 (not enforced).
+ * @returns
+ */
+const metaTxRequest = (
+  chainId: number,
+  target: string,
+  data: BytesLike,
+  feeToken: string,
+  paymentType: number,
+  maxFee: string,
+  user: string,
+  nonce: number,
+  sponsor?: string,
+  sponsorChainId?: number,
+  deadline?: number
+): MetaTxRequest;
+```
+
+Then we send `request` to Gelato Relay API. `userSignature` is the EIP-712 signature from dApp's user. If `sponsorSignature` is not passed, we assume `sponsor` is also the `user`, so that we set it equal to `sponsorSignature`.
 
 ```ts
 /**
@@ -151,23 +206,5 @@ const sendMetaTxRequest = async (
   request: MetaTxRequest,
   userSignature: BytesLike,
   sponsorSignature?: BytesLike
-): Promise<string> => {
-  try {
-    const response = await axios.post(
-      `${GELATO_RELAY_URL}/metabox-relays/${request.chainId}`,
-      {
-        typeId: "MetaTxRequest",
-        ...request,
-        userSignature,
-        sponsorSignature: sponsorSignature ?? userSignature,
-      }
-    );
-
-    return response.data.taskId;
-  } catch (error) {
-    const errorMsg = (error as Error).message ?? String(error);
-
-    throw new Error(`sendMetaTxRequest: Failed with error: ${errorMsg}`);
-  }
-};
+): Promise<string>;
 ```
