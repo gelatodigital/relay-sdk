@@ -41,6 +41,8 @@ const getMetaBoxPullFeeAddress = (chainId: number): string => {
       return utils.getAddress("0xE2c5CE12FFBAF12FaEc238E029aBc5b0FF27F18b");
     case 42:
       return utils.getAddress("0xf93f0462D1882bf9CB5ecf1830ceFA826A254ADE");
+    case 137:
+      return utils.getAddress("0xDf592cB2d32445F8e831d211AB20D3233cA41bD8");
     case 80001:
       return utils.getAddress("0xc2336e796F77E4E57b6630b6dEdb01f5EE82383e");
     default:
@@ -58,6 +60,8 @@ const getRelayForwarderAddress = (chainId: number): string => {
       return utils.getAddress("0xDde7416baE4CcfB1f131038482D424AdD61cF378");
     case 42:
       return utils.getAddress("0xC176f63f3827afE6789FD737f4679B299F97d108");
+    case 137:
+      return utils.getAddress("0xcF0EbF1C61B70970858d0feA8A105d266aC3681F");
     case 80001:
       return utils.getAddress("0x953c67EFFFB961244E72bcE8b887a6ead29c45AF");
     default:
@@ -75,6 +79,8 @@ const getRelayForwarderPullFeeAddress = (chainId: number): string => {
       return utils.getAddress("0x30227F1597e81Ca2b87161A68cdd2e330947CfA2");
     case 42:
       return utils.getAddress("0x8185048016f10efa675b0eF969c01b14006a4740");
+    case 137:
+      return utils.getAddress("0xa6259303C270207F1eE2cCaEFFF50547B215DF75");
     case 80001:
       return utils.getAddress("0xf93f0462D1882bf9CB5ecf1830ceFA826A254ADE");
     default:

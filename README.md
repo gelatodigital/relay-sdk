@@ -6,7 +6,11 @@ SDK to integrate into Gelato Multichain Relay
 ## Table of Contents <!-- omit in toc -->
 
 - [Installation](#installation)
-- [Examples](#examples)
+- [Payment Types](#paymentTypes)
+- [Request Types](#requestTypes)
+- [Sending ForwardCall (Payment of type 0)](#forwardCall)
+- [Sending ForwardRequest (Payments of type 1, 2 or 3)](#forwardRequest)
+- [Sending MetaTxRequest (Payments of type 1, 2 or 3)](#metaTxRequest)
 
 ## Installation
 

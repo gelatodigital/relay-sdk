@@ -2,23 +2,16 @@ import { utils, Wallet } from "ethers";
 
 import { GelatoRelaySDK } from "./src";
 
-const CHAIN_ID = 42;
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const HELLO_WORLD = "0x61bBe925A5D646cE074369A6335e5095Ea7abB7A";
 
-const callRequest = async () => {
+const callRequest = async (chainId: number, target: string) => {
   // abi encode for HelloWorld.sayHiVanilla(address _feeToken) (see 0x61bBe925A5D646cE074369A6335e5095Ea7abB7A on Kovan)
   const data = `0x4b327067000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`;
 
-  await GelatoRelaySDK.sendCallRequest(
-    CHAIN_ID,
-    HELLO_WORLD,
-    data,
-    NATIVE_TOKEN
-  );
+  await GelatoRelaySDK.sendCallRequest(chainId, target, data, NATIVE_TOKEN);
 };
 
-const forwardRequest = async () => {
+const forwardRequest = async (chainId: number, target: string) => {
   const wallet = Wallet.createRandom();
   const sponsor = await wallet.getAddress();
 
@@ -28,8 +21,8 @@ const forwardRequest = async () => {
   const data = `0x4b327067000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeaeeeeeeeeeeeeeeeee`;
 
   const forwardRequest = GelatoRelaySDK.forwardRequest(
-    CHAIN_ID,
-    HELLO_WORLD,
+    chainId,
+    target,
     data,
     NATIVE_TOKEN,
     1,
@@ -48,7 +41,7 @@ const forwardRequest = async () => {
   await GelatoRelaySDK.sendForwardRequest(forwardRequest, sponsorSignature);
 };
 
-const metaTxRequest = async () => {
+const metaTxRequest = async (chainId: number, target: string) => {
   const wallet = Wallet.createRandom();
   const user = await wallet.getAddress();
 
@@ -57,8 +50,8 @@ const metaTxRequest = async () => {
   const data = `0x4c6d2627000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`;
 
   const metaTxRequest = GelatoRelaySDK.metaTxRequest(
-    CHAIN_ID,
-    HELLO_WORLD,
+    chainId,
+    target,
     data,
     NATIVE_TOKEN,
     1,
@@ -76,10 +69,67 @@ const metaTxRequest = async () => {
   await GelatoRelaySDK.sendMetaTxRequest(metaTxRequest, userSignature);
 };
 
+const testKovan = async (): Promise<void> => {
+  const chainId = 42;
+  const HELLO_WORLD = "0x61bBe925A5D646cE074369A6335e5095Ea7abB7A";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testRinkeby = async (): Promise<void> => {
+  const chainId = 4;
+  const HELLO_WORLD = "0xeeea839E2435873adA11d5dD4CAE6032742C0445";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testGoerli = async (): Promise<void> => {
+  const chainId = 5;
+  const HELLO_WORLD = "0x8580995EB790a3002A55d249e92A8B6e5d0b384a";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testMatic = async (): Promise<void> => {
+  const chainId = 137;
+  const HELLO_WORLD = "0x9B79b798563e538cc326D03696B3Be38b971D282";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testMumbai = async (): Promise<void> => {
+  const chainId = 80001;
+  const HELLO_WORLD = "0xE6Bc17A4AD90d03617a24E6799c0ea228E8f912F";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
 async function main() {
-  await callRequest();
-  await forwardRequest();
-  await metaTxRequest();
+  //await testKovan();
+  //await testGoerli();
+  //await testRinkeby();
+  //await testMatic();
+  await testMumbai();
 }
 
 main()
