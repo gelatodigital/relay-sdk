@@ -125,10 +125,10 @@ const testMumbai = async (): Promise<void> => {
 };
 
 async function main() {
-  //await testKovan();
-  //await testGoerli();
-  //await testRinkeby();
-  //await testMatic();
+  await testKovan();
+  await testGoerli();
+  await testRinkeby();
+  await testMatic();
   await testMumbai();
 }
 
