@@ -6,11 +6,13 @@ SDK to integrate into Gelato Multichain Relay
 ## Table of Contents <!-- omit in toc -->
 
 - [Installation](#installation)
-- [Payment Types](#paymentTypes)
-- [Request Types](#requestTypes)
-- [Sending ForwardCall (Payment of type 0)](#forwardCall)
-- [Sending ForwardRequest (Payments of type 1, 2 or 3)](#forwardRequest)
-- [Sending MetaTxRequest (Payments of type 1, 2 or 3)](#metaTxRequest)
+- [Introduction](#introduction)
+- [Quick Start](#quick-start)
+- [Payment Types](#payment-types)
+- [Request Types](#request-types)
+- [Sending ForwardCall](#sending-forwardcall)
+- [Sending ForwardRequest](#sending-forwardrequest)
+- [Sending MetaTxRequest](#sending-metatxrequest)
 
 ## Installation
 
@@ -24,19 +26,87 @@ or
 npm install @gelatonetwork/gelato-relay-sdk
 ```
 
+## Introduction
+
+Gelato Relay SDK offers a convenient suite of functions in order to interact with Gelato Relay API.
+Gelato Relay API is a service that allows users and developers to get transactions mined fast, reliably and securely, without having to deal with the low-level complexities of blockchains.
+
+As requests are submitted to Gelato Relay API, a network of Gelato Executors will execute and get said transactions mined as soon as they become executable (hence paying for gas fees). ECDSA signatures enforce the integrity of data whenever necessary, while gas fee refunds can be handled in any of our supported payment types. In this way, users and developers no longer have to become their own central point of failure with regards to their blockchain infrastructure, which may improve on the UX, costs, security and liveness of their Web3 systems.
+
+## Quick Start
+
+Below is a simple example in order to get us started. We get Gelato Relay to call a `HelloWorld` smart contract on our behalf. Note that in this example there is no dependency on RPC providers, as we simply build all transaction data, its required `sponsorSignature` and send to Gelato Relay API. `sponsorSignature` is required by `sponsor` in order for Gelato to securely credit payments, but in this example we do not enforce any payment to be made as it is a testnet. In this way, interacting with a blockchain is simplified to sending a `POST` request to a web server.
+
+```ts
+import { Wallet, utils } from "ethers";
+import { GelatoRelaySDK } from "@gelatonetwork/gelato-relay-sdk";
+
+const forwardRequestExample = async () => {
+  // Goerli
+  const chainId = 5;
+  // HELLO WORLD smart contract on Goerli
+  const target = "0x8580995EB790a3002A55d249e92A8B6e5d0b384a";
+  // Create Mock wallet
+  const wallet = Wallet.createRandom();
+  const sponsor = await wallet.getAddress();
+
+  console.log(`Mock PK: ${await wallet._signingKey().privateKey}`);
+  console.log(`Mock wallet address: ${sponsor}`);
+  // abi encode for HelloWorld.sayHiVanilla(address _feeToken)
+  const data = `0x4b327067000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeaeeeeeeeeeeeeeeeee`;
+  // Async Gas Tank payment model (won't be enforced on testnets, hence no need to deposit into Gelato's Gas Tank smart contract)
+  const paymentType = 1;
+  // Maximum fee that sponsor is willing to pay worth of NATIVE_TOKEN
+  const maxFee = "1000000000000000000";
+  // We do not enforce smart contract nonces to simplify the example.
+  // In reality, this decision depends whether or not target address already implements
+  // replay protection. (More info in the docs)
+  const sponsorNonce = 0;
+  const enforceSponsorNonce = false;
+
+  // Build ForwardRequest object
+  const forwardRequest = GelatoRelaySDK.forwardRequest(
+    chainId,
+    target,
+    data,
+    NATIVE_TOKEN,
+    paymentType,
+    maxFee,
+    sponsorNonce,
+    enforceSponsorNonce,
+    sponsor
+  );
+
+  // Get EIP-712 hash (aka digest) of forwardRequest
+  const digest = GelatoRelaySDK.getForwardRequestDigestToSign(forwardRequest);
+
+  // Sign digest using Mock private key
+  const sponsorSignature: utils.BytesLike = utils.joinSignature(
+    await wallet._signingKey().signDigest(digest)
+  );
+
+  // Send forwardRequest and its sponsorSignature to Gelato Relay API
+  await GelatoRelaySDK.sendForwardRequest(forwardRequest, sponsorSignature);
+
+  console.log("ForwardRequest submitted!");
+};
+
+forwardRequestExample();
+```
+
 ## Payment Types
 
 Upon sending messages and signatures to Gelato Relay API, Gelato Executors will acknowledge and execute them as soon as they are ready, hence paying gas fees in native token. Gelato Executors can have their fee costs refunded, plus a small fraction as incentive, in one of the following options:
 
-Synchronous Payment (Type 0): This means that the `target` smart contract will pay Gelato Relay's smart contract as the call is forwarded. Payment can be done in `feeToken`, where it is expected to be a whitelisted payment token.
+`Synchronous Payment (Type 0)`: This means that the `target` smart contract will pay Gelato Relay's smart contract as the call is forwarded. Payment can be done in `feeToken`, where it is expected to be a whitelisted payment token.
 
-Asynchronous Gas Tank Payment (Type 1): This means that the `sponsor` must hold a balance in one of Gelato's Gas Tank smart contracts. The balance could even be held on a different `chainId` than the one the transaction is being relayed on (as defined by `sponsorChainId`). An event is emitted to tell Gelato how much to charge in the future, which shall be acknowledged in an off-chain accounting system. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
+`Asynchronous Gas Tank Payment (Type 1)`: This means that the `sponsor` must hold a balance in one of Gelato's Gas Tank smart contracts. The balance could even be held on a different `chainId` than the one the transaction is being relayed on (as defined by `sponsorChainId`). An event is emitted to tell Gelato how much to charge in the future, which shall be acknowledged in an off-chain accounting system. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
 
-Synchronous Gas Tank Payment (Type 2): Similarly to `Type 1`, but `sponsor` is expected to hold a balance with Gelato on the same `chainId` where the transaction is executed. Fee deduction happens during the transaction. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
+`Synchronous Gas Tank Payment (Type 2)`: Similarly to `Type 1`, but `sponsor` is expected to hold a balance with Gelato on the same `chainId` where the transaction is executed. Fee deduction happens during the transaction. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
 
-Synchronous Pull Fee Payment (Type 3): In this scenario a `sponsor` pre-approves the appropriate Gelato Relay's smart contract to spend tokens up so some maximum allowance value. During execution of the transaction, Gelato will credit due fees using `IERC20(feeToken).transferFrom(...)` in order to pull fees from his/her account. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
+`Synchronous Pull Fee Payment (Type 3)`: In this scenario a `sponsor` pre-approves the appropriate Gelato Relay's smart contract to spend tokens up so some maximum allowance value. During execution of the transaction, Gelato will credit due fees using `IERC20(feeToken).transferFrom(...)` in order to pull fees from his/her account. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
 
-Note that payment of type 0 is the simplest one, as it requires no `sponsor` signature to be provided, but it assumes that the `target` smart contract refunds `msg.sender` due amount of fees in `feeToken`.
+Note that payment of type 0 is the simplest one, as it requires no `sponsor` signature to be provided, but it assumes that the `target` smart contract refunds `msg.sender` due amount of fees in `feeToken`. This may require changes to the internal logic of `target` smart contract.
 
 ## Request Types
 
@@ -86,7 +156,9 @@ type MetaTxRequest = {
 
 `MetaTxRequest` is designed to handle payments of type 1, 2 and 3, in cases where the `target` contract does not have any meta-transaction nor replay protection logic. In this case, the appropriate Gelato Relay's smart contract already verifies `user` and `sponsor` signatures. `user` is the EOA address that wants to interact with the dApp, while `sponsor` is the account that pays fees.
 
-## Sending ForwardCall (Payment of type 0)
+## Sending ForwardCall
+
+### ForwardCall are for payments of Type 0.
 
 ForwardCall requests require no signatures and can be submitted by calling the following method in Gelato Relay SDK:
 
@@ -107,7 +179,9 @@ const sendCallRequest = async (
 ): Promise<string>;
 ```
 
-## Sending ForwardRequest (Payments of type 1, 2 or 3)
+## Sending ForwardRequest
+
+### ForwardRequest are for payments of Type 1, 2 or 3.
 
 Firstly, we build a `ForwardRequest` object using the following method:
 
@@ -157,7 +231,9 @@ const sendForwardRequest = async (
 ): Promise<string>;
 ```
 
-## Sending MetaTxRequest (Payments of type 1, 2 or 3)
+## Sending MetaTxRequest
+
+### MetaTxRequest are for payments of Type 1, 2 or 3.
 
 Firstly we create `MetaTxRequest` object using the following SDK's method:
 
