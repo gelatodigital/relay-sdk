@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BytesLike, utils } from "ethers";
 import { _TypedDataEncoder } from "ethers/lib/utils";
-import { Oracle } from "@gelatonetwork/core-sdk";
+import { Oracle, TransactionStatus } from "@gelatonetwork/core-sdk";
 
 import {
   GELATO_RELAY_URL,
@@ -474,6 +474,20 @@ const getMetaTxRequestWalletPayloadToSign = (request: MetaTxRequest): any => {
   );
 };
 
+const getStatus = async (
+  taskId: string
+): Promise<TransactionStatus | undefined> => {
+  let result: TransactionStatus | undefined;
+  try {
+    const res = await axios.get(`${GELATO_RELAY_URL}/tasks/${taskId}`);
+    if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+      result = res.data.data[0];
+    }
+  } catch (error) {} // eslint-disable-line no-empty
+
+  return result;
+};
+
 export {
   isChainSupported,
   sendCallRequest,
@@ -490,4 +504,6 @@ export {
   getMetaTxRequestDigestToSign,
   getForwardRequestWalletPayloadToSign,
   getMetaTxRequestWalletPayloadToSign,
+  getStatus,
+  TransactionStatus,
 };

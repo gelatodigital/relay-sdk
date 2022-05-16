@@ -1,6 +1,7 @@
 import { utils, Wallet } from "ethers";
 
 import { GelatoRelaySDK } from "./src";
+import { getStatus } from "./src/lib";
 
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -8,7 +9,16 @@ const callRequest = async (chainId: number, target: string) => {
   // abi encode for HelloWorld.sayHiVanilla(address _feeToken) (see 0x61bBe925A5D646cE074369A6335e5095Ea7abB7A on Kovan)
   const data = `0x4b327067000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`;
 
-  await GelatoRelaySDK.sendCallRequest(chainId, target, data, NATIVE_TOKEN);
+  const taskId = await GelatoRelaySDK.sendCallRequest(
+    chainId,
+    target,
+    data,
+    NATIVE_TOKEN
+  );
+
+  const status = await getStatus(taskId);
+
+  console.log(`Status for task ${taskId}: ${status}`);
 };
 
 const forwardRequest = async (chainId: number, target: string) => {
@@ -38,7 +48,14 @@ const forwardRequest = async (chainId: number, target: string) => {
     await wallet._signingKey().signDigest(digest)
   );
 
-  await GelatoRelaySDK.sendForwardRequest(forwardRequest, sponsorSignature);
+  const taskId = await GelatoRelaySDK.sendForwardRequest(
+    forwardRequest,
+    sponsorSignature
+  );
+
+  const status = await getStatus(taskId);
+
+  console.log(`Status for task ${taskId}: ${status}`);
 };
 
 const metaTxRequest = async (chainId: number, target: string) => {
@@ -66,7 +83,14 @@ const metaTxRequest = async (chainId: number, target: string) => {
     await wallet._signingKey().signDigest(digest)
   );
 
-  await GelatoRelaySDK.sendMetaTxRequest(metaTxRequest, userSignature);
+  const taskId = await GelatoRelaySDK.sendMetaTxRequest(
+    metaTxRequest,
+    userSignature
+  );
+
+  const status = await getStatus(taskId);
+
+  console.log(`Status for task ${taskId}: ${status}`);
 };
 
 const testKovan = async (): Promise<void> => {
