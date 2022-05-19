@@ -46,6 +46,7 @@ const forwardRequestExample = async () => {
   const chainId = 5;
   // HELLO WORLD smart contract on Goerli
   const target = "0x8580995EB790a3002A55d249e92A8B6e5d0b384a";
+  const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
   // Create Mock wallet
   const wallet = Wallet.createRandom();
   const sponsor = await wallet.getAddress();
