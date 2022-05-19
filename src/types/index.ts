@@ -15,9 +15,12 @@ const EIP712ForwardRequestTypeData = {
     { name: "feeToken", type: "address" },
     { name: "paymentType", type: "uint256" },
     { name: "maxFee", type: "uint256" },
+    { name: "gas", type: "uint256" },
     { name: "sponsor", type: "address" },
     { name: "sponsorChainId", type: "uint256" },
     { name: "nonce", type: "uint256" },
+    { name: "enforceSponsorNonce", type: "bool" },
+    { name: "enforceSponsorNonceOrdering", type: "bool" },
   ],
 };
 
@@ -29,6 +32,7 @@ const EIP712MetaTxRequestTypeData = {
     { name: "feeToken", type: "address" },
     { name: "paymentType", type: "uint256" },
     { name: "maxFee", type: "uint256" },
+    { name: "gas", type: "uint256" },
     { name: "user", type: "address" },
     { name: "sponsor", type: "address" },
     { name: "sponsorChainId", type: "uint256" },
@@ -42,20 +46,32 @@ type ForwardCallParams = {
   target: string;
   data: BytesLike;
   feeToken: string;
+  gas: string;
 };
 
-type ForwardRequest = ForwardCallParams & {
+type ForwardRequest = {
+  chainId: number;
+  target: string;
+  data: BytesLike;
+  feeToken: string;
   paymentType: number;
   maxFee: string;
+  gas: string;
   sponsor: string;
   sponsorChainId: number;
   nonce: number;
   enforceSponsorNonce: boolean;
+  enforceSponsorNonceOrdering: boolean;
 };
 
-type MetaTxRequest = ForwardCallParams & {
+type MetaTxRequest = {
+  chainId: number;
+  target: string;
+  data: BytesLike;
+  feeToken: string;
   paymentType: number;
   maxFee: string;
+  gas: string;
   user: string;
   sponsor: string;
   sponsorChainId: number;
@@ -64,6 +80,7 @@ type MetaTxRequest = ForwardCallParams & {
 };
 
 export {
+  ForwardCallParams,
   ForwardRequest,
   MetaTxRequest,
   EIP712Domain,

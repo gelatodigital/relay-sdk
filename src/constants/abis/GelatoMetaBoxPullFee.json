@@ -192,6 +192,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_pullFeeRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "initPullFeeRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "components": [
           {
             "internalType": "uint256",
@@ -221,6 +234,11 @@
           {
             "internalType": "uint256",
             "name": "maxFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "gas",
             "type": "uint256"
           },
           {
@@ -326,6 +344,19 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pullFeeRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

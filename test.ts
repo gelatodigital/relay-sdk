@@ -4,6 +4,7 @@ import { GelatoRelaySDK } from "./src";
 import { getStatus } from "./src/lib";
 
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+const GAS = "200000";
 
 const callRequest = async (chainId: number, target: string) => {
   // abi encode for HelloWorld.sayHiVanilla(address _feeToken) (see 0x61bBe925A5D646cE074369A6335e5095Ea7abB7A on Kovan)
@@ -13,12 +14,13 @@ const callRequest = async (chainId: number, target: string) => {
     chainId,
     target,
     data,
-    NATIVE_TOKEN
+    NATIVE_TOKEN,
+    GAS
   );
 
   const status = await getStatus(taskId);
 
-  console.log(`Status for task ${taskId}: ${status}`);
+  console.log(`Status for task ${taskId}: ${JSON.stringify(status)}`);
 };
 
 const forwardRequest = async (chainId: number, target: string) => {
@@ -37,6 +39,7 @@ const forwardRequest = async (chainId: number, target: string) => {
     NATIVE_TOKEN,
     1,
     "1000000000000000000",
+    GAS,
     0,
     false,
     sponsor
@@ -55,7 +58,7 @@ const forwardRequest = async (chainId: number, target: string) => {
 
   const status = await getStatus(taskId);
 
-  console.log(`Status for task ${taskId}: ${status}`);
+  console.log(`Status for task ${taskId}: ${JSON.stringify(status)}`);
 };
 
 const metaTxRequest = async (chainId: number, target: string) => {
@@ -73,6 +76,7 @@ const metaTxRequest = async (chainId: number, target: string) => {
     NATIVE_TOKEN,
     1,
     "100000000000000000000",
+    GAS,
     user,
     0
   );
@@ -90,7 +94,7 @@ const metaTxRequest = async (chainId: number, target: string) => {
 
   const status = await getStatus(taskId);
 
-  console.log(`Status for task ${taskId}: ${status}`);
+  console.log(`Status for task ${taskId}: ${JSON.stringify(status)}`);
 };
 
 const testKovan = async (): Promise<void> => {

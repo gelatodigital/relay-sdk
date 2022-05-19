@@ -58,11 +58,15 @@ const forwardRequestExample = async () => {
   const paymentType = 1;
   // Maximum fee that sponsor is willing to pay worth of NATIVE_TOKEN
   const maxFee = "1000000000000000000";
+  // Gas limit
+  const gas = "200000";
   // We do not enforce smart contract nonces to simplify the example.
   // In reality, this decision depends whether or not target address already implements
   // replay protection. (More info in the docs)
   const sponsorNonce = 0;
   const enforceSponsorNonce = false;
+  // Only relevant when enforceSponsorNonce=true
+  const enforceSponsorNonceOrdering = false;
 
   // Build ForwardRequest object
   const forwardRequest = GelatoRelaySDK.forwardRequest(
@@ -72,6 +76,7 @@ const forwardRequestExample = async () => {
     NATIVE_TOKEN,
     paymentType,
     maxFee,
+    gas,
     sponsorNonce,
     enforceSponsorNonce,
     sponsor
@@ -116,6 +121,7 @@ type ForwardCall = {
   target: string;
   data: BytesLike;
   feeToken: string;
+  gas: string;
 };
 ```
 
@@ -129,10 +135,12 @@ type ForwardRequest = {
   feeToken: string;
   paymentType: number;
   maxFee: string;
+  gas: string;
   sponsor: string;
   sponsorChainId: number;
   nonce: number;
   enforceSponsorNonce: boolean;
+  enforceSponsorNonceOrdering: boolean;
 };
 ```
 
@@ -146,6 +154,7 @@ type MetaTxRequest = {
   feeToken: string;
   paymentType: number;
   maxFee: string;
+  gas: string;
   user: string;
   sponsor: string;
   sponsorChainId: number;
@@ -169,13 +178,15 @@ ForwardCall requests require no signatures and can be submitted by calling the f
  * @param {string} target   - Address of dApp's smart contract to call.
  * @param {string} data     - Payload for `target`.
  * @param {string} feeToken - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {string} gas      - Gas limit.
  * @returns {PromiseLike<string>} taskId - Task ID.
  */
 const sendCallRequest = async (
   chainId: number,
   target: string,
   data: string,
-  feeToken: string
+  feeToken: string,
+  gas: string
 ): Promise<string>;
 ```
 
@@ -188,18 +199,21 @@ Firstly, we build a `ForwardRequest` object using the following method:
 ```ts
 /**
  *
- * @param {number} chainId              - Chain ID.
- * @param {string} target               - Address of dApp's smart contract to call.
- * @param {string} data                 - Payload for `target`.
- * @param {string} feeToken             - paymentToken for Gelato Executors. Use `0xeee...` for native token.
- * @param {number} paymentType          - Type identifier for Gelato's payment. Can be 1, 2 or 3.
- * @param {string} maxFee               - Maximum fee sponsor is willing to pay Gelato Executors.
- * @param {number} nonce                - Smart contract nonce for sponsor to sign.
- *                                        Can be 0 if enforceSponsorNonce is always false.
- * @param {boolean} enforceSponsorNonce - Whether or not to enforce replay protection using sponsor's nonce.
- * @param {string} sponsor              - EOA address that pays Gelato Executors.
- * @param {number} sponsorChainId       - Chain ID of where sponsor holds a Gas Tank balance with Gelato.
- *                                        Relevant for paymentType=1
+ * @param {number} chainId                        - Chain ID.
+ * @param {string} target                         - Address of dApp's smart contract to call.
+ * @param {string} data                           - Payload for `target`.
+ * @param {string} feeToken                       - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {number} paymentType                    - Type identifier for Gelato's payment. Can be 1, 2 or 3.
+ * @param {string} maxFee                         - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {string} gas                            - Gas limit.
+ * @param {number} nonce                          - Smart contract nonce for sponsor to sign.
+ *                                                Can be 0 if enforceSponsorNonce is always false.
+ * @param {boolean} enforceSponsorNonce           - Whether or not to enforce replay protection using sponsor's nonce.
+ * @param {string} sponsor                        - EOA address that pays Gelato Executors.
+ * @param {number} [sponsorChainId]               - Chain ID of where sponsor holds a Gas Tank balance with Gelato.
+ *                                                  Relevant for paymentType=1. Defaults to `chainId` if not provided.
+ * @param {boolean} [enforceSponsorNonceOrdering] - Whether or not ordering matters for concurrently submitted transactions.
+ *                                                  Defaults to `true` if not provided.
  * @returns {ForwardRequest}
  */
 const forwardRequest = (
@@ -209,10 +223,12 @@ const forwardRequest = (
   feeToken: string,
   paymentType: number,
   maxFee: string,
+  gas: string,
   nonce: number,
   enforceSponsorNonce: boolean,
   sponsor: string,
-  sponsorChainId?: number
+  sponsorChainId?: number,
+  enforceSponsorNonceOrdering?: boolean
 ): ForwardRequest;
 ```
 
@@ -246,6 +262,7 @@ Firstly we create `MetaTxRequest` object using the following SDK's method:
  * @param {string} feeToken         - paymentToken for Gelato Executors. Use `0xeee...` for native token.
  * @param {number} paymentType      - Type identifier for Gelato's payment. Can be 1, 2 or 3.
  * @param {string} maxFee           - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {string} gas              - Gas limit.
  * @param {string} user             - EOA of dApp's user
  * @param {number} nonce            - user's smart contract nonce.
  * @param {string} [sponsor]        - EOA that pays Gelato Executors.
@@ -253,7 +270,7 @@ Firstly we create `MetaTxRequest` object using the following SDK's method:
  *                                    Relevant for paymentType=1.
  * @param {number} [deadline]       - Deadline for executing MetaTxRequest, UNIX timestamp in seconds.
  *                                    Can also be 0 (not enforced).
- * @returns
+ * @returns {MetaTxRequest}
  */
 const metaTxRequest = (
   chainId: number,
@@ -262,6 +279,7 @@ const metaTxRequest = (
   feeToken: string,
   paymentType: number,
   maxFee: string,
+  gas: string,
   user: string,
   nonce: number,
   sponsor?: string,
@@ -278,9 +296,9 @@ Then we send `request` to Gelato Relay API. `userSignature` is the EIP-712 signa
  * @param {MetaTxRequest} request   - MetaTxRequest to be relayed by Gelato Executors.
  * @param {string} userSignature    - EIP-712 signature from user:
  *                                    EOA that interacts with target dApp's address.
- * @param {string} [sponsorSignature] - EIP-712 signature from sponsor:
+ * @param {string} sponsorSignature - EIP-712 signature from sponsor:
  *                                    EOA that pays Gelato Executors, could be same as user.
- * @returns {string} taskId         - Task ID.
+ * @returns {PromiseLike<string>} taskId         - Task ID.
  */
 const sendMetaTxRequest = async (
   request: MetaTxRequest,

@@ -179,6 +179,11 @@
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "gas",
+            "type": "uint256"
+          },
+          {
             "internalType": "address",
             "name": "sponsor",
             "type": "address"
@@ -196,6 +201,11 @@
           {
             "internalType": "bool",
             "name": "enforceSponsorNonce",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "enforceSponsorNonceOrdering",
             "type": "bool"
           }
         ],
@@ -267,6 +277,38 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_pullFeeRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "initPullFeeRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "messageDelivered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -310,6 +352,19 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pullFeeRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

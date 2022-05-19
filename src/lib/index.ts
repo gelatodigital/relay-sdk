@@ -34,13 +34,15 @@ import {
  * @param {string} target   - Address of dApp's smart contract to call.
  * @param {string} data     - Payload for `target`.
  * @param {string} feeToken - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {string} gas      - Gas limit.
  * @returns {PromiseLike<string>} taskId - Task ID.
  */
 const sendCallRequest = async (
   chainId: number,
   target: string,
   data: string,
-  feeToken: string
+  feeToken: string,
+  gas: string
 ): Promise<string> => {
   try {
     const response = await axios.post(
@@ -51,6 +53,7 @@ const sendCallRequest = async (
         target,
         data,
         feeToken,
+        gas,
       }
     );
 
@@ -211,18 +214,21 @@ const getRelayForwarderPullFeeAddressAndABI = (
 
 /**
  *
- * @param {number} chainId              - Chain ID.
- * @param {string} target               - Address of dApp's smart contract to call.
- * @param {string} data                 - Payload for `target`.
- * @param {string} feeToken             - paymentToken for Gelato Executors. Use `0xeee...` for native token.
- * @param {number} paymentType          - Type identifier for Gelato's payment. Can be 1, 2 or 3.
- * @param {string} maxFee               - Maximum fee sponsor is willing to pay Gelato Executors.
- * @param {number} nonce                - Smart contract nonce for sponsor to sign.
- *                                        Can be 0 if enforceSponsorNonce is always false.
- * @param {boolean} enforceSponsorNonce - Whether or not to enforce replay protection using sponsor's nonce.
- * @param {string} sponsor              - EOA address that pays Gelato Executors.
- * @param {number} sponsorChainId       - Chain ID of where sponsor holds a Gas Tank balance with Gelato.
- *                                        Relevant for paymentType=1
+ * @param {number} chainId                        - Chain ID.
+ * @param {string} target                         - Address of dApp's smart contract to call.
+ * @param {string} data                           - Payload for `target`.
+ * @param {string} feeToken                       - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {number} paymentType                    - Type identifier for Gelato's payment. Can be 1, 2 or 3.
+ * @param {string} maxFee                         - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {string} gas                            - Gas limit.
+ * @param {number} nonce                          - Smart contract nonce for sponsor to sign.
+ *                                                Can be 0 if enforceSponsorNonce is always false.
+ * @param {boolean} enforceSponsorNonce           - Whether or not to enforce replay protection using sponsor's nonce.
+ * @param {string} sponsor                        - EOA address that pays Gelato Executors.
+ * @param {number} [sponsorChainId]               - Chain ID of where sponsor holds a Gas Tank balance with Gelato.
+ *                                                  Relevant for paymentType=1. Defaults to `chainId` if not provided.
+ * @param {boolean} [enforceSponsorNonceOrdering] - Whether or not ordering matters for concurrently submitted transactions.
+ *                                                  Defaults to `true` if not provided.
  * @returns {ForwardRequest}
  */
 const forwardRequest = (
@@ -232,10 +238,12 @@ const forwardRequest = (
   feeToken: string,
   paymentType: number,
   maxFee: string,
+  gas: string,
   nonce: number,
   enforceSponsorNonce: boolean,
   sponsor: string,
-  sponsorChainId?: number
+  sponsorChainId?: number,
+  enforceSponsorNonceOrdering?: boolean
 ): ForwardRequest => {
   return {
     chainId,
@@ -244,10 +252,12 @@ const forwardRequest = (
     feeToken,
     paymentType,
     maxFee,
+    gas,
     sponsor,
     sponsorChainId: sponsorChainId ?? chainId,
     nonce,
     enforceSponsorNonce,
+    enforceSponsorNonceOrdering: enforceSponsorNonceOrdering ?? true,
   };
 };
 
@@ -282,9 +292,11 @@ const getForwardRequestDigestToSign = (request: ForwardRequest): string => {
           "address",
           "uint256",
           "uint256",
+          "uint256",
           "address",
           "uint256",
           "uint256",
+          "bool",
           "bool",
         ],
         [
@@ -295,10 +307,12 @@ const getForwardRequestDigestToSign = (request: ForwardRequest): string => {
           request.feeToken,
           request.paymentType,
           request.maxFee,
+          request.gas,
           request.sponsor,
           request.sponsorChainId,
           request.nonce,
           request.enforceSponsorNonce,
+          request.enforceSponsorNonceOrdering,
         ]
       ),
     ]
@@ -320,6 +334,7 @@ const getForwardRequestDigestToSign = (request: ForwardRequest): string => {
  * @param {string} feeToken         - paymentToken for Gelato Executors. Use `0xeee...` for native token.
  * @param {number} paymentType      - Type identifier for Gelato's payment. Can be 1, 2 or 3.
  * @param {string} maxFee           - Maximum fee sponsor is willing to pay Gelato Executors.
+ * @param {string} gas              - Gas limit.
  * @param {string} user             - EOA of dApp's user
  * @param {number} nonce            - user's smart contract nonce.
  * @param {string} [sponsor]        - EOA that pays Gelato Executors.
@@ -336,6 +351,7 @@ const metaTxRequest = (
   feeToken: string,
   paymentType: number,
   maxFee: string,
+  gas: string,
   user: string,
   nonce: number,
   sponsor?: string,
@@ -349,6 +365,7 @@ const metaTxRequest = (
     feeToken,
     paymentType,
     maxFee,
+    gas,
     user,
     sponsor: sponsor ?? user,
     sponsorChainId: sponsorChainId ?? chainId,
@@ -388,6 +405,7 @@ const getMetaTxRequestDigestToSign = (request: MetaTxRequest): string => {
           "address",
           "uint256",
           "uint256",
+          "uint256",
           "address",
           "address",
           "uint256",
@@ -402,6 +420,7 @@ const getMetaTxRequestDigestToSign = (request: MetaTxRequest): string => {
           request.feeToken,
           request.paymentType,
           request.maxFee,
+          request.gas,
           request.user,
           request.sponsor,
           request.sponsorChainId,
@@ -479,7 +498,9 @@ const getStatus = async (
 ): Promise<TransactionStatus | undefined> => {
   let result: TransactionStatus | undefined;
   try {
-    const res = await axios.get(`${GELATO_RELAY_URL}/tasks/${taskId}`);
+    const res = await axios.get(
+      `${GELATO_RELAY_URL}/tasks/GelatoMetaBox/${taskId}`
+    );
     if (Array.isArray(res.data.data) && res.data.data.length > 0) {
       result = res.data.data[0];
     }
