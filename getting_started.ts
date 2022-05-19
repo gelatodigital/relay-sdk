@@ -26,8 +26,6 @@ const forwardRequestExample = async () => {
   // replay protection. (More info in the docs)
   const sponsorNonce = 0;
   const enforceSponsorNonce = false;
-  // Only relevant when enforceSponsorNonce=true
-  const enforceSponsorNonceOrdering = false;
 
   // Build ForwardRequest object
   const forwardRequest = GelatoRelaySDK.forwardRequest(
