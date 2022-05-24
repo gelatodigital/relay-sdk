@@ -119,6 +119,17 @@ const testRinkeby = async (): Promise<void> => {
   ]);
 };
 
+const testGnosis = async (): Promise<void> => {
+  const chainId = 100;
+  const HELLO_WORLD = "0x3F9BBfb21E666914a5ab195C1CE02c4365A85aA5";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
 const testGoerli = async (): Promise<void> => {
   const chainId = 5;
   const HELLO_WORLD = "0x8580995EB790a3002A55d249e92A8B6e5d0b384a";
@@ -153,6 +164,7 @@ const testMumbai = async (): Promise<void> => {
 };
 
 async function main() {
+  await testGnosis();
   await testKovan();
   await testGoerli();
   await testRinkeby();
