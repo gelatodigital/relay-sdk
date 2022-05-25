@@ -163,12 +163,12 @@ const testMumbai = async (): Promise<void> => {
 };
 
 async function main() {
-  //await testGnosis();
-  //await testKovan();
-  //await testGoerli();
-  //await testRinkeby();
+  await testGnosis();
+  await testKovan();
+  await testGoerli();
+  await testRinkeby();
   await testMatic();
-  //await testMumbai();
+  await testMumbai();
 }
 
 main()
