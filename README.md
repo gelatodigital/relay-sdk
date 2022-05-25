@@ -13,6 +13,7 @@ SDK to integrate into Gelato Multichain Relay
 - [Sending ForwardCall](#sending-forwardcall)
 - [Sending ForwardRequest](#sending-forwardrequest)
 - [Sending MetaTxRequest](#sending-metatxrequest)
+- [Querying Task Status](#querying-task-status)
 
 ## Installation
 
@@ -106,11 +107,11 @@ Upon sending messages and signatures to Gelato Relay API, Gelato Executors will 
 
 `Synchronous Payment (Type 0)`: This means that the `target` smart contract will pay Gelato Relay's smart contract as the call is forwarded. Payment can be done in `feeToken`, where it is expected to be a whitelisted payment token.
 
-`Asynchronous Gas Tank Payment (Type 1)`: This means that the `sponsor` must hold a balance in one of Gelato's Gas Tank smart contracts. The balance could even be held on a different `chainId` than the one the transaction is being relayed on (as defined by `sponsorChainId`). An event is emitted to tell Gelato how much to charge in the future, which shall be acknowledged in an off-chain accounting system. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
+`Asynchronous Gas Tank Payment (Type 1)`: This means that the `sponsor` must hold a balance in one of Gelato's Gas Tank smart contracts. The balance could even be held on a different `chainId` than the one the transaction is being relayed on (as defined by `sponsorChainId`). An event is emitted to tell Gelato how much to charge in the future, which shall be acknowledged in an off-chain accounting system. A `sponsorSignature` is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
 
-`Synchronous Gas Tank Payment (Type 2)`: Similarly to `Type 1`, but `sponsor` is expected to hold a balance with Gelato on the same `chainId` where the transaction is executed. Fee deduction happens during the transaction. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
+`Synchronous Gas Tank Payment (Type 2)`: Similarly to `Type 1`, but `sponsor` is expected to hold a balance with Gelato on the same `chainId` where the transaction is executed. Fee deduction happens during the transaction. A `sponsorSignature` is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
 
-`Synchronous Pull Fee Payment (Type 3)`: In this scenario a `sponsor` pre-approves the appropriate Gelato Relay's smart contract to spend tokens up so some maximum allowance value. During execution of the transaction, Gelato will credit due fees using `IERC20(feeToken).transferFrom(...)` in order to pull fees from his/her account. A `sponsor` signature is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
+`Synchronous Pull Fee Payment (Type 3)`: In this scenario a `sponsor` pre-approves the appropriate Gelato Relay's smart contract to spend tokens up so some maximum allowance value. During execution of the transaction, Gelato will credit due fees using `IERC20(feeToken).transferFrom(...)` in order to pull fees from his/her account. A `sponsorSignature` is expected in order to ensure that the sponsor agrees on being charged up to a `maxFee` amount.
 
 Note that payment of type 0 is the simplest one, as it requires no `sponsor` signature to be provided, but it assumes that the `target` smart contract refunds `msg.sender` due amount of fees in `feeToken`. This may require changes to the internal logic of `target` smart contract.
 
@@ -191,6 +192,8 @@ const sendCallRequest = async (
 ): Promise<string>;
 ```
 
+Upon Promise resolution, we get a unique `taskId` that identifies our request. `taskId` can then be used to query Gelato Status API in order to retrieve more information.
+
 ## Sending ForwardRequest
 
 ### ForwardRequest are for payments of Type 1, 2 or 3.
@@ -233,7 +236,7 @@ const forwardRequest = (
 ): ForwardRequest;
 ```
 
-Then we send `request` to Gelato Relay API. `sponsorSignature` is the EIP-712 signature from `sponsor`.
+Then we send `request` to Gelato Relay API. `sponsorSignature` is the EIP-712 signature from `sponsor`. Upon Promise resolution, we get a unique `taskId` that identifies our request. `taskId` can then be used to query Gelato Status API in order to retrieve more information.
 
 ```ts
 /**
@@ -289,7 +292,7 @@ const metaTxRequest = (
 ): MetaTxRequest;
 ```
 
-Then we send `request` to Gelato Relay API. `userSignature` is the EIP-712 signature from dApp's user. If `sponsorSignature` is not passed, we assume `sponsor` is also the `user`, so that we set it equal to `sponsorSignature`.
+Then we send `request` to Gelato Relay API. `userSignature` is the EIP-712 signature from dApp's user. If `sponsorSignature` is not passed, we assume `sponsor` is also the `user`, so that we set it equal to `sponsorSignature`. Upon Promise resolution, we get a unique `taskId` that identifies our request. `taskId` can then be used to query Gelato Status API in order to retrieve more information.
 
 ```ts
 /**
@@ -306,4 +309,62 @@ const sendMetaTxRequest = async (
   userSignature: BytesLike,
   sponsorSignature?: BytesLike
 ): Promise<string>;
+```
+
+## Querying Task Status
+
+Once a task is submitted to Gelato Relay API, we can use its `taskId` in order to query Gelato Status API as follows:
+
+```ts
+/**
+ *
+ * @param taskId - Task ID.
+ * @returns {PromiseLike<TransactionStatus | undefined}
+ */
+const getStatus = async (
+  taskId: string
+): Promise<TransactionStatus | undefined>;
+```
+
+`getStatus` returns `undefined` in case any error has occurred, otherwise it returns an object of type `TransactionStatus` defined as follows:
+
+```ts
+interface TransactionStatus {
+  service: string; // Name of Gelato Service
+  chain: string; // Chain ID
+  taskId: string; // taskId
+  taskState: TaskState;
+  created_at: Date; // JS Date object
+  lastCheck?: Check;
+  execution?: Execution;
+  lastExecution: Date; // JS Date object
+}
+
+// TransactionStatus.taskState is of type:
+enum TaskState {
+  CheckPending = "CheckPending",
+  ExecPending = "ExecPending",
+  ExecSuccess = "ExecSuccess",
+  ExecReverted = "ExecReverted",
+  WaitingForConfirmation = "WaitingForConfirmation",
+  Blacklisted = "Blacklisted",
+  Cancelled = "Cancelled",
+  NotFound = "NotFound",
+}
+
+// TransactionStatus.lastCheck is optional of type:
+interface Check {
+  taskState: TaskState;
+  message?: string;
+  payload?: Payload;
+  reason?: string;
+}
+
+// TransactionStatus.lastExecution is optional of type:
+interface Execution {
+  status: string;
+  transactionHash: string;
+  blockNumber: number;
+  created_at: Date;
+}
 ```

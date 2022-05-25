@@ -1,6 +1,6 @@
 import { utils } from "ethers";
 
-const GELATO_RELAY_URL = "https://gateway.api.gelato.digital";
+const GELATO_RELAY_URL = "https://relay.gelato.digital";
 
 const METATX_REQUEST_TYPEHASH = utils.solidityKeccak256(
   ["string"],

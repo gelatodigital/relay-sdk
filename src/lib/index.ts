@@ -493,6 +493,11 @@ const getMetaTxRequestWalletPayloadToSign = (request: MetaTxRequest): any => {
   );
 };
 
+/**
+ *
+ * @param taskId - Task ID.
+ * @returns {PromiseLike<TransactionStatus | undefined}
+ */
 const getStatus = async (
   taskId: string
 ): Promise<TransactionStatus | undefined> => {

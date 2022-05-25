@@ -1,7 +1,6 @@
 import { utils, Wallet } from "ethers";
 
 import { GelatoRelaySDK } from "./src";
-import { getStatus } from "./src/lib";
 
 const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const GAS = "200000";
@@ -18,7 +17,7 @@ const callRequest = async (chainId: number, target: string) => {
     GAS
   );
 
-  const status = await getStatus(taskId);
+  const status = await GelatoRelaySDK.getStatus(taskId);
 
   console.log(`Status for task ${taskId}: ${JSON.stringify(status)}`);
 };
@@ -56,7 +55,7 @@ const forwardRequest = async (chainId: number, target: string) => {
     sponsorSignature
   );
 
-  const status = await getStatus(taskId);
+  const status = await GelatoRelaySDK.getStatus(taskId);
 
   console.log(`Status for task ${taskId}: ${JSON.stringify(status)}`);
 };
@@ -92,7 +91,7 @@ const metaTxRequest = async (chainId: number, target: string) => {
     userSignature
   );
 
-  const status = await getStatus(taskId);
+  const status = await GelatoRelaySDK.getStatus(taskId);
 
   console.log(`Status for task ${taskId}: ${JSON.stringify(status)}`);
 };
@@ -164,12 +163,12 @@ const testMumbai = async (): Promise<void> => {
 };
 
 async function main() {
-  await testGnosis();
-  await testKovan();
-  await testGoerli();
-  await testRinkeby();
+  //await testGnosis();
+  //await testKovan();
+  //await testGoerli();
+  //await testRinkeby();
   await testMatic();
-  await testMumbai();
+  //await testMumbai();
 }
 
 main()
