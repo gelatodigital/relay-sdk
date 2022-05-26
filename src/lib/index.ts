@@ -1,10 +1,11 @@
 import axios from "axios";
-import { BytesLike, utils } from "ethers";
+import { BytesLike, utils, BigNumber } from "ethers";
 import { _TypedDataEncoder } from "ethers/lib/utils";
 import { Oracle, TransactionStatus } from "@gelatonetwork/core-sdk";
 
 import {
   GELATO_RELAY_URL,
+  GELATO_GAS_BUFFER,
   FORWARD_REQUEST_TYPEHASH,
   METATX_REQUEST_TYPEHASH,
 } from "../constants";
@@ -61,7 +62,9 @@ const sendCallRequest = async (
   } catch (error) {
     const errorMsg = (error as Error).message ?? String(error);
 
-    throw new Error(`sendCallRequest: Failed with error: ${errorMsg}`);
+    throw new Error(
+      `GelatoRelaySDK/sendCallRequest: Failed with error: ${errorMsg}`
+    );
   }
 };
 
@@ -89,7 +92,9 @@ const sendForwardRequest = async (
   } catch (error) {
     const errorMsg = (error as Error).message ?? String(error);
 
-    throw new Error(`sendForwardRequest: Failed with error: ${errorMsg}`);
+    throw new Error(
+      `GelatoRelaySDK/sendForwardRequest: Failed with error: ${errorMsg}`
+    );
   }
 };
 
@@ -122,7 +127,9 @@ const sendMetaTxRequest = async (
   } catch (error) {
     const errorMsg = (error as Error).message ?? String(error);
 
-    throw new Error(`sendMetaTxRequest: Failed with error: ${errorMsg}`);
+    throw new Error(
+      `GelatoRelaySDK/sendMetaTxRequest: Failed with error: ${errorMsg}`
+    );
   }
 };
 
@@ -140,17 +147,27 @@ const isChainSupported = async (chainId: number): Promise<boolean> => {
   } catch (error) {
     const errorMsg = (error as Error).message ?? String(error);
 
-    throw new Error(`isChainSupported: Failed with error: ${errorMsg}`);
+    throw new Error(
+      `GelatoRelaySDK/isChainSupported: Failed with error: ${errorMsg}`
+    );
   }
 };
 
 /**
  *
  * @param {number} chainId - Chain ID.
- * @returns {PromiseLike<string[]>}
+ * @returns {PromiseLike<string[]>} - Array of whitelisted feeTokens
  */
 const getFeeTokens = async (chainId: number): Promise<string[]> => {
-  return await Oracle.getPaymentTokens(chainId);
+  try {
+    return await Oracle.getPaymentTokens(chainId);
+  } catch (error) {
+    const errorMsg = (error as Error).message ?? String(error);
+
+    throw new Error(
+      `GelatoRelaySDK/getFeeTokens: Failed with error: ${errorMsg}`
+    );
+  }
 };
 
 /**
@@ -495,6 +512,42 @@ const getMetaTxRequestWalletPayloadToSign = (request: MetaTxRequest): any => {
 
 /**
  *
+ * @param {number} chainId                  - Chain ID.
+ * @param {string} feeToken                 - paymentToken for Gelato Executors. Use `0xeee...` for native token.
+ * @param {string} totalGasLimit            - gasLimit of tx to be relayed + GELATO_GAS_BUFFER,
+ *                                            to account for the fact that it will be routed through Gelato's smart contracts.
+ * @param {boolean} [isHighPriority]        - Optional, in case the gasFee needs to be bumped for higher priority of inclusion.
+ *                                            Useful to ensure Flashbots bundles get mined with high probability.
+ * @returns {PromiseLike<string|undefined>} - `maxFee` estimate denominated in `feeToken`
+ */
+const getMaxFeeEstimate = async (
+  chainId: number,
+  feeToken: string,
+  totalGasLimit: number,
+  isHighPriority?: boolean
+): Promise<string | undefined> => {
+  try {
+    const maxFee = await Oracle.getEstimatedFee(
+      chainId,
+      feeToken,
+      BigNumber.from(totalGasLimit),
+      isHighPriority ?? false
+    );
+
+    return maxFee.toString();
+  } catch (error) {
+    const errorMsg = (error as Error).message ?? String(error);
+
+    console.log(
+      `GelatoRelaySDK/getMaxFeeEstimate: Failed with error: ${errorMsg}`
+    );
+
+    return undefined;
+  }
+};
+
+/**
+ *
  * @param taskId - Task ID.
  * @returns {PromiseLike<TransactionStatus | undefined}
  */
@@ -509,7 +562,11 @@ const getStatus = async (
     if (Array.isArray(res.data.data) && res.data.data.length > 0) {
       result = res.data.data[0];
     }
-  } catch (error) {} // eslint-disable-line no-empty
+  } catch (error) {
+    const errorMsg = (error as Error).message ?? String(error);
+
+    console.log(`GelatoRelaySDK/getStatus: Failed with error: ${errorMsg}`);
+  }
 
   return result;
 };
@@ -530,6 +587,8 @@ export {
   getMetaTxRequestDigestToSign,
   getForwardRequestWalletPayloadToSign,
   getMetaTxRequestWalletPayloadToSign,
+  getMaxFeeEstimate,
   getStatus,
   TransactionStatus,
+  GELATO_GAS_BUFFER,
 };

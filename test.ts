@@ -162,6 +162,50 @@ const testMumbai = async (): Promise<void> => {
   ]);
 };
 
+const estimateMaxFee = async (
+  chainId: number,
+  feeToken: string,
+  gasLimit: number
+): Promise<string | undefined> => {
+  try {
+    const whitelistedFeeTokens: string[] = (
+      await GelatoRelaySDK.getFeeTokens(chainId)
+    ).map((token) => {
+      return token.toLowerCase();
+    });
+
+    console.log(
+      `Whitelisted fee tokens for chainId ${chainId}: ${JSON.stringify(
+        whitelistedFeeTokens
+      )}`
+    );
+
+    if (!whitelistedFeeTokens.includes(feeToken.toLowerCase())) {
+      throw new Error(`feeToken ${feeToken} not whitelisted`);
+    }
+
+    // Add a constant buffer to gasLimit, since the tx will be routed through
+    // Gelato's smart contracts
+    const totalGasLimit = gasLimit + GelatoRelaySDK.GELATO_GAS_BUFFER;
+
+    const maxFee = await GelatoRelaySDK.getMaxFeeEstimate(
+      chainId,
+      feeToken,
+      totalGasLimit
+    );
+
+    console.log(`maxFee estimate for feeToken ${feeToken}: ${maxFee}`);
+
+    return maxFee;
+  } catch (error) {
+    const errorMsg = (error as Error).message ?? String(error);
+
+    console.log(`testGelatoFeeOracle: Failed with error: ${errorMsg}`);
+
+    return undefined;
+  }
+};
+
 async function main() {
   await testGnosis();
   await testKovan();
@@ -169,6 +213,7 @@ async function main() {
   await testRinkeby();
   await testMatic();
   await testMumbai();
+  await estimateMaxFee(4, NATIVE_TOKEN, 100000);
 }
 
 main()

@@ -2,6 +2,8 @@ import { utils } from "ethers";
 
 const GELATO_RELAY_URL = "https://relay.gelato.digital";
 
+const GELATO_GAS_BUFFER = 60000;
+
 const METATX_REQUEST_TYPEHASH = utils.solidityKeccak256(
   ["string"],
   [
@@ -100,6 +102,7 @@ const getRelayForwarderPullFeeAddress = (chainId: number): string => {
 
 export {
   GELATO_RELAY_URL,
+  GELATO_GAS_BUFFER,
   getMetaBoxAddress,
   getMetaBoxPullFeeAddress,
   getRelayForwarderAddress,
