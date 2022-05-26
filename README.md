@@ -14,6 +14,7 @@ SDK to integrate into Gelato Multichain Relay
 - [Sending ForwardRequest](#sending-forwardrequest)
 - [Sending MetaTxRequest](#sending-metatxrequest)
 - [Querying Task Status](#querying-task-status)
+- [Estimating maxFee](#estimating-maxfee)
 
 ## Installation
 
