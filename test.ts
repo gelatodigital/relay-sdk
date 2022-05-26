@@ -200,7 +200,7 @@ const estimateMaxFee = async (
   } catch (error) {
     const errorMsg = (error as Error).message ?? String(error);
 
-    console.log(`testGelatoFeeOracle: Failed with error: ${errorMsg}`);
+    console.log(`estimateMaxFee: Failed with error: ${errorMsg}`);
 
     return undefined;
   }

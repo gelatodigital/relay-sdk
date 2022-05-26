@@ -372,7 +372,7 @@ interface Execution {
 
 ## Estimating maxFee
 
-`maxFee` denotes the maximum fee denominated in `feeToken` a `sponsor` is willing to pay, and is one of the required parameters in both `ForwardRequest` and `MetaTxRequest`. Thanks to `sponsorSignature` and smart contract logic, Gelato Bots will be strongly disencouraged to over-charge transaction sponsors. Moreover, `maxFee` also serves as a buffer to protect against gas price volatility spikes, meaning that transactions will still get mined on time and reliably under said adversarial circumstances. At execution time, Gelato will charge the fair fee according to actual gas cost estimates and gas price used, not the whole `maxFee`. In the future, staked Gelato Executors will have a strong incentive to play by the fair rules described in this paragraph even if there is no way for the smart contract to enforce this rule (for instance, payments of Type 1 which use an Off-chain accounting system), as doing otherwise will result in their fee revenues not being paid by the Gelato DAO, and possibly have some or all of their GEL stake slashed.
+`maxFee` denotes the maximum fee denominated in `feeToken` a `sponsor` is willing to pay, and is one of the required parameters in both `ForwardRequest` and `MetaTxRequest`. Thanks to `sponsorSignature` and smart contract logic, Gelato Executors will be strongly disencouraged to over-charge transaction sponsors. Moreover, `maxFee` also serves as a buffer to protect against gas price volatility spikes, meaning that transactions will still get mined on time and reliably under said adversarial circumstances. At execution time, Gelato will charge the fair fee according to actual gas cost estimates and gas price used, not the whole `maxFee`. In the future, staked Gelato Executors will have a strong incentive to play by the fair rules described in this paragraph even if there is no way for the smart contract to enforce this rule (for instance, payments of Type 1 which use an Off-chain accounting system), as doing otherwise will result in their fee revenues not being paid by the Gelato DAO, and possibly have some or all of their GEL stake slashed.
 
 Below is an example on how to use Gelato Relay SDK in order to calculate suitable `maxFee` values:
 
@@ -417,7 +417,7 @@ const estimateMaxFee = async (
   } catch (error) {
     const errorMsg = (error as Error).message ?? String(error);
 
-    console.log(`testGelatoFeeOracle: Failed with error: ${errorMsg}`);
+    console.log(`estimateMaxFee: Failed with error: ${errorMsg}`);
 
     return undefined;
   }
