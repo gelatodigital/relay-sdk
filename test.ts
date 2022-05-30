@@ -162,6 +162,17 @@ const testMumbai = async (): Promise<void> => {
   ]);
 };
 
+const testEvmos = async (): Promise<void> => {
+  const chainId = 9001;
+  const HELLO_WORLD = "0x953c67EFFFB961244E72bcE8b887a6ead29c45AF";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
 const estimateMaxFee = async (
   chainId: number,
   feeToken: string,
@@ -213,7 +224,8 @@ async function main() {
   await testRinkeby();
   await testMatic();
   await testMumbai();
-  await estimateMaxFee(4, NATIVE_TOKEN, 100000);
+  await testEvmos();
+  await estimateMaxFee(9001, NATIVE_TOKEN, 100000);
 }
 
 main()
