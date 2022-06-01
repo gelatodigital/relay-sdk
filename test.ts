@@ -26,8 +26,10 @@ const forwardRequest = async (chainId: number, target: string) => {
   const wallet = Wallet.createRandom();
   const sponsor = await wallet.getAddress();
 
-  console.log(`Mock PK: ${await wallet._signingKey().privateKey}`);
-  console.log(`Mock wallet address: ${sponsor}`);
+  console.log(
+    `forwardRequest: Mock PK: ${await wallet._signingKey().privateKey}`
+  );
+  console.log(`forwardRequest: Mock wallet address: ${sponsor}`);
   // abi encode for HelloWorld.sayHiVanilla(address _feeToken) (see 0x61bBe925A5D646cE074369A6335e5095Ea7abB7A on Kovan)
   const data = `0x4b327067000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeaeeeeeeeeeeeeeeeee`;
 
@@ -43,12 +45,17 @@ const forwardRequest = async (chainId: number, target: string) => {
     false,
     sponsor
   );
+  console.log(
+    `forwardRequest: Mock forwardRequest: ${JSON.stringify(forwardRequest)}`
+  );
 
   const digest = GelatoRelaySDK.getForwardRequestDigestToSign(forwardRequest);
 
   const sponsorSignature: utils.BytesLike = utils.joinSignature(
     await wallet._signingKey().signDigest(digest)
   );
+
+  console.log(`forwardRequest: Mock sponsorSignature: ${sponsorSignature}`);
 
   const taskId = await GelatoRelaySDK.sendForwardRequest(
     forwardRequest,
@@ -173,6 +180,17 @@ const testEvmos = async (): Promise<void> => {
   ]);
 };
 
+const testBsc = async (): Promise<void> => {
+  const chainId = 56;
+  const HELLO_WORLD = "0x3F9BBfb21E666914a5ab195C1CE02c4365A85aA5";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
 const estimateMaxFee = async (
   chainId: number,
   feeToken: string,
@@ -225,7 +243,8 @@ async function main() {
   await testMatic();
   await testMumbai();
   await testEvmos();
-  await estimateMaxFee(9001, NATIVE_TOKEN, 100000);
+  await testBsc();
+  await estimateMaxFee(56, NATIVE_TOKEN, 100000);
 }
 
 main()
