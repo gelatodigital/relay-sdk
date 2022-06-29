@@ -191,6 +191,28 @@ const testBsc = async (): Promise<void> => {
   ]);
 };
 
+const testMainnet = async (): Promise<void> => {
+  const chainId = 1;
+  const HELLO_WORLD = "0x16aaA06cE56CC6251A8b813c0c9208223fd460E0";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testAlfajores = async (): Promise<void> => {
+  const chainId = 44787;
+  const HELLO_WORLD = "0x9561aCdf04C2B639dFfeCB357438e7B3eD979C5C";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
 const estimateMaxFee = async (
   chainId: number,
   feeToken: string,
@@ -235,16 +257,110 @@ const estimateMaxFee = async (
   }
 };
 
+const testForwardRequestWalletPayload = async () => {
+  const chainId = 80001;
+  const target = "0xE6Bc17A4AD90d03617a24E6799c0ea228E8f912F";
+
+  const wallet = Wallet.createRandom();
+  const sponsor = await wallet.getAddress();
+
+  console.log(
+    `forwardRequest: Mock PK: ${await wallet._signingKey().privateKey}`
+  );
+  console.log(`forwardRequest: Mock wallet address: ${sponsor}`);
+  // abi encode for HelloWorld.sayHiVanilla(address _feeToken) (see 0x61bBe925A5D646cE074369A6335e5095Ea7abB7A on Kovan)
+  const data = `0x4b327067000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeaeeeeeeeeeeeeeeeee`;
+
+  const forwardRequest = GelatoRelaySDK.forwardRequest(
+    chainId,
+    target,
+    data,
+    NATIVE_TOKEN,
+    1,
+    "1000000000000000000",
+    GAS,
+    0,
+    false,
+    sponsor
+  );
+
+  const { domain, types, value } =
+    GelatoRelaySDK.getForwardRequestWalletPayloadToSign(forwardRequest);
+
+  const signature = await wallet._signTypedData(domain, types, value);
+
+  console.log(`wallet signature: ${signature}`);
+
+  const digest = GelatoRelaySDK.getForwardRequestDigestToSign(forwardRequest);
+
+  const sponsorSignature: utils.BytesLike = utils.joinSignature(
+    await wallet._signingKey().signDigest(digest)
+  );
+
+  console.log(`wallet sponsorSignature: ${sponsorSignature}`);
+
+  if (signature !== sponsorSignature) {
+    throw new Error("testForwardRequestWalletPayload: Invalid signature");
+  }
+};
+
+const testMetaTxRequestWalletPayload = async () => {
+  const chainId = 80001;
+  const target = "0xE6Bc17A4AD90d03617a24E6799c0ea228E8f912F";
+
+  const wallet = Wallet.createRandom();
+  const user = await wallet.getAddress();
+
+  console.log(`Mock wallet address: ${user}`);
+  // abi encode for HelloWorld.sayHi(address _feeToken) (see 0x61bBe925A5D646cE074369A6335e5095Ea7abB7A on Kovan)
+  const data = `0x4c6d2627000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`;
+
+  const metaTxRequest = GelatoRelaySDK.metaTxRequest(
+    chainId,
+    target,
+    data,
+    NATIVE_TOKEN,
+    1,
+    "100000000000000000000",
+    GAS,
+    user,
+    0
+  );
+
+  const { domain, types, value } =
+    GelatoRelaySDK.getMetaTxRequestWalletPayloadToSign(metaTxRequest);
+
+  const signature = await wallet._signTypedData(domain, types, value);
+
+  console.log(`wallet signature: ${signature}`);
+
+  const digest = GelatoRelaySDK.getMetaTxRequestDigestToSign(metaTxRequest);
+
+  const sponsorSignature: utils.BytesLike = utils.joinSignature(
+    await wallet._signingKey().signDigest(digest)
+  );
+
+  console.log(`wallet sponsorSignature: ${sponsorSignature}`);
+
+  if (signature !== sponsorSignature) {
+    throw new Error("testMetaTxRequestWalletPayload: Invalid signature");
+  }
+};
+
 async function main() {
-  await testGnosis();
-  await testKovan();
-  await testGoerli();
-  await testRinkeby();
-  await testMatic();
-  await testMumbai();
-  await testEvmos();
-  await testBsc();
-  await estimateMaxFee(56, NATIVE_TOKEN, 100000);
+  //await testGnosis();
+  //await testKovan();
+  //await testGoerli();
+  //await testRinkeby();
+  //await testMatic();
+  //await testMumbai();
+  //await testEvmos();
+  //await testBsc();
+  //await testAlfajores();
+  //await testMainnet();
+  //await estimateMaxFee(5, NATIVE_TOKEN, 100000);
+  await testForwardRequestWalletPayload();
+  await testMetaTxRequestWalletPayload();
 }
 
 main()

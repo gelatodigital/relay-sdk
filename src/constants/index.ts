@@ -20,6 +20,8 @@ const FORWARD_REQUEST_TYPEHASH = utils.solidityKeccak256(
 
 const getMetaBoxAddress = (chainId: number): string => {
   switch (chainId) {
+    case 1:
+      return utils.getAddress("0x60c5F77578b095a34d064a3e736F3a7bEb765C0D");
     case 4:
       return utils.getAddress("0x91f2A140cA47DdF438B9c583b7E71987525019bB");
     case 5:
@@ -68,6 +70,8 @@ const getMetaBoxPullFeeAddress = (chainId: number): string => {
 
 const getRelayForwarderAddress = (chainId: number): string => {
   switch (chainId) {
+    case 1:
+      return utils.getAddress("0x5ca448e53e77499222741DcB6B3c959Fa829dAf2");
     case 4:
       return utils.getAddress("0x9B79b798563e538cc326D03696B3Be38b971D282");
     case 5:

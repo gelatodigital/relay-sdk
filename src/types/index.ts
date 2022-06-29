@@ -8,7 +8,7 @@ type EIP712Domain = {
 };
 
 const EIP712ForwardRequestTypeData = {
-  Request: [
+  ForwardRequest: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
     { name: "data", type: "bytes" },
@@ -25,7 +25,7 @@ const EIP712ForwardRequestTypeData = {
 };
 
 const EIP712MetaTxRequestTypeData = {
-  Request: [
+  MetaTxRequest: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
     { name: "data", type: "bytes" },

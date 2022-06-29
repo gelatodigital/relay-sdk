@@ -1,6 +1,5 @@
 import axios from "axios";
 import { BytesLike, utils, BigNumber } from "ethers";
-import { _TypedDataEncoder } from "ethers/lib/utils";
 import { Oracle, TransactionStatus } from "@gelatonetwork/core-sdk";
 
 import {
@@ -459,7 +458,7 @@ const getMetaTxRequestDigestToSign = (request: MetaTxRequest): string => {
 /**
  *
  * @param {ForwardRequest} request - `ForwardRequest`
- * @returns {string} - Wallet compatible `request` ready to be signed.
+ * @returns - Wallet compatible payload ready to be signed (ethers js signer._signTypedData)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getForwardRequestWalletPayloadToSign = (request: ForwardRequest): any => {
@@ -476,17 +475,13 @@ const getForwardRequestWalletPayloadToSign = (request: ForwardRequest): any => {
     verifyingContract
   );
 
-  return _TypedDataEncoder.getPayload(
-    domain,
-    EIP712ForwardRequestTypeData,
-    request
-  );
+  return { domain, types: EIP712ForwardRequestTypeData, value: request };
 };
 
 /**
  *
  * @param {MetaTxRequest} request - `MetaTxRequest`
- * @returns {string} - Wallet compatible `request` ready to be signed.
+ * @returns - Wallet compatible payload ready to be signed (ethers js signer._signTypedData)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getMetaTxRequestWalletPayloadToSign = (request: MetaTxRequest): any => {
@@ -503,11 +498,7 @@ const getMetaTxRequestWalletPayloadToSign = (request: MetaTxRequest): any => {
     verifyingContract
   );
 
-  return _TypedDataEncoder.getPayload(
-    domain,
-    EIP712MetaTxRequestTypeData,
-    request
-  );
+  return { domain, types: EIP712MetaTxRequestTypeData, value: request };
 };
 
 /**
