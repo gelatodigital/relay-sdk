@@ -348,17 +348,17 @@ const testMetaTxRequestWalletPayload = async () => {
 };
 
 async function main() {
-  //await testGnosis();
-  //await testKovan();
-  //await testGoerli();
-  //await testRinkeby();
-  //await testMatic();
-  //await testMumbai();
-  //await testEvmos();
-  //await testBsc();
-  //await testAlfajores();
-  //await testMainnet();
-  //await estimateMaxFee(5, NATIVE_TOKEN, 100000);
+  await testGnosis();
+  await testKovan();
+  await testGoerli();
+  await testRinkeby();
+  await testMatic();
+  await testMumbai();
+  await testEvmos();
+  await testBsc();
+  await testAlfajores();
+  await testMainnet();
+  await estimateMaxFee(5, NATIVE_TOKEN, 100000);
   await testForwardRequestWalletPayload();
   await testMetaTxRequestWalletPayload();
 }
