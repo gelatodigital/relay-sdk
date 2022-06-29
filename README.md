@@ -39,6 +39,7 @@ As requests are submitted to Gelato Relay API, a network of Gelato Executors wil
 
 Below is a simple example in order to get us started. We get Gelato Relay to call a `HelloWorld` smart contract on our behalf. Note that in this example there is no dependency on RPC providers, as we simply build all transaction data, its required `sponsorSignature` and send to Gelato Relay API. `sponsorSignature` is required by `sponsor` in order for Gelato to securely credit payments, but in this example we do not enforce any payment to be made as it is a testnet. In this way, interacting with a blockchain is simplified to sending a `POST` request to a web server.
 
+#### Backend example
 ```ts
 import { Wallet, utils } from "ethers";
 import { GelatoRelaySDK } from "@gelatonetwork/gelato-relay-sdk";
@@ -100,6 +101,27 @@ const forwardRequestExample = async () => {
 };
 
 forwardRequestExample();
+```
+
+####  Frontend example
+
+Using [ReactJS](https://reactjs.org/) and [Wagmi](https://wagmi.sh/).
+
+Generate the payload using `getForwardRequestWalletPayloadToSign` method than sign it using `signTypedDataAsync` 
+
+```ts
+import { useSignTypedData } from 'wagmi';
+const { signTypedDataAsync } = useSignTypedData();
+
+// Get transaction data (use forwardRequest from the example above)
+const generatedParams = GelatoRelaySDK.getForwardRequestWalletPayloadToSign(forwardRequest);
+
+// Sign it on Metamask
+const sponsorSignature = await signTypedDataAsync(generatedParams);
+
+// Send forwardRequest and its sponsorSignature to Gelato Relay API
+const requestId = await GelatoRelaySDK.sendForwardRequest(forwardRequest, sponsorSignature);
+console.log("ForwardRequest submitted!", requestId);
 ```
 
 ## Payment Types
