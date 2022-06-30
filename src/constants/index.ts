@@ -36,6 +36,8 @@ const getMetaBoxAddress = (chainId: number): string => {
       return utils.getAddress("0xB113360B7CD6660a032E7a1175116e86d38Ec4AF");
     case 9001:
       return utils.getAddress("0x0d738c7fd96717305d82E5EF1D0fcc45C71042Fa");
+    case 44787:
+      return utils.getAddress("0xB113360B7CD6660a032E7a1175116e86d38Ec4AF");
     case 80001:
       return utils.getAddress("0x8F2510b3D61CE21b470d1fa4Fd657D82F692Cc6C");
     default:
@@ -59,6 +61,8 @@ const getMetaBoxPullFeeAddress = (chainId: number): string => {
       return utils.getAddress("0x0d738c7fd96717305d82E5EF1D0fcc45C71042Fa");
     case 9001:
       return utils.getAddress("0x38306FB998e48b3e4BCE9AB84463aae536413Cc4");
+    case 44787:
+      return utils.getAddress("0x0d738c7fd96717305d82E5EF1D0fcc45C71042Fa");
     case 80001:
       return utils.getAddress("0x832e030fd726a032D4Bd1A6922363c8aa3cB4fFD");
     default:
@@ -86,6 +90,8 @@ const getRelayForwarderAddress = (chainId: number): string => {
       return utils.getAddress("0xc2336e796F77E4E57b6630b6dEdb01f5EE82383e");
     case 9001:
       return utils.getAddress("0x9561aCdf04C2B639dFfeCB357438e7B3eD979C5C");
+    case 44787:
+      return utils.getAddress("0xc2336e796F77E4E57b6630b6dEdb01f5EE82383e");
     case 80001:
       return utils.getAddress("0x3428E19A01E40333D5D51465A08476b8F61B86f3");
     default:
@@ -111,6 +117,8 @@ const getRelayForwarderPullFeeAddress = (chainId: number): string => {
       return utils.getAddress("0x38306FB998e48b3e4BCE9AB84463aae536413Cc4");
     case 9001:
       return utils.getAddress("0xC176f63f3827afE6789FD737f4679B299F97d108");
+    case 44787:
+      return utils.getAddress("0x38306FB998e48b3e4BCE9AB84463aae536413Cc4");
     case 80001:
       return utils.getAddress("0xE70aA6e2630CAbF5Dc6460674d175D21572B9b35");
     default:
