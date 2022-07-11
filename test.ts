@@ -213,6 +213,39 @@ const testAlfajores = async (): Promise<void> => {
   ]);
 };
 
+const testMoonbeam = async (): Promise<void> => {
+  const chainId = 1284;
+  const HELLO_WORLD = "0x3456E168d2D7271847808463D6D383D079Bd5Eaa";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testMoonriver = async (): Promise<void> => {
+  const chainId = 1285;
+  const HELLO_WORLD = "0x62B1a88CCc6BC5e6FF91FB2FCD29Ab4F819b35C6";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
+const testAvalanche = async (): Promise<void> => {
+  const chainId = 43114;
+  const HELLO_WORLD = "0x5D6c3f065Ce364Af04f1207Cbad999A7B640921A";
+
+  await Promise.all([
+    callRequest(chainId, HELLO_WORLD),
+    forwardRequest(chainId, HELLO_WORLD),
+    metaTxRequest(chainId, HELLO_WORLD),
+  ]);
+};
+
 const estimateMaxFee = async (
   chainId: number,
   feeToken: string,
@@ -348,6 +381,9 @@ const testMetaTxRequestWalletPayload = async () => {
 };
 
 async function main() {
+  await testMoonbeam();
+  await testMoonriver();
+  await testAvalanche();
   await testGnosis();
   await testKovan();
   await testGoerli();
