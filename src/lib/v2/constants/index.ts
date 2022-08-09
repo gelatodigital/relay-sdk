@@ -1,0 +1,1 @@
+export const SIGN_TYPED_DATA_V4 = "eth_signTypedData_v4"
