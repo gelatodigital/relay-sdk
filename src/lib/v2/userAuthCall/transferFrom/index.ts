@@ -3,35 +3,37 @@ import { getMetaBoxAddress } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
 import { PaymentType } from "../../types";
 import { signTypedDataV4 } from "../../utils";
+import { UserAuthCallPayloadToSign } from "../types";
 import {
-  EIP712UserAuthCallTypeData,
-  UserAuthCallPayloadToSign,
-  UserAuthCallRequest,
-} from "../types";
-
-export type UserAuthCallWithTransferFromRequest = Omit<
-  UserAuthCallRequest,
-  "paymentType" | "oneBalanceChainId"
->;
+  EIP712UserAuthCallWithTransferFromTypeData,
+  UserAuthCallWithTransferFromRequest,
+  UserAuthCallWithTransferFromStruct,
+} from "./types";
 
 const getPayloadToSign = (
   request: UserAuthCallWithTransferFromRequest
-): UserAuthCallPayloadToSign<UserAuthCallRequest> => {
-  const verifyingContract = getMetaBoxAddress(request.chainId); //TODO: To be changed
+): UserAuthCallPayloadToSign<UserAuthCallWithTransferFromStruct> => {
+  const verifyingContract = getMetaBoxAddress(request.chainId as number); //TODO: To be changed
   const domain = getEIP712Domain(
     "GelatoMetaBox",
     "V1",
-    request.chainId,
+    request.chainId as number,
     verifyingContract
   );
   return {
     domain,
-    types: EIP712UserAuthCallTypeData,
+    types: EIP712UserAuthCallWithTransferFromTypeData,
     primaryType: "UserAuthCall",
     message: {
-      ...request,
       paymentType: PaymentType.TransferFrom,
-      oneBalanceChainId: "0",
+      chainId: request.chainId,
+      data: request.data,
+      feeToken: request.feeToken,
+      maxFee: request.maxFee,
+      target: request.target,
+      user: request.user,
+      userNonce: request.userNonce,
+      userDeadline: request.userDeadline,
     },
   };
 };
@@ -43,7 +45,7 @@ export const userAuthCallWithTransferFrom = async (
   try {
     const signature = await signTypedDataV4(
       provider,
-      request.user,
+      request.user as string,
       JSON.stringify(getPayloadToSign(request))
     );
     return signature;

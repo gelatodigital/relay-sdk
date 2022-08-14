@@ -1,14 +1,10 @@
 import { providers } from "ethers";
-import {
-  userAuthCallWith1Balance,
-  UserAuthCallWith1BalanceRequest,
-} from "./1balance";
-import {
-  userAuthCallWithTransferFrom,
-  UserAuthCallWithTransferFromRequest,
-} from "./transferFrom";
+import { userAuthCallWith1Balance } from "./1balance";
+import { userAuthCallWithTransferFrom } from "./transferFrom";
 import { PaymentMethod, RelaySeparator } from "../types";
 import { RelayRequestWithUserSignature } from "./types";
+import { UserAuthCallWith1BalanceRequest } from "./1balance/types";
+import { UserAuthCallWithTransferFromRequest } from "./transferFrom/types";
 
 export const relayWithUserSignature = async <T extends RelaySeparator>(
   request: RelayRequestWithUserSignature<T>,

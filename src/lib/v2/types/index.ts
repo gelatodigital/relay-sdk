@@ -16,7 +16,8 @@ export type SyncPayment = {
 };
 
 export enum PaymentType {
-  SyncFee,
   OneBalance,
   TransferFrom,
 }
+
+export type PromiseOrValue<T> = T | Promise<T>;
