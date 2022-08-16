@@ -1,3 +1,5 @@
+import { BigNumberish } from "ethers";
+
 export enum PaymentMethod {
   Async,
   Sync,
@@ -21,3 +23,8 @@ export enum PaymentType {
 }
 
 export type PromiseOrValue<T> = T | Promise<T>;
+
+export type RelayRequestOptions = {
+  gasLimit?: BigNumberish;
+  retries?: number;
+};

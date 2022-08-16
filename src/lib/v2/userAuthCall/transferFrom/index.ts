@@ -1,9 +1,11 @@
+import axios from "axios";
 import { providers } from "ethers";
-import { getMetaBoxAddress } from "../../../../constants";
+import { GELATO_RELAY_URL } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
-import { PaymentType } from "../../types";
+import { getRelayAddress } from "../../constants";
+import { PaymentType, RelayRequestOptions } from "../../types";
 import { signTypedDataV4 } from "../../utils";
-import { UserAuthCallPayloadToSign } from "../types";
+import { UserAuthCallPayloadToSign, UserAuthSignature } from "../types";
 import {
   EIP712UserAuthCallWithTransferFromTypeData,
   UserAuthCallWithTransferFromRequest,
@@ -11,46 +13,79 @@ import {
 } from "./types";
 
 const getPayloadToSign = (
-  request: UserAuthCallWithTransferFromRequest
+  struct: UserAuthCallWithTransferFromStruct
 ): UserAuthCallPayloadToSign<UserAuthCallWithTransferFromStruct> => {
-  const verifyingContract = getMetaBoxAddress(request.chainId as number); //TODO: To be changed
+  const verifyingContract = getRelayAddress(struct.chainId as number);
   const domain = getEIP712Domain(
-    "GelatoMetaBox",
-    "V1",
-    request.chainId as number,
+    "GelatoRelay",
+    "1",
+    struct.chainId as number,
     verifyingContract
   );
   return {
     domain,
     types: EIP712UserAuthCallWithTransferFromTypeData,
     primaryType: "UserAuthCall",
-    message: {
-      paymentType: PaymentType.TransferFrom,
-      chainId: request.chainId,
-      data: request.data,
-      feeToken: request.feeToken,
-      maxFee: request.maxFee,
-      target: request.target,
-      user: request.user,
-      userNonce: request.userNonce,
-      userDeadline: request.userDeadline,
-    },
+    message: struct,
   };
+};
+
+const mapRequestToStruct = (
+  request: UserAuthCallWithTransferFromRequest
+): UserAuthCallWithTransferFromStruct => {
+  return {
+    chainId: request.chainId,
+    target: request.target,
+    data: request.data,
+    user: request.user,
+    userNonce: request.userNonce,
+    userDeadline: request.userDeadline ?? 0,
+    paymentType: PaymentType.TransferFrom,
+    feeToken: request.feeToken,
+    maxFee: request.maxFee,
+  }
+};
+
+const post = async (
+  request: UserAuthCallWithTransferFromStruct &
+    RelayRequestOptions &
+    UserAuthSignature
+): Promise<any> => {
+  try {
+    const response = await axios.post(
+      `${GELATO_RELAY_URL}/v2/relays/userAuthCall`,
+      request
+    );
+    return response.data;
+  } catch (error) {
+    const errorMsg = (error as Error).message ?? String(error);
+
+    throw new Error(
+      `GelatoRelaySDK/userAuthCall/transferFrom/post: Failed with error: ${errorMsg}`
+    );
+  }
 };
 
 export const userAuthCallWithTransferFrom = async (
   request: UserAuthCallWithTransferFromRequest,
-  provider: providers.Web3Provider
+  provider: providers.Web3Provider,
+  options?: RelayRequestOptions
 ): Promise<string> => {
   try {
+    const struct = mapRequestToStruct(request);
     const signature = await signTypedDataV4(
       provider,
       request.user as string,
-      JSON.stringify(getPayloadToSign(request))
+      JSON.stringify(getPayloadToSign(struct))
     );
-    return signature;
+    const postResponse = await post({
+      ...struct,
+      ...options,
+      userSignature: signature,
+    });
+    return postResponse;
   } catch (error) {
     const errorMessage = (error as Error).message;
-    throw Error(`An error occurred: ${errorMessage}`);
+    throw Error(`GelatoRelaySDK/userAuthCall/transferFrom: Failed with error: ${errorMessage}`);
   }
 };

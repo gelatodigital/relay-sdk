@@ -15,6 +15,10 @@ export type UserAuthCallPayloadToSign<T> = {
   message: T;
 };
 
+export type UserAuthSignature = {
+  userSignature: string;
+};
+
 export type RelayRequestWithUserSignature<T extends RelaySeparator> =
   T extends AsyncPayment
     ? UserAuthCallWith1Balance
