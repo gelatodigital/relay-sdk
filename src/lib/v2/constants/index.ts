@@ -10,3 +10,8 @@ export const getRelayAddress = (chainId: number): string => {
       throw new Error(`getRelayAddress: chainId [${chainId}] is not supported`);
   }
 };
+
+export const DEFAULT_DEADLINE_GAP = 86400;
+export const ABI = [
+  "function userNonce(address account) external view returns (uint256)",
+];

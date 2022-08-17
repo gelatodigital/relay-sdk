@@ -2,19 +2,20 @@ import axios from "axios";
 import { providers } from "ethers";
 import { GELATO_RELAY_URL } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
-import { getRelayAddress } from "../../constants";
+import { DEFAULT_DEADLINE_GAP, getRelayAddress } from "../../constants";
 import { PaymentType, RelayRequestOptions } from "../../types";
-import { signTypedDataV4 } from "../../utils";
-import { UserAuthCallPayloadToSign, UserAuthSignature } from "../types";
+import { calculateDeadline, getUserNonce, signTypedDataV4 } from "../../utils";
+import { UserAuthSignature } from "../types";
 import {
   EIP712UserAuthCallWith1BalanceTypeData,
+  UserAuthCallWith1BalancePayloadToSign,
   UserAuthCallWith1BalanceRequest,
   UserAuthCallWith1BalanceStruct,
 } from "./types";
 
 const getPayloadToSign = (
   struct: UserAuthCallWith1BalanceStruct
-): UserAuthCallPayloadToSign<UserAuthCallWith1BalanceStruct> => {
+): UserAuthCallWith1BalancePayloadToSign => {
   const verifyingContract = getRelayAddress(struct.chainId as number);
   const domain = getEIP712Domain(
     "GelatoRelay",
@@ -25,7 +26,7 @@ const getPayloadToSign = (
   return {
     domain,
     types: EIP712UserAuthCallWith1BalanceTypeData,
-    primaryType: "UserAuthCall",
+    primaryType: "UserAuthCallWith1Balance",
     message: struct,
   };
 };
@@ -39,7 +40,8 @@ const mapRequestToStruct = (
     data: request.data,
     user: request.user,
     userNonce: request.userNonce,
-    userDeadline: request.userDeadline ?? 0,
+    userDeadline:
+      request.userDeadline ?? calculateDeadline(DEFAULT_DEADLINE_GAP),
     paymentType: PaymentType.OneBalance,
     feeToken: request.feeToken,
     oneBalanceChainId: request.oneBalanceChainId,
@@ -72,6 +74,11 @@ export const userAuthCallWith1Balance = async (
   options?: RelayRequestOptions
 ): Promise<string> => {
   try {
+    const userNonce = await getUserNonce(
+      request.chainId as number,
+      request.user as string,
+      provider
+    );
     const struct = mapRequestToStruct(request);
     const signature = await signTypedDataV4(
       provider,
@@ -86,6 +93,8 @@ export const userAuthCallWith1Balance = async (
     return postResponse;
   } catch (error) {
     const errorMessage = (error as Error).message;
-    throw new Error(`GelatoRelaySDK/userAuthCall/1balance: Failed with error: ${errorMessage}`);
+    throw new Error(
+      `GelatoRelaySDK/userAuthCall/1balance: Failed with error: ${errorMessage}`
+    );
   }
 };

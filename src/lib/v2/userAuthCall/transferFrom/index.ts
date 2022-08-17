@@ -2,19 +2,20 @@ import axios from "axios";
 import { providers } from "ethers";
 import { GELATO_RELAY_URL } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
-import { getRelayAddress } from "../../constants";
+import { DEFAULT_DEADLINE_GAP, getRelayAddress } from "../../constants";
 import { PaymentType, RelayRequestOptions } from "../../types";
-import { signTypedDataV4 } from "../../utils";
-import { UserAuthCallPayloadToSign, UserAuthSignature } from "../types";
+import { calculateDeadline, getUserNonce, signTypedDataV4 } from "../../utils";
+import { UserAuthSignature } from "../types";
 import {
   EIP712UserAuthCallWithTransferFromTypeData,
+  UserAuthCallWithTransferFromPayloadToSign,
   UserAuthCallWithTransferFromRequest,
   UserAuthCallWithTransferFromStruct,
 } from "./types";
 
 const getPayloadToSign = (
   struct: UserAuthCallWithTransferFromStruct
-): UserAuthCallPayloadToSign<UserAuthCallWithTransferFromStruct> => {
+): UserAuthCallWithTransferFromPayloadToSign => {
   const verifyingContract = getRelayAddress(struct.chainId as number);
   const domain = getEIP712Domain(
     "GelatoRelay",
@@ -25,7 +26,7 @@ const getPayloadToSign = (
   return {
     domain,
     types: EIP712UserAuthCallWithTransferFromTypeData,
-    primaryType: "UserAuthCall",
+    primaryType: "UserAuthCallWithTransferFrom",
     message: struct,
   };
 };
@@ -39,11 +40,12 @@ const mapRequestToStruct = (
     data: request.data,
     user: request.user,
     userNonce: request.userNonce,
-    userDeadline: request.userDeadline ?? 0,
+    userDeadline:
+      request.userDeadline ?? calculateDeadline(DEFAULT_DEADLINE_GAP),
     paymentType: PaymentType.TransferFrom,
     feeToken: request.feeToken,
     maxFee: request.maxFee,
-  }
+  };
 };
 
 const post = async (
@@ -72,6 +74,11 @@ export const userAuthCallWithTransferFrom = async (
   options?: RelayRequestOptions
 ): Promise<string> => {
   try {
+    const userNonce = await getUserNonce(
+      request.chainId as number,
+      request.user as string,
+      provider
+    );
     const struct = mapRequestToStruct(request);
     const signature = await signTypedDataV4(
       provider,
@@ -86,6 +93,8 @@ export const userAuthCallWithTransferFrom = async (
     return postResponse;
   } catch (error) {
     const errorMessage = (error as Error).message;
-    throw Error(`GelatoRelaySDK/userAuthCall/transferFrom: Failed with error: ${errorMessage}`);
+    throw Error(
+      `GelatoRelaySDK/userAuthCall/transferFrom: Failed with error: ${errorMessage}`
+    );
   }
 };

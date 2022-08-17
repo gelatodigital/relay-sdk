@@ -1,8 +1,9 @@
 import { BigNumberish, BytesLike } from "ethers";
+import { EIP712Domain } from "../../../../../types";
 import { PromiseOrValue, SyncPayment } from "../../../types";
 
 export const EIP712UserAuthCallWithTransferFromTypeData = {
-  UserAuthCall: [
+  UserAuthCallWithTransferFrom: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
     { name: "data", type: "bytes" },
@@ -15,13 +16,25 @@ export const EIP712UserAuthCallWithTransferFromTypeData = {
   ],
 };
 
+export type UserAuthCallWithTransferFromPayloadToSign = {
+  domain: EIP712Domain;
+  types: {
+    UserAuthCallWithTransferFrom: {
+      name: string;
+      type: string;
+    }[];
+  };
+  primaryType: "UserAuthCallWithTransferFrom";
+  message: UserAuthCallWithTransferFromStruct;
+};
+
 export type UserAuthCallWithTransferFromStruct = {
   chainId: PromiseOrValue<BigNumberish>;
   target: PromiseOrValue<string>;
   data: PromiseOrValue<BytesLike>;
   user: PromiseOrValue<string>;
   userNonce: PromiseOrValue<BigNumberish>;
-  userDeadline?: PromiseOrValue<BigNumberish>;
+  userDeadline: PromiseOrValue<BigNumberish>;
   paymentType: PromiseOrValue<BigNumberish>;
   feeToken: PromiseOrValue<string>;
   maxFee: PromiseOrValue<BigNumberish>;
