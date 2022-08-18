@@ -1,15 +1,18 @@
 import axios from "axios";
-import { providers } from "ethers";
+import { BigNumber, providers } from "ethers";
+import { getAddress } from "ethers/lib/utils";
 import { GELATO_RELAY_URL } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
 import { DEFAULT_DEADLINE_GAP, getRelayAddress } from "../../constants";
 import { PaymentType, RelayRequestOptions } from "../../types";
 import { calculateDeadline, getUserNonce, signTypedDataV4 } from "../../utils";
+import { getFeeToken } from "../../utils/getFeeToken";
 import { UserAuthSignature } from "../types";
 import {
   EIP712UserAuthCallWith1BalanceTypeData,
   UserAuthCallWith1BalancePayloadToSign,
   UserAuthCallWith1BalanceRequest,
+  UserAuthCallWith1BalanceRequestOptionalParameters,
   UserAuthCallWith1BalanceStruct,
 } from "./types";
 
@@ -31,19 +34,28 @@ const getPayloadToSign = (
   };
 };
 
-const mapRequestToStruct = (
-  request: UserAuthCallWith1BalanceRequest
-): UserAuthCallWith1BalanceStruct => {
+const mapRequestToStruct = async (
+  request: UserAuthCallWith1BalanceRequest,
+  override: Partial<UserAuthCallWith1BalanceRequestOptionalParameters>
+): Promise<UserAuthCallWith1BalanceStruct> => {
+  if (!override.userNonce && !request.userNonce) {
+    throw new Error(`userNonce is not found in the request, nor fetched`);
+  }
+  if (!override.userDeadline && !request.userDeadline) {
+    throw new Error(`userDeadline is not found in the request, nor fetched`);
+  }
   return {
+    userNonce: override.userNonce ?? request.userNonce!,
+    userDeadline: override.userDeadline ?? request.userDeadline!,
     chainId: request.chainId,
-    target: request.target,
+    target: getAddress(request.target as string),
     data: request.data,
-    user: request.user,
-    userNonce: request.userNonce,
-    userDeadline:
-      request.userDeadline ?? calculateDeadline(DEFAULT_DEADLINE_GAP),
+    user: getAddress(request.user as string),
     paymentType: PaymentType.OneBalance,
-    feeToken: request.feeToken,
+    feeToken: await getFeeToken(
+      request.chainId as number,
+      request.user as string
+    ),
     oneBalanceChainId: request.oneBalanceChainId,
   };
 };
@@ -55,7 +67,7 @@ const post = async (
 ): Promise<any> => {
   try {
     const response = await axios.post(
-      `${GELATO_RELAY_URL}/v2/relays/userAuthCall`,
+      `${GELATO_RELAY_URL}/v2/relays/user-auth-call`,
       request
     );
     return response.data;
@@ -68,18 +80,39 @@ const post = async (
   }
 };
 
+const populateOptionalParameters = async (
+  request: UserAuthCallWith1BalanceRequest,
+  provider: providers.Web3Provider
+): Promise<Partial<UserAuthCallWith1BalanceRequestOptionalParameters>> => {
+  const paramsToOverride: Partial<UserAuthCallWith1BalanceRequestOptionalParameters> =
+    {};
+  if (!request.userDeadline) {
+    paramsToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
+  }
+  if (!request.userNonce) {
+    paramsToOverride.userNonce = (
+      (await getUserNonce(
+        request.chainId as number,
+        request.user as string,
+        provider
+      )) as BigNumber
+    ).toNumber();
+  }
+
+  return paramsToOverride;
+};
+
 export const userAuthCallWith1Balance = async (
   request: UserAuthCallWith1BalanceRequest,
   provider: providers.Web3Provider,
   options?: RelayRequestOptions
 ): Promise<string> => {
   try {
-    const userNonce = await getUserNonce(
-      request.chainId as number,
-      request.user as string,
+    const paramsToOverride = await populateOptionalParameters(
+      request,
       provider
     );
-    const struct = mapRequestToStruct(request);
+    const struct = await mapRequestToStruct(request, paramsToOverride);
     const signature = await signTypedDataV4(
       provider,
       request.user as string,

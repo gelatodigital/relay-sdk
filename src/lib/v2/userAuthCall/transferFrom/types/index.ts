@@ -1,8 +1,14 @@
 import { BigNumberish, BytesLike } from "ethers";
 import { EIP712Domain } from "../../../../../types";
-import { PromiseOrValue, SyncPayment } from "../../../types";
+import { Optional, PromiseOrValue, SyncPayment } from "../../../types";
 
 export const EIP712UserAuthCallWithTransferFromTypeData = {
+  EIP712Domain: [
+    { name: "name", type: "string" },
+    { name: "version", type: "string" },
+    { name: "chainId", type: "uint256" },
+    { name: "verifyingContract", type: "address" },
+  ],
   UserAuthCallWithTransferFrom: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
@@ -10,7 +16,7 @@ export const EIP712UserAuthCallWithTransferFromTypeData = {
     { name: "user", type: "address" },
     { name: "userNonce", type: "uint256" },
     { name: "userDeadline", type: "uint256" },
-    { name: "paymentType", type: "string" },
+    { name: "paymentType", type: "uint8" },
     { name: "feeToken", type: "address" },
     { name: "maxFee", type: "uint256" },
   ],
@@ -19,6 +25,10 @@ export const EIP712UserAuthCallWithTransferFromTypeData = {
 export type UserAuthCallWithTransferFromPayloadToSign = {
   domain: EIP712Domain;
   types: {
+    EIP712Domain: {
+      name: string;
+      type: string;
+    }[];
     UserAuthCallWithTransferFrom: {
       name: string;
       type: string;
@@ -40,10 +50,15 @@ export type UserAuthCallWithTransferFromStruct = {
   maxFee: PromiseOrValue<BigNumberish>;
 };
 
-export type UserAuthCallWithTransferFromRequest = Omit<
-  UserAuthCallWithTransferFromStruct,
-  "paymentType"
+export type UserAuthCallWithTransferFromRequest = Optional<
+  Omit<UserAuthCallWithTransferFromStruct, "paymentType">,
+  keyof UserAuthCallWithTransferFromRequestOptionalParameters
 >;
+
+export type UserAuthCallWithTransferFromRequestOptionalParameters = {
+  userNonce: PromiseOrValue<BigNumberish>;
+  userDeadline: PromiseOrValue<BigNumberish>;
+};
 
 export type UserAuthCallWithTransferFrom = {
   relaySeparator: SyncPayment;

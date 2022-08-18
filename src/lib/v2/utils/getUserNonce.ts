@@ -6,7 +6,6 @@ export const getUserNonce = async (
   account: string,
   provider: providers.Web3Provider
 ) => {
-
   const contract = new ethers.Contract(getRelayAddress(chainId), ABI, provider);
   return await contract.userNonce(account);
 };

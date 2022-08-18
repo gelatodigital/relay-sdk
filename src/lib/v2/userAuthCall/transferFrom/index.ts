@@ -1,5 +1,6 @@
 import axios from "axios";
-import { providers } from "ethers";
+import { BigNumber, providers } from "ethers";
+import { getAddress } from "ethers/lib/utils";
 import { GELATO_RELAY_URL } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
 import { DEFAULT_DEADLINE_GAP, getRelayAddress } from "../../constants";
@@ -10,6 +11,7 @@ import {
   EIP712UserAuthCallWithTransferFromTypeData,
   UserAuthCallWithTransferFromPayloadToSign,
   UserAuthCallWithTransferFromRequest,
+  UserAuthCallWithTransferFromRequestOptionalParameters,
   UserAuthCallWithTransferFromStruct,
 } from "./types";
 
@@ -32,18 +34,24 @@ const getPayloadToSign = (
 };
 
 const mapRequestToStruct = (
-  request: UserAuthCallWithTransferFromRequest
+  request: UserAuthCallWithTransferFromRequest,
+  override: Partial<UserAuthCallWithTransferFromRequestOptionalParameters>
 ): UserAuthCallWithTransferFromStruct => {
+  if (!override.userNonce && !request.userNonce) {
+    throw new Error(`userNonce is not found in the request, nor fetched`);
+  }
+  if (!override.userDeadline && !request.userDeadline) {
+    throw new Error(`userDeadline is not found in the request, nor fetched`);
+  }
   return {
+    userNonce: override.userNonce ?? request.userNonce!,
+    userDeadline: override.userDeadline ?? request.userDeadline!,
     chainId: request.chainId,
-    target: request.target,
+    target: getAddress(request.target as string),
     data: request.data,
-    user: request.user,
-    userNonce: request.userNonce,
-    userDeadline:
-      request.userDeadline ?? calculateDeadline(DEFAULT_DEADLINE_GAP),
+    user: getAddress(request.user as string),
     paymentType: PaymentType.TransferFrom,
-    feeToken: request.feeToken,
+    feeToken: getAddress(request.feeToken as string),
     maxFee: request.maxFee,
   };
 };
@@ -55,7 +63,7 @@ const post = async (
 ): Promise<any> => {
   try {
     const response = await axios.post(
-      `${GELATO_RELAY_URL}/v2/relays/userAuthCall`,
+      `${GELATO_RELAY_URL}/v2/relays/user-auth-call`,
       request
     );
     return response.data;
@@ -68,18 +76,39 @@ const post = async (
   }
 };
 
+const populateOptionalParameters = async (
+  request: UserAuthCallWithTransferFromRequest,
+  provider: providers.Web3Provider
+): Promise<Partial<UserAuthCallWithTransferFromRequestOptionalParameters>> => {
+  const paramsToOverride: Partial<UserAuthCallWithTransferFromRequestOptionalParameters> =
+    {};
+  if (!request.userDeadline) {
+    paramsToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
+  }
+  if (!request.userNonce) {
+    paramsToOverride.userNonce = (
+      (await getUserNonce(
+        request.chainId as number,
+        request.user as string,
+        provider
+      )) as BigNumber
+    ).toNumber();
+  }
+
+  return paramsToOverride;
+};
+
 export const userAuthCallWithTransferFrom = async (
   request: UserAuthCallWithTransferFromRequest,
   provider: providers.Web3Provider,
   options?: RelayRequestOptions
 ): Promise<string> => {
   try {
-    const userNonce = await getUserNonce(
-      request.chainId as number,
-      request.user as string,
+    const paramsToOverride = await populateOptionalParameters(
+      request,
       provider
     );
-    const struct = mapRequestToStruct(request);
+    const struct = mapRequestToStruct(request, paramsToOverride);
     const signature = await signTypedDataV4(
       provider,
       request.user as string,

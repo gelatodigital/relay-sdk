@@ -1,5 +1,7 @@
 import { BigNumberish } from "ethers";
 
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
 export enum PaymentMethod {
   Async,
   Sync,

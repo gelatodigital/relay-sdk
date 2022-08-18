@@ -1,8 +1,14 @@
 import { BigNumberish, BytesLike } from "ethers";
 import { EIP712Domain } from "../../../../../types";
-import { AsyncPayment, PromiseOrValue } from "../../../types";
+import { AsyncPayment, Optional, PromiseOrValue } from "../../../types";
 
 export const EIP712UserAuthCallWith1BalanceTypeData = {
+  EIP712Domain: [
+    { name: "name", type: "string" },
+    { name: "version", type: "string" },
+    { name: "chainId", type: "uint256" },
+    { name: "verifyingContract", type: "address" },
+  ],
   UserAuthCallWith1Balance: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
@@ -10,15 +16,19 @@ export const EIP712UserAuthCallWith1BalanceTypeData = {
     { name: "user", type: "address" },
     { name: "userNonce", type: "uint256" },
     { name: "userDeadline", type: "uint256" },
-    { name: "paymentType", type: "string" },
+    { name: "paymentType", type: "uint8" },
     { name: "feeToken", type: "address" },
-    { name: "oneBalanceChainId", type: "uint256" }
+    { name: "oneBalanceChainId", type: "uint256" },
   ],
 };
 
 export type UserAuthCallWith1BalancePayloadToSign = {
   domain: EIP712Domain;
   types: {
+    EIP712Domain: {
+      name: string;
+      type: string;
+    }[];
     UserAuthCallWith1Balance: {
       name: string;
       type: string;
@@ -40,10 +50,15 @@ export type UserAuthCallWith1BalanceStruct = {
   oneBalanceChainId: PromiseOrValue<BigNumberish>;
 };
 
-export type UserAuthCallWith1BalanceRequest = Omit<
-  UserAuthCallWith1BalanceStruct,
-  "paymentType"
+export type UserAuthCallWith1BalanceRequest = Optional<
+  Omit<UserAuthCallWith1BalanceStruct, "paymentType" | "feeToken">,
+  keyof UserAuthCallWith1BalanceRequestOptionalParameters
 >;
+
+export type UserAuthCallWith1BalanceRequestOptionalParameters = {
+  userNonce: PromiseOrValue<BigNumberish>;
+  userDeadline: PromiseOrValue<BigNumberish>;
+};
 
 export type UserAuthCallWith1Balance = {
   relaySeparator: AsyncPayment;
