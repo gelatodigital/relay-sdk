@@ -36,7 +36,7 @@
     "@gelatonetwork/1balance-sdk": "0.2.2-9",
     "@gelatonetwork/core-sdk": "^0.3.0",
     "axios": "0.24.0",
-    "ethers": "5.5.2"
+    "ethers": "5.7.0"
   },
   "lint-staged": {
     "*.{js,json,md,ts}": "yarn format",
