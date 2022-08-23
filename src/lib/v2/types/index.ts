@@ -2,21 +2,16 @@ import { BigNumberish } from "ethers";
 
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-export enum PaymentMethod {
-  Async,
-  Sync,
-}
-
 export type RelaySeparator = {
-  paymentMethod: PaymentMethod;
+  paymentType: PaymentType;
 };
 
 // RequestSeparator types
-export type AsyncPayment = {
-  paymentMethod: PaymentMethod.Async;
+export type OneBalancePayment = {
+  paymentType: PaymentType.OneBalance;
 };
-export type SyncPayment = {
-  paymentMethod: PaymentMethod.Sync;
+export type TransferFromPayment = {
+  paymentType: PaymentType.TransferFrom;
 };
 
 export enum PaymentType {
@@ -24,9 +19,11 @@ export enum PaymentType {
   TransferFrom,
 }
 
-export type PromiseOrValue<T> = T | Promise<T>;
-
 export type RelayRequestOptions = {
   gasLimit?: BigNumberish;
   retries?: number;
+};
+
+export type RelayResponse = {
+  taskId: string;
 };

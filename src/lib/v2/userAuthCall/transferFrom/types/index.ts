@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike } from "ethers";
 import { EIP712Domain } from "../../../../../types";
-import { Optional, PromiseOrValue, SyncPayment } from "../../../types";
+import { Optional, TransferFromPayment } from "../../../types";
 
 export const EIP712UserAuthCallWithTransferFromTypeData = {
   EIP712Domain: [
@@ -39,15 +39,15 @@ export type UserAuthCallWithTransferFromPayloadToSign = {
 };
 
 export type UserAuthCallWithTransferFromStruct = {
-  chainId: PromiseOrValue<BigNumberish>;
-  target: PromiseOrValue<string>;
-  data: PromiseOrValue<BytesLike>;
-  user: PromiseOrValue<string>;
-  userNonce: PromiseOrValue<BigNumberish>;
-  userDeadline: PromiseOrValue<BigNumberish>;
-  paymentType: PromiseOrValue<BigNumberish>;
-  feeToken: PromiseOrValue<string>;
-  maxFee: PromiseOrValue<BigNumberish>;
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+  user: string;
+  userNonce: BigNumberish;
+  userDeadline: BigNumberish;
+  paymentType: BigNumberish;
+  feeToken: string;
+  maxFee: BigNumberish;
 };
 
 export type UserAuthCallWithTransferFromRequest = Optional<
@@ -56,11 +56,11 @@ export type UserAuthCallWithTransferFromRequest = Optional<
 >;
 
 export type UserAuthCallWithTransferFromRequestOptionalParameters = {
-  userNonce: PromiseOrValue<BigNumberish>;
-  userDeadline: PromiseOrValue<BigNumberish>;
+  userNonce: BigNumberish;
+  userDeadline: BigNumberish;
 };
 
 export type UserAuthCallWithTransferFrom = {
-  relaySeparator: SyncPayment;
+  relaySeparator: TransferFromPayment;
   relayData: UserAuthCallWithTransferFromRequest;
 };

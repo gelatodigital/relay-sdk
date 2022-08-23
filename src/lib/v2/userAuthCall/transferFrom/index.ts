@@ -4,7 +4,7 @@ import { getAddress } from "ethers/lib/utils";
 import { GELATO_RELAY_URL } from "../../../../constants";
 import { getEIP712Domain } from "../../../../utils";
 import { DEFAULT_DEADLINE_GAP, getRelayAddress } from "../../constants";
-import { PaymentType, RelayRequestOptions } from "../../types";
+import { PaymentType, RelayRequestOptions, RelayResponse } from "../../types";
 import { calculateDeadline, getUserNonce, signTypedDataV4 } from "../../utils";
 import { UserAuthSignature } from "../types";
 import {
@@ -102,7 +102,7 @@ export const userAuthCallWithTransferFrom = async (
   request: UserAuthCallWithTransferFromRequest,
   provider: providers.Web3Provider,
   options?: RelayRequestOptions
-): Promise<string> => {
+): Promise<RelayResponse> => {
   try {
     const paramsToOverride = await populateOptionalParameters(
       request,

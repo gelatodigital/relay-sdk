@@ -27,7 +27,7 @@ import {
   getEIP712Domain,
   getEIP712DomainSeparator,
 } from "../utils";
-import { relayWithUserSignature, PaymentMethod } from "./v2";
+import { relayWithUserSignature, PaymentType, relayWithSyncFee } from "./v2";
 
 /**
  *
@@ -584,5 +584,6 @@ export {
   TransactionStatus,
   GELATO_GAS_BUFFER,
   relayWithUserSignature,
-  PaymentMethod,
+  relayWithSyncFee,
+  PaymentType,
 };

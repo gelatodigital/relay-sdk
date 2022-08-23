@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike } from "ethers";
 import { EIP712Domain } from "../../../../../types";
-import { AsyncPayment, Optional, PromiseOrValue } from "../../../types";
+import { OneBalancePayment, Optional } from "../../../types";
 
 export const EIP712UserAuthCallWith1BalanceTypeData = {
   EIP712Domain: [
@@ -39,15 +39,15 @@ export type UserAuthCallWith1BalancePayloadToSign = {
 };
 
 export type UserAuthCallWith1BalanceStruct = {
-  chainId: PromiseOrValue<BigNumberish>;
-  target: PromiseOrValue<string>;
-  data: PromiseOrValue<BytesLike>;
-  user: PromiseOrValue<string>;
-  userNonce: PromiseOrValue<BigNumberish>;
-  userDeadline: PromiseOrValue<BigNumberish>;
-  paymentType: PromiseOrValue<BigNumberish>;
-  feeToken: PromiseOrValue<string>;
-  oneBalanceChainId: PromiseOrValue<BigNumberish>;
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+  user: string;
+  userNonce: BigNumberish;
+  userDeadline: BigNumberish;
+  paymentType: BigNumberish;
+  feeToken: string;
+  oneBalanceChainId: BigNumberish;
 };
 
 export type UserAuthCallWith1BalanceRequest = Optional<
@@ -56,11 +56,11 @@ export type UserAuthCallWith1BalanceRequest = Optional<
 >;
 
 export type UserAuthCallWith1BalanceRequestOptionalParameters = {
-  userNonce: PromiseOrValue<BigNumberish>;
-  userDeadline: PromiseOrValue<BigNumberish>;
+  userNonce: BigNumberish;
+  userDeadline: BigNumberish;
 };
 
 export type UserAuthCallWith1Balance = {
-  relaySeparator: AsyncPayment;
+  relaySeparator: OneBalancePayment;
   relayData: UserAuthCallWith1BalanceRequest;
 };

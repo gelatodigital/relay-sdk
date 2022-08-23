@@ -1,2 +1,3 @@
 export { relayWithUserSignature } from "./userAuthCall";
-export { PaymentMethod } from "./types";
+export { relayWithSyncFee } from "./callWithSyncFee";
+export { PaymentType } from "./types";

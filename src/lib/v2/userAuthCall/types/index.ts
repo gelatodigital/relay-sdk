@@ -1,4 +1,8 @@
-import { AsyncPayment, RelaySeparator, SyncPayment } from "../../types";
+import {
+  OneBalancePayment,
+  RelaySeparator,
+  TransferFromPayment,
+} from "../../types";
 import { UserAuthCallWith1Balance } from "../1balance/types";
 import { UserAuthCallWithTransferFrom } from "../transferFrom/types";
 
@@ -7,8 +11,8 @@ export type UserAuthSignature = {
 };
 
 export type RelayRequestWithUserSignature<T extends RelaySeparator> =
-  T extends AsyncPayment
+  T extends OneBalancePayment
     ? UserAuthCallWith1Balance
-    : T extends SyncPayment
+    : T extends TransferFromPayment
     ? UserAuthCallWithTransferFrom
     : never;
