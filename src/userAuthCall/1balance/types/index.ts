@@ -1,15 +1,15 @@
 import { BigNumberish, BytesLike } from "ethers";
-import { EIP712Domain } from "../../../../../types";
-import { Optional, TransferFromPayment } from "../../../types";
 
-export const EIP712UserAuthCallWithTransferFromTypeData = {
+import { EIP712Domain, OneBalancePayment, Optional } from "../../../types";
+
+export const EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
   EIP712Domain: [
     { name: "name", type: "string" },
     { name: "version", type: "string" },
     { name: "chainId", type: "uint256" },
     { name: "verifyingContract", type: "address" },
   ],
-  UserAuthCallWithTransferFrom: [
+  UserAuthCallWith1Balance: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
     { name: "data", type: "bytes" },
@@ -18,27 +18,27 @@ export const EIP712UserAuthCallWithTransferFromTypeData = {
     { name: "userDeadline", type: "uint256" },
     { name: "paymentType", type: "uint8" },
     { name: "feeToken", type: "address" },
-    { name: "maxFee", type: "uint256" },
+    { name: "oneBalanceChainId", type: "uint256" },
   ],
 };
 
-export type UserAuthCallWithTransferFromPayloadToSign = {
+export type UserAuthCallWith1BalancePayloadToSign = {
   domain: EIP712Domain;
   types: {
     EIP712Domain: {
       name: string;
       type: string;
     }[];
-    UserAuthCallWithTransferFrom: {
+    UserAuthCallWith1Balance: {
       name: string;
       type: string;
     }[];
   };
-  primaryType: "UserAuthCallWithTransferFrom";
-  message: UserAuthCallWithTransferFromStruct;
+  primaryType: "UserAuthCallWith1Balance";
+  message: UserAuthCallWith1BalanceStruct;
 };
 
-export type UserAuthCallWithTransferFromStruct = {
+export type UserAuthCallWith1BalanceStruct = {
   chainId: BigNumberish;
   target: string;
   data: BytesLike;
@@ -47,20 +47,20 @@ export type UserAuthCallWithTransferFromStruct = {
   userDeadline: BigNumberish;
   paymentType: BigNumberish;
   feeToken: string;
-  maxFee: BigNumberish;
+  oneBalanceChainId: BigNumberish;
 };
 
-export type UserAuthCallWithTransferFromRequest = Optional<
-  Omit<UserAuthCallWithTransferFromStruct, "paymentType">,
-  keyof UserAuthCallWithTransferFromRequestOptionalParameters
+export type UserAuthCallWith1BalanceRequest = Optional<
+  Omit<UserAuthCallWith1BalanceStruct, "paymentType" | "feeToken">,
+  keyof UserAuthCallWith1BalanceRequestOptionalParameters
 >;
 
-export type UserAuthCallWithTransferFromRequestOptionalParameters = {
+export type UserAuthCallWith1BalanceRequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
 };
 
-export type UserAuthCallWithTransferFrom = {
-  relaySeparator: TransferFromPayment;
-  relayData: UserAuthCallWithTransferFromRequest;
+export type UserAuthCallWith1Balance = {
+  relaySeparator: OneBalancePayment;
+  relayData: UserAuthCallWith1BalanceRequest;
 };

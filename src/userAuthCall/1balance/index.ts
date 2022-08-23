@@ -1,23 +1,33 @@
 import axios from "axios";
 import { BigNumber, providers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
-import { GELATO_RELAY_URL } from "../../../../constants";
-import { getEIP712Domain } from "../../../../utils";
-import { DEFAULT_DEADLINE_GAP, getRelayAddress } from "../../constants";
-import { PaymentType, RelayRequestOptions, RelayResponse } from "../../types";
-import { calculateDeadline, getUserNonce, signTypedDataV4 } from "../../utils";
-import { UserAuthSignature } from "../types";
+
 import {
-  EIP712UserAuthCallWithTransferFromTypeData,
-  UserAuthCallWithTransferFromPayloadToSign,
-  UserAuthCallWithTransferFromRequest,
-  UserAuthCallWithTransferFromRequestOptionalParameters,
-  UserAuthCallWithTransferFromStruct,
+  GELATO_RELAY_URL,
+  DEFAULT_DEADLINE_GAP,
+  getRelayAddress,
+} from "../../constants";
+import {
+  getEIP712Domain,
+  calculateDeadline,
+  getUserNonce,
+  signTypedDataV4,
+} from "../../utils";
+import { PaymentType, RelayRequestOptions, RelayResponse } from "../../types";
+import { getFeeToken } from "../../utils/getFeeToken";
+import { UserAuthSignature } from "../types";
+
+import {
+  EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
+  UserAuthCallWith1BalancePayloadToSign,
+  UserAuthCallWith1BalanceRequest,
+  UserAuthCallWith1BalanceRequestOptionalParameters,
+  UserAuthCallWith1BalanceStruct,
 } from "./types";
 
 const getPayloadToSign = (
-  struct: UserAuthCallWithTransferFromStruct
-): UserAuthCallWithTransferFromPayloadToSign => {
+  struct: UserAuthCallWith1BalanceStruct
+): UserAuthCallWith1BalancePayloadToSign => {
   const verifyingContract = getRelayAddress(struct.chainId as number);
   const domain = getEIP712Domain(
     "GelatoRelay",
@@ -27,16 +37,16 @@ const getPayloadToSign = (
   );
   return {
     domain,
-    types: EIP712UserAuthCallWithTransferFromTypeData,
-    primaryType: "UserAuthCallWithTransferFrom",
+    types: EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
+    primaryType: "UserAuthCallWith1Balance",
     message: struct,
   };
 };
 
-const mapRequestToStruct = (
-  request: UserAuthCallWithTransferFromRequest,
-  override: Partial<UserAuthCallWithTransferFromRequestOptionalParameters>
-): UserAuthCallWithTransferFromStruct => {
+const mapRequestToStruct = async (
+  request: UserAuthCallWith1BalanceRequest,
+  override: Partial<UserAuthCallWith1BalanceRequestOptionalParameters>
+): Promise<UserAuthCallWith1BalanceStruct> => {
   if (!override.userNonce && !request.userNonce) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }
@@ -44,23 +54,28 @@ const mapRequestToStruct = (
     throw new Error(`userDeadline is not found in the request, nor fetched`);
   }
   return {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     userNonce: override.userNonce ?? request.userNonce!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     userDeadline: override.userDeadline ?? request.userDeadline!,
     chainId: request.chainId,
     target: getAddress(request.target as string),
     data: request.data,
     user: getAddress(request.user as string),
-    paymentType: PaymentType.TransferFrom,
-    feeToken: getAddress(request.feeToken as string),
-    maxFee: request.maxFee,
+    paymentType: PaymentType.OneBalance,
+    feeToken: await getFeeToken(
+      request.chainId as number,
+      request.user as string
+    ),
+    oneBalanceChainId: request.oneBalanceChainId,
   };
 };
 
 const post = async (
-  request: UserAuthCallWithTransferFromStruct &
+  request: UserAuthCallWith1BalanceStruct &
     RelayRequestOptions &
     UserAuthSignature
-): Promise<any> => {
+): Promise<RelayResponse> => {
   try {
     const response = await axios.post(
       `${GELATO_RELAY_URL}/v2/relays/user-auth-call`,
@@ -68,25 +83,25 @@ const post = async (
     );
     return response.data;
   } catch (error) {
-    const errorMsg = (error as Error).message ?? String(error);
+    const errorMessage = (error as Error).message ?? String(error);
 
     throw new Error(
-      `GelatoRelaySDK/userAuthCall/transferFrom/post: Failed with error: ${errorMsg}`
+      `GelatoRelaySDK/userAuthCall/1balance/post: Failed with error: ${errorMessage}`
     );
   }
 };
 
 const populateOptionalParameters = async (
-  request: UserAuthCallWithTransferFromRequest,
+  request: UserAuthCallWith1BalanceRequest,
   provider: providers.Web3Provider
-): Promise<Partial<UserAuthCallWithTransferFromRequestOptionalParameters>> => {
-  const paramsToOverride: Partial<UserAuthCallWithTransferFromRequestOptionalParameters> =
+): Promise<Partial<UserAuthCallWith1BalanceRequestOptionalParameters>> => {
+  const parametersToOverride: Partial<UserAuthCallWith1BalanceRequestOptionalParameters> =
     {};
   if (!request.userDeadline) {
-    paramsToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
+    parametersToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
   }
   if (!request.userNonce) {
-    paramsToOverride.userNonce = (
+    parametersToOverride.userNonce = (
       (await getUserNonce(
         request.chainId as number,
         request.user as string,
@@ -95,20 +110,20 @@ const populateOptionalParameters = async (
     ).toNumber();
   }
 
-  return paramsToOverride;
+  return parametersToOverride;
 };
 
-export const userAuthCallWithTransferFrom = async (
-  request: UserAuthCallWithTransferFromRequest,
+export const userAuthCallWith1Balance = async (
+  request: UserAuthCallWith1BalanceRequest,
   provider: providers.Web3Provider,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
-    const paramsToOverride = await populateOptionalParameters(
+    const parametersToOverride = await populateOptionalParameters(
       request,
       provider
     );
-    const struct = mapRequestToStruct(request, paramsToOverride);
+    const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       provider,
       request.user as string,
@@ -122,8 +137,8 @@ export const userAuthCallWithTransferFrom = async (
     return postResponse;
   } catch (error) {
     const errorMessage = (error as Error).message;
-    throw Error(
-      `GelatoRelaySDK/userAuthCall/transferFrom: Failed with error: ${errorMessage}`
+    throw new Error(
+      `GelatoRelaySDK/userAuthCall/1balance: Failed with error: ${errorMessage}`
     );
   }
 };

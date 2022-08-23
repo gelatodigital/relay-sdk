@@ -1,7 +1,9 @@
 import { providers } from "ethers";
+
+import { PaymentType, RelayRequestOptions, RelaySeparator } from "../types";
+
 import { userAuthCallWith1Balance } from "./1balance";
 import { userAuthCallWithTransferFrom } from "./transferFrom";
-import { PaymentType, RelayRequestOptions, RelaySeparator } from "../types";
 import { RelayRequestWithUserSignature } from "./types";
 import { UserAuthCallWith1BalanceRequest } from "./1balance/types";
 import { UserAuthCallWithTransferFromRequest } from "./transferFrom/types";
@@ -14,7 +16,6 @@ export const relayWithUserSignature = async <T extends RelaySeparator>(
   const requestSeparator = request.relaySeparator;
   switch (requestSeparator.paymentType) {
     case PaymentType.OneBalance:
-      console.log("Async payment with user signature");
       return userAuthCallWith1Balance(
         request.relayData as UserAuthCallWith1BalanceRequest,
         provider,
@@ -22,7 +23,6 @@ export const relayWithUserSignature = async <T extends RelaySeparator>(
       );
 
     case PaymentType.TransferFrom:
-      console.log("Sync payment with user signature");
       return userAuthCallWithTransferFrom(
         request.relayData as UserAuthCallWithTransferFromRequest,
         provider,
