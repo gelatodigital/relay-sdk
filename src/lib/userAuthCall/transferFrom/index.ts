@@ -74,7 +74,7 @@ const post = async (
 ): Promise<RelayResponse> => {
   try {
     const response = await axios.post(
-      `${GELATO_RELAY_URL}/v2/relays/user-auth-call`,
+      `${GELATO_RELAY_URL}/relays/v2/user-auth-call`,
       request
     );
     return response.data;

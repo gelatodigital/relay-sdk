@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike } from "ethers";
 
-import { EIP712Domain, Optional, TransferFromPayment } from "../../../types";
+import { EIP712Domain, Optional } from "../../../types";
 
 export const EIP712_USER_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA = {
   EIP712Domain: [
@@ -58,9 +58,4 @@ export type UserAuthCallWithTransferFromRequest = Optional<
 export type UserAuthCallWithTransferFromRequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
-};
-
-export type UserAuthCallWithTransferFrom = {
-  relaySeparator: TransferFromPayment;
-  relayData: UserAuthCallWithTransferFromRequest;
 };

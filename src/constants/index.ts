@@ -1,6 +1,6 @@
 import { utils } from "ethers";
 
-export const GELATO_RELAY_URL = "http://localhost:8080";
+export const GELATO_RELAY_URL = "https://relay.gelato.digital";
 
 export const SIGN_TYPED_DATA_V4 = "eth_signTypedData_v4";
 

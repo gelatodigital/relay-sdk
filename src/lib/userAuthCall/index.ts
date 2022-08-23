@@ -1,36 +1,47 @@
 import { providers } from "ethers";
 
-import { PaymentType, RelayRequestOptions, RelaySeparator } from "../types";
+import { PaymentType, RelayRequestOptions, RelayResponse } from "../types";
 
 import { userAuthCallWith1Balance } from "./1balance";
 import { userAuthCallWithTransferFrom } from "./transferFrom";
-import { RelayRequestWithUserSignature } from "./types";
 import { UserAuthCallWith1BalanceRequest } from "./1balance/types";
 import { UserAuthCallWithTransferFromRequest } from "./transferFrom/types";
+import { RelayRequestWithUserSignature } from "./types";
 
-export const relayWithUserSignature = async <T extends RelaySeparator>(
-  request: RelayRequestWithUserSignature<T>,
+/**
+ * @function
+ * @template PT
+ * @extends {PaymentType}
+ * @param {PT} paymentType - PaymentType.OneBalance or PaymentType.TransferFrom
+ * @param {RelayRequestWithUserSignature<PT>} request - Depending on the paymentType, UserAuthCallWith1Balance or UserAuthCallWithTransferFrom request to be relayed by Gelato Executors
+ * @param {providers.Web3Provider} provider - Web3Provider to sign the payload
+ * @param {RelayRequestOptions} options - Optional Relay configuration
+ * @returns {Promise<RelayResponse>} Response object with taskId parameter
+ *
+ */
+export const relayWithUserSignature = async <PT extends PaymentType>(
+  paymentType: PT,
+  request: RelayRequestWithUserSignature<PT>,
   provider: providers.Web3Provider,
   options?: RelayRequestOptions
-) => {
-  const requestSeparator = request.relaySeparator;
-  switch (requestSeparator.paymentType) {
+): Promise<RelayResponse> => {
+  switch (paymentType) {
     case PaymentType.OneBalance:
       return userAuthCallWith1Balance(
-        request.relayData as UserAuthCallWith1BalanceRequest,
+        request as UserAuthCallWith1BalanceRequest,
         provider,
         options
       );
 
     case PaymentType.TransferFrom:
       return userAuthCallWithTransferFrom(
-        request.relayData as UserAuthCallWithTransferFromRequest,
+        request as UserAuthCallWithTransferFromRequest,
         provider,
         options
       );
 
     default: {
-      const _exhaustiveCheck: never = requestSeparator;
+      const _exhaustiveCheck: never = paymentType;
       return _exhaustiveCheck;
     }
   }

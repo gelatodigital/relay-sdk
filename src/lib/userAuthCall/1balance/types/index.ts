@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike } from "ethers";
 
-import { EIP712Domain, OneBalancePayment, Optional } from "../../../types";
+import { EIP712Domain, Optional } from "../../../types";
 
 export const EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
   EIP712Domain: [
@@ -58,9 +58,4 @@ export type UserAuthCallWith1BalanceRequest = Optional<
 export type UserAuthCallWith1BalanceRequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
-};
-
-export type UserAuthCallWith1Balance = {
-  relaySeparator: OneBalancePayment;
-  relayData: UserAuthCallWith1BalanceRequest;
 };
