@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { GELATO_RELAY_URL } from "../constants";
+import { GELATO_RELAY_URL } from "../../constants";
 import { RelayRequestOptions, RelayResponse } from "../types";
 
 import { CallWithSyncFeeRequest } from "./types";

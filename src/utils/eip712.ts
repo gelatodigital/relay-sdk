@@ -1,4 +1,4 @@
-import { EIP712Domain } from "../types";
+import { EIP712Domain } from "../lib/types";
 
 export const getEIP712Domain = (
   name: string,

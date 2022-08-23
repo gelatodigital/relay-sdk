@@ -6,15 +6,15 @@ import {
   GELATO_RELAY_URL,
   DEFAULT_DEADLINE_GAP,
   getRelayAddress,
-} from "../../constants";
+} from "../../../constants";
 import {
   getEIP712Domain,
   calculateDeadline,
   getUserNonce,
   signTypedDataV4,
-} from "../../utils";
+} from "../../../utils";
 import { PaymentType, RelayRequestOptions, RelayResponse } from "../../types";
-import { getFeeToken } from "../../utils/getFeeToken";
+import { getFeeToken } from "../../../utils/getFeeToken";
 import { UserAuthSignature } from "../types";
 
 import {
