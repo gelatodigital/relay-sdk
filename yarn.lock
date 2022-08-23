@@ -1021,10 +1021,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@gelatonetwork/1balance-sdk@0.2.2-9":
-  version "0.2.2-9"
-  resolved "https://registry.yarnpkg.com/@gelatonetwork/1balance-sdk/-/1balance-sdk-0.2.2-9.tgz#dbe1e3e8f144488fd763c9fe927b66df8a51da53"
-  integrity sha512-eSFLRuXs2w4xqRHTBwGNy6VDrTZ8mwwf1ivxdFI8ktrJeVNHj+McIkShKa/bnjraiFoSk7gwUFpOIKCYhkUI0w==
+"@gelatonetwork/1balance-sdk@0.3.0-0":
+  version "0.3.0-0"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/1balance-sdk/-/1balance-sdk-0.3.0-0.tgz#d562e7f49f0a31f594f668c0c782ea90720156fd"
+  integrity sha512-sGFdEtzRbRDbr9izsVm/p5CbuuSzM+JK9LpoSThNiYT79XL89+w3YqNr9ldDIcMJlX0jl8q2gM7CZo4+7MF8EQ==
   dependencies:
     axios "0.27.2"
     ethers "5.6.9"

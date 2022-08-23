@@ -29,7 +29,7 @@ const getPayloadToSign = (
 ): UserAuthCallWithTransferFromPayloadToSign => {
   const verifyingContract = getRelayAddress(struct.chainId as number);
   const domain = getEIP712Domain(
-    "GelatoRelay",
+    "GelatoRelayWithTransferFrom",
     "1",
     struct.chainId as number,
     verifyingContract
