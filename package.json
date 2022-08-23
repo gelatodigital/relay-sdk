@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/relay-sdk",
-  "version": "1.0.1-2",
+  "version": "1.0.1-3",
   "description": "SDK to integrate with Gelato Relay",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
