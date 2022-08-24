@@ -6,6 +6,7 @@ import {
   GELATO_RELAY_URL,
   DEFAULT_DEADLINE_GAP,
   getRelayAddress,
+  DEFAULT_INTERNAL_ERROR_MESSAGE,
 } from "../../../constants";
 import {
   getEIP712Domain,
@@ -83,11 +84,11 @@ const post = async (
     );
     return response.data;
   } catch (error) {
-    const errorMessage = (error as Error).message ?? String(error);
-
-    throw new Error(
-      `GelatoRelaySDK/userAuthCall/1balance/post: Failed with error: ${errorMessage}`
-    );
+    const errorMessage =
+      error.response?.data?.message ??
+      error.message ??
+      DEFAULT_INTERNAL_ERROR_MESSAGE;
+    throw new Error(errorMessage);
   }
 };
 

@@ -4,6 +4,8 @@ export const GELATO_RELAY_URL = "https://relay.gelato.digital";
 
 export const SIGN_TYPED_DATA_V4 = "eth_signTypedData_v4";
 
+export const DEFAULT_INTERNAL_ERROR_MESSAGE = "Internal Error";
+
 export const getRelayAddress = (chainId: number): string => {
   switch (chainId) {
     case 80_001:
