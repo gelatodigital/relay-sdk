@@ -1,9 +1,7 @@
 import axios from "axios";
 
-import {
-  DEFAULT_INTERNAL_ERROR_MESSAGE,
-  GELATO_RELAY_URL,
-} from "../../constants";
+import { GELATO_RELAY_URL } from "../../constants";
+import { getHttpErrorMessage } from "../../utils";
 import { RelayRequestOptions, RelayResponse } from "../types";
 
 import { CallWithSyncFeeRequest } from "./types";
@@ -25,12 +23,10 @@ export const relayWithSyncFee = async (
     );
     return response.data;
   } catch (error) {
-    const errorMessage =
-      error.response?.data?.message ??
-      error.message ??
-      DEFAULT_INTERNAL_ERROR_MESSAGE;
     throw new Error(
-      `GelatoRelaySDK/relayWithSyncFee: Failed with error: ${errorMessage}`
+      `GelatoRelaySDK/relayWithSyncFee: Failed with error: ${getHttpErrorMessage(
+        error
+      )}`
     );
   }
 };

@@ -15,7 +15,18 @@ export const getRelayAddress = (chainId: number): string => {
   }
 };
 
-export const DEFAULT_DEADLINE_GAP = 86_400;
-export const ABI = [
+export const getRelayWithTransferFromAddress = (chainId: number): string => {
+  switch (chainId) {
+    case 80_001:
+      return utils.getAddress("0xaBcC9b596420A9E9172FD5938620E265a0f9Df92");
+    default:
+      throw new Error(
+        `getRelayWithTransferFromAddress: chainId [${chainId}] is not supported`
+      );
+  }
+};
+
+export const DEFAULT_DEADLINE_GAP = 86_400; //24H
+export const USER_NONCE_ABI = [
   "function userNonce(address account) external view returns (uint256)",
 ];
