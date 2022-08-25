@@ -7,6 +7,8 @@ import {
   getEIP712Domain,
   signTypedDataV4,
   getHttpErrorMessage,
+  getFeeToken,
+  populateOptionalUserParameters,
 } from "../../../utils";
 import {
   PaymentType,
@@ -14,9 +16,7 @@ import {
   RelayRequestOptions,
   RelayResponse,
 } from "../../types";
-import { getFeeToken } from "../../../utils/getFeeToken";
 import { UserAuthSignature } from "../types";
-import { populateOptionalUserParameters } from "../utils";
 
 import {
   EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,

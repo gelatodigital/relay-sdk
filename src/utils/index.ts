@@ -4,3 +4,4 @@ export * from "./getUserNonce";
 export * from "./eip712";
 export * from "./getFeeToken";
 export * from "./getHttpErrorMessage";
+export * from "./populateOptionalUserParameters";
