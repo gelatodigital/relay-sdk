@@ -52,7 +52,7 @@ export const generateUserSponsorSignatureWithTransferFrom = async (
     const parametersToOverride = await populateOptionalUserParameters<
       UserSponsorAuthCallWithTransferFromRequest,
       UserSponsorAuthCallWithTransferFromRequestOptionalParameters
-    >(request, signer.provider);
+    >(PaymentType.TransferFrom, request, signer.provider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const domain = getEIP712Domain(
       request.chainId as number,

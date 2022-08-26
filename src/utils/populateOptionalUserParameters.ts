@@ -1,6 +1,7 @@
 import { BigNumber, ethers, providers } from "ethers";
 
 import { DEFAULT_DEADLINE_GAP } from "../constants";
+import { PaymentType } from "../lib";
 import {
   UserAuthCallWith1BalanceRequest,
   UserAuthCallWith1BalanceRequestOptionalParameters,
@@ -33,6 +34,7 @@ export const populateOptionalUserParameters = async <
     | UserSponsorAuthCallWith1BalanceRequestOptionalParameters
     | UserSponsorAuthCallWithTransferFromRequestOptionalParameters
 >(
+  paymentType: PaymentType,
   request: Request,
   provider: providers.Web3Provider | ethers.providers.Provider
 ): Promise<Partial<OptionalParameters>> => {
@@ -43,6 +45,7 @@ export const populateOptionalUserParameters = async <
   if (!request.userNonce) {
     parametersToOverride.userNonce = (
       (await getUserNonce(
+        paymentType,
         request.chainId as number,
         request.user as string,
         provider

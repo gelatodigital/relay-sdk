@@ -55,7 +55,7 @@ export const generateUserSponsorSignatureWith1Balance = async (
     const parametersToOverride = await populateOptionalUserParameters<
       UserSponsorAuthCallWith1BalanceRequest,
       UserSponsorAuthCallWith1BalanceRequestOptionalParameters
-    >(request, signer.provider);
+    >(PaymentType.OneBalance, request, signer.provider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const domain = getEIP712Domain(
       request.chainId as number,

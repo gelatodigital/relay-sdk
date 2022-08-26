@@ -90,7 +90,7 @@ export const userAuthCallWithTransferFrom = async (
     const parametersToOverride = await populateOptionalUserParameters<
       UserAuthCallWithTransferFromRequest,
       UserAuthCallWithTransferFromRequestOptionalParameters
-    >(request, provider);
+    >(PaymentType.TransferFrom, request, provider);
     const struct = mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       provider,

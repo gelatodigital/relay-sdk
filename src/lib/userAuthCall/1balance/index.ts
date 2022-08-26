@@ -93,7 +93,7 @@ export const userAuthCallWith1Balance = async (
     const parametersToOverride = await populateOptionalUserParameters<
       UserAuthCallWith1BalanceRequest,
       UserAuthCallWith1BalanceRequestOptionalParameters
-    >(request, provider);
+    >(PaymentType.OneBalance, request, provider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       provider,
