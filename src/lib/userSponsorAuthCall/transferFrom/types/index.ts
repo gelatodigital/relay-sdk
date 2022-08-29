@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike } from "ethers";
 
-import { Optional } from "../../../types";
+import { EIP712Domain, Optional } from "../../../types";
 
 export const EIP712_USER_SPONSOR_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA = {
   UserSponsorAuthCallWithTransferFrom: [
@@ -16,6 +16,22 @@ export const EIP712_USER_SPONSOR_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA = {
     { name: "feeToken", type: "address" },
     { name: "maxFee", type: "uint256" },
   ],
+};
+
+export type UserSponsorAuthCallWithTransferFromPayloadToSign = {
+  domain: EIP712Domain;
+  types: {
+    EIP712Domain: {
+      name: string;
+      type: string;
+    }[];
+    UserSponsorAuthCallWithTransferFrom: {
+      name: string;
+      type: string;
+    }[];
+  };
+  primaryType: "UserSponsorAuthCallWithTransferFrom";
+  message: UserSponsorAuthCallWithTransferFromStruct;
 };
 
 export type UserSponsorAuthCallWithTransferFromStruct = {

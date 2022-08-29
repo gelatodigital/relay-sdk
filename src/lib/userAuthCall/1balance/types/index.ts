@@ -3,12 +3,6 @@ import { BigNumberish, BytesLike } from "ethers";
 import { EIP712Domain, Optional } from "../../../types";
 
 export const EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
-  EIP712Domain: [
-    { name: "name", type: "string" },
-    { name: "version", type: "string" },
-    { name: "chainId", type: "uint256" },
-    { name: "verifyingContract", type: "address" },
-  ],
   UserAuthCallWith1Balance: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },

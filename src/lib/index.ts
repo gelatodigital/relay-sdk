@@ -1,4 +1,8 @@
-export { relayWithUserSignature } from "./userAuthCall";
 export { relayWithSyncFee } from "./callWithSyncFee";
-export { PaymentType } from "./types";
-export { generateSponsorSignature } from "./sponsorAuthCall";
+export { relayWithUserSignature } from "./userAuthCall";
+export { relayWithSponsorSignature } from "./sponsorAuthCall";
+export {
+  generateUserSponsorSignature,
+  relayWithUserSponsorSignature,
+} from "./userSponsorAuthCall";
+export { PaymentType, SignerProfile } from "./types";

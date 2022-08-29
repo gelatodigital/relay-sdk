@@ -1,16 +1,16 @@
-import axios from "axios";
 import { providers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
-import { GELATO_RELAY_URL } from "../../../constants";
 import {
   getEIP712Domain,
   signTypedDataV4,
-  getHttpErrorMessage,
   getFeeToken,
   populateOptionalUserParameters,
+  postAuthCall,
 } from "../../../utils";
 import {
+  AuthCall,
+  EIP712_DOMAIN_TYPE_DATA,
   PaymentType,
   RelayContract,
   RelayRequestOptions,
@@ -35,7 +35,10 @@ const getPayloadToSign = (
   );
   return {
     domain,
-    types: EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
+    types: {
+      ...EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
+      ...EIP712_DOMAIN_TYPE_DATA,
+    },
     primaryType: "UserAuthCallWith1Balance",
     message: struct,
   };
@@ -68,22 +71,6 @@ const mapRequestToStruct = async (
   };
 };
 
-const post = async (
-  request: UserAuthCallWith1BalanceStruct &
-    RelayRequestOptions &
-    UserAuthSignature
-): Promise<RelayResponse> => {
-  try {
-    const response = await axios.post(
-      `${GELATO_RELAY_URL}/relays/v2/user-auth-call`,
-      request
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(getHttpErrorMessage(error));
-  }
-};
-
 export const userAuthCallWith1Balance = async (
   request: UserAuthCallWith1BalanceRequest,
   provider: providers.Web3Provider,
@@ -100,7 +87,10 @@ export const userAuthCallWith1Balance = async (
       request.user as string,
       JSON.stringify(getPayloadToSign(struct))
     );
-    const postResponse = await post({
+    const postResponse = await postAuthCall<
+      UserAuthCallWith1BalanceStruct & RelayRequestOptions & UserAuthSignature,
+      RelayResponse
+    >(AuthCall.User, {
       ...struct,
       ...options,
       userSignature: signature,

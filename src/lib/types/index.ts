@@ -5,11 +5,22 @@ export enum RelayContract {
   GelatoRelayWithTransferFrom = "GelatoRelayWithTransferFrom",
 }
 
+export enum AuthCall {
+  User,
+  Sponsor,
+  UserSponsor,
+}
+
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 export enum PaymentType {
   OneBalance = 0,
   TransferFrom = 1,
+}
+
+export enum SignerProfile {
+  User,
+  Sponsor,
 }
 
 export type OneBalancePayment = {
@@ -33,4 +44,13 @@ export type EIP712Domain = {
   version: string;
   chainId: number;
   verifyingContract: string;
+};
+
+export const EIP712_DOMAIN_TYPE_DATA = {
+  EIP712Domain: [
+    { name: "name", type: "string" },
+    { name: "version", type: "string" },
+    { name: "chainId", type: "uint256" },
+    { name: "verifyingContract", type: "address" },
+  ],
 };

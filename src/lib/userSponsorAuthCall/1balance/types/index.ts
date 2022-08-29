@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike } from "ethers";
 
-import { Optional } from "../../../types";
+import { EIP712Domain, Optional } from "../../../types";
 
 export const EIP712_USER_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
   UserSponsorAuthCallWith1Balance: [
@@ -16,6 +16,22 @@ export const EIP712_USER_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
     { name: "feeToken", type: "address" },
     { name: "oneBalanceChainId", type: "uint256" },
   ],
+};
+
+export type UserSponsorAuthCallWith1BalancePayloadToSign = {
+  domain: EIP712Domain;
+  types: {
+    EIP712Domain: {
+      name: string;
+      type: string;
+    }[];
+    UserSponsorAuthCallWith1Balance: {
+      name: string;
+      type: string;
+    }[];
+  };
+  primaryType: "UserSponsorAuthCallWith1Balance";
+  message: UserSponsorAuthCallWith1BalanceStruct;
 };
 
 export type UserSponsorAuthCallWith1BalanceStruct = {

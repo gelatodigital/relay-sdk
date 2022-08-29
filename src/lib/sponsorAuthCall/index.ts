@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 
-import { PaymentType } from "../types";
+import { PaymentType, RelayRequestOptions, RelayResponse } from "../types";
 
-import { generateSponsorSignatureWith1Balance } from "./1balance";
+import { sponsorAuthCallWith1Balance } from "./1balance";
 import { SponsorAuthCallWith1BalanceRequest } from "./1balance/types";
-import { generateSponsorSignatureWithTransferFrom } from "./transferFrom";
+import { sponsorAuthCallWithTransferFrom } from "./transferFrom";
 import { SponsorAuthCallWithTransferFromRequest } from "./transferFrom/types";
 import { SponsorSignatureRequest } from "./types";
 
@@ -15,25 +15,29 @@ import { SponsorSignatureRequest } from "./types";
  * @param {PT} paymentType - PaymentType.OneBalance or PaymentType.TransferFrom
  * @param {SponsorSignatureRequest<PT>} request - Depending on the paymentType, SponsorAuthCallWith1Balance or SponsorAuthCallWithTransferFrom request to be signed by the signer
  * @param {ethers.Wallet} signer - Wallet to sign the payload
- * @returns {Promise<string>} signature
+ * @param {RelayRequestOptions} options - Optional Relay configuration
+ * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */
-export const generateSponsorSignature = async <PT extends PaymentType>(
+export const relayWithSponsorSignature = async <PT extends PaymentType>(
   paymentType: PT,
   request: SponsorSignatureRequest<PT>,
-  signer: ethers.Wallet
-): Promise<string> => {
+  signer: ethers.Wallet,
+  options?: RelayRequestOptions
+): Promise<RelayResponse> => {
   switch (paymentType) {
     case PaymentType.OneBalance:
-      return generateSponsorSignatureWith1Balance(
+      return await sponsorAuthCallWith1Balance(
         request as SponsorAuthCallWith1BalanceRequest,
-        signer
+        signer,
+        options
       );
 
     case PaymentType.TransferFrom:
-      return generateSponsorSignatureWithTransferFrom(
+      return await sponsorAuthCallWithTransferFrom(
         request as SponsorAuthCallWithTransferFromRequest,
-        signer
+        signer,
+        options
       );
 
     default: {

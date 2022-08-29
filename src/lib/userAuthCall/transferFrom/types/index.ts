@@ -3,12 +3,6 @@ import { BigNumberish, BytesLike } from "ethers";
 import { EIP712Domain, Optional } from "../../../types";
 
 export const EIP712_USER_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA = {
-  EIP712Domain: [
-    { name: "name", type: "string" },
-    { name: "version", type: "string" },
-    { name: "chainId", type: "uint256" },
-    { name: "verifyingContract", type: "address" },
-  ],
   UserAuthCallWithTransferFrom: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
