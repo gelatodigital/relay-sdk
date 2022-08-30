@@ -3,6 +3,7 @@ import { getAddress } from "ethers/lib/utils";
 
 import {
   getEIP712Domain,
+  populateOptionalSponsorParameters,
   populateOptionalUserParameters,
   signTypedDataV4,
 } from "../../../../utils";
@@ -58,7 +59,8 @@ const mapRequestToStruct = async (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     userDeadline: override.userDeadline ?? request.userDeadline!,
     sponsor: getAddress(request.sponsor as string),
-    sponsorSalt: request.sponsorSalt,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    sponsorSalt: override.sponsorSalt ?? request.sponsorSalt!,
     paymentType: PaymentType.TransferFrom,
     feeToken: getAddress(request.feeToken as string),
     maxFee: request.maxFee,
@@ -73,11 +75,18 @@ export const generateUserSponsorSignatureWithTransferFromAndUser = async (
     if (!signer.provider && !request.userNonce) {
       throw new Error(`No provider found to fetch the user nonce`);
     }
-    const parametersToOverride = await populateOptionalUserParameters<
+    const userParametersToOverride = await populateOptionalUserParameters<
       UserSponsorAuthCallWithTransferFromRequest,
       UserSponsorAuthCallWithTransferFromRequestOptionalParameters
     >(PaymentType.TransferFrom, request, signer);
-    const struct = await mapRequestToStruct(request, parametersToOverride);
+    const sponsorParametersToOverride = await populateOptionalSponsorParameters<
+      UserSponsorAuthCallWithTransferFromRequest,
+      UserSponsorAuthCallWithTransferFromRequestOptionalParameters
+    >(request);
+    const struct = await mapRequestToStruct(request, {
+      ...userParametersToOverride,
+      ...sponsorParametersToOverride,
+    });
     const signature = await signTypedDataV4(
       signer,
       request.sponsor,

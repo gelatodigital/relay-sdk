@@ -5,5 +5,6 @@ export * from "./eip712";
 export * from "./getFeeToken";
 export * from "./getHttpErrorMessage";
 export * from "./populateOptionalUserParameters";
+export * from "./populateOptionalSponsorParameters";
 export * from "./postAuthCall";
 export * from "./getRelayAddresses";

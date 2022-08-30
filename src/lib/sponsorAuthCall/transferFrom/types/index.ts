@@ -1,5 +1,7 @@
 import { BigNumberish, BytesLike } from "ethers";
 
+import { Optional } from "../../../types";
+
 export const EIP712_SPONSOR_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA = {
   SponsorAuthCallWithTransferFrom: [
     { name: "chainId", type: "uint256" },
@@ -24,7 +26,11 @@ export type SponsorAuthCallWithTransferFromStruct = {
   maxFee: BigNumberish;
 };
 
-export type SponsorAuthCallWithTransferFromRequest = Omit<
-  SponsorAuthCallWithTransferFromStruct,
-  "paymentType"
+export type SponsorAuthCallWithTransferFromRequest = Optional<
+  Omit<SponsorAuthCallWithTransferFromStruct, "paymentType">,
+  keyof SponsorAuthCallWithTransferFromRequestOptionalParameters
 >;
+
+export type SponsorAuthCallWithTransferFromRequestOptionalParameters = {
+  sponsorSalt: BigNumberish;
+};

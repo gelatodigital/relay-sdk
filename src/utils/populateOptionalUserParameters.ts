@@ -43,14 +43,16 @@ export const populateOptionalUserParameters = async <
     parametersToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
   }
   if (!request.userNonce) {
-    parametersToOverride.userNonce = (
-      (await getUserNonce(
-        paymentType,
-        request.chainId as number,
-        request.user as string,
-        provider
-      )) as BigNumber
-    ).toNumber();
+    parametersToOverride.userNonce = BigNumber.from(
+      (
+        (await getUserNonce(
+          paymentType,
+          request.chainId as number,
+          request.user as string,
+          provider
+        )) as BigNumber
+      ).toNumber()
+    ).toString();
   }
 
   return parametersToOverride;

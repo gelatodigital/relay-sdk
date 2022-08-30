@@ -56,4 +56,5 @@ export type UserSponsorAuthCallWith1BalanceRequest = Optional<
 export type UserSponsorAuthCallWith1BalanceRequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
+  sponsorSalt: BigNumberish;
 };

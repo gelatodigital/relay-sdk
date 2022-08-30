@@ -56,4 +56,5 @@ export type UserSponsorAuthCallWithTransferFromRequest = Optional<
 export type UserSponsorAuthCallWithTransferFromRequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
+  sponsorSalt: BigNumberish;
 };

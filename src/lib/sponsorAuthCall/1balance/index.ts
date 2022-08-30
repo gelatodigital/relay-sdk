@@ -1,7 +1,11 @@
 import { ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
-import { getEIP712Domain, postAuthCall } from "../../../utils";
+import {
+  getEIP712Domain,
+  populateOptionalSponsorParameters,
+  postAuthCall,
+} from "../../../utils";
 import {
   AuthCall,
   PaymentType,
@@ -15,18 +19,21 @@ import { SponsorAuthSignature } from "../types";
 import {
   EIP712_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
   SponsorAuthCallWith1BalanceRequest,
+  SponsorAuthCallWith1BalanceRequestOptionalParameters,
   SponsorAuthCallWith1BalanceStruct,
 } from "./types";
 
 const mapRequestToStruct = async (
-  request: SponsorAuthCallWith1BalanceRequest
+  request: SponsorAuthCallWith1BalanceRequest,
+  override: Partial<SponsorAuthCallWith1BalanceRequestOptionalParameters>
 ): Promise<SponsorAuthCallWith1BalanceStruct> => {
   return {
     chainId: request.chainId,
     target: getAddress(request.target as string),
     data: request.data,
     sponsor: getAddress(request.sponsor as string),
-    sponsorSalt: request.sponsorSalt,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    sponsorSalt: override.sponsorSalt ?? request.sponsorSalt!,
     paymentType: PaymentType.OneBalance,
     feeToken: getAddress(
       await getFeeToken(request.chainId as number, request.sponsor as string)
@@ -41,7 +48,11 @@ export const sponsorAuthCallWith1Balance = async (
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
-    const struct = await mapRequestToStruct(request);
+    const parametersToOverride = await populateOptionalSponsorParameters<
+      SponsorAuthCallWith1BalanceRequest,
+      SponsorAuthCallWith1BalanceRequestOptionalParameters
+    >(request);
+    const struct = await mapRequestToStruct(request, parametersToOverride);
     const domain = getEIP712Domain(
       request.chainId as number,
       RelayContract.GelatoRelay

@@ -1,5 +1,7 @@
 import { BigNumberish, BytesLike } from "ethers";
 
+import { Optional } from "../../../types";
+
 export const EIP712_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
   SponsorAuthCallWith1Balance: [
     { name: "chainId", type: "uint256" },
@@ -24,7 +26,11 @@ export type SponsorAuthCallWith1BalanceStruct = {
   oneBalanceChainId: BigNumberish;
 };
 
-export type SponsorAuthCallWith1BalanceRequest = Omit<
-  SponsorAuthCallWith1BalanceStruct,
-  "paymentType" | "feeToken"
+export type SponsorAuthCallWith1BalanceRequest = Optional<
+  Omit<SponsorAuthCallWith1BalanceStruct, "paymentType" | "feeToken">,
+  keyof SponsorAuthCallWith1BalanceRequestOptionalParameters
 >;
+
+export type SponsorAuthCallWith1BalanceRequestOptionalParameters = {
+  sponsorSalt: BigNumberish;
+};
