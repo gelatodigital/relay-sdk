@@ -1,11 +1,12 @@
 import { ethers, providers } from "ethers";
 
+import { USER_NONCE_ABI } from "../constants";
+import { PaymentType } from "../lib";
+
 import {
-  USER_NONCE_ABI,
   getRelayAddress,
   getRelayWithTransferFromAddress,
-} from "../constants";
-import { PaymentType } from "../lib";
+} from "./getRelayAddresses";
 
 export const getUserNonce = async (
   paymentType: PaymentType,

@@ -1,5 +1,9 @@
-import { getRelayAddress, getRelayWithTransferFromAddress } from "../constants";
 import { EIP712Domain, RelayContract } from "../lib/types";
+
+import {
+  getRelayAddress,
+  getRelayWithTransferFromAddress,
+} from "./getRelayAddresses";
 
 export const getEIP712Domain = (
   chainId: number,
