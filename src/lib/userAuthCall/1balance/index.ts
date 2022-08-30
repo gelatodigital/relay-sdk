@@ -1,4 +1,4 @@
-import { providers } from "ethers";
+import { BigNumber, providers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import {
@@ -56,10 +56,12 @@ const mapRequestToStruct = async (
   }
   return {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userNonce: override.userNonce ?? request.userNonce!,
+    userNonce:
+      override.userNonce ?? BigNumber.from(request.userNonce!).toString(),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userDeadline: override.userDeadline ?? request.userDeadline!,
-    chainId: request.chainId,
+    userDeadline:
+      override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
+    chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
     data: request.data,
     user: getAddress(request.user as string),
@@ -67,7 +69,7 @@ const mapRequestToStruct = async (
     feeToken: getAddress(
       await getFeeToken(request.chainId as number, request.user as string)
     ),
-    oneBalanceChainId: request.oneBalanceChainId,
+    oneBalanceChainId: BigNumber.from(request.oneBalanceChainId).toString(),
   };
 };
 

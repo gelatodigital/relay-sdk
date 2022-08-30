@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import {
@@ -51,22 +51,25 @@ const mapRequestToStruct = async (
     throw new Error(`userDeadline is not found in the request, nor fetched`);
   }
   return {
-    chainId: request.chainId,
+    chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
     data: request.data,
     user: getAddress(request.user),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userNonce: override.userNonce ?? request.userNonce!,
+    userNonce:
+      override.userNonce ?? BigNumber.from(request.userNonce!).toString(),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userDeadline: override.userDeadline ?? request.userDeadline!,
+    userDeadline:
+      override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
     sponsor: getAddress(request.sponsor as string),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    sponsorSalt: override.sponsorSalt ?? request.sponsorSalt!,
+    sponsorSalt:
+      override.sponsorSalt ?? BigNumber.from(request.sponsorSalt!).toString(),
     paymentType: PaymentType.OneBalance,
     feeToken: getAddress(
       await getFeeToken(request.chainId as number, request.sponsor as string)
     ),
-    oneBalanceChainId: request.oneBalanceChainId,
+    oneBalanceChainId: BigNumber.from(request.oneBalanceChainId).toString(),
   };
 };
 

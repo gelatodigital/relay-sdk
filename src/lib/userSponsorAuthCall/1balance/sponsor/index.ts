@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import { getEIP712Domain } from "../../../../utils";
@@ -13,17 +13,17 @@ const mapRequestToStruct = (
   request: UserSponsorAuthCallWith1BalanceStruct
 ): UserSponsorAuthCallWith1BalanceStruct => {
   return {
-    chainId: request.chainId,
+    chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
     data: request.data,
     user: getAddress(request.user),
-    userNonce: request.userNonce,
-    userDeadline: request.userDeadline,
+    userNonce: BigNumber.from(request.userNonce).toString(),
+    userDeadline: BigNumber.from(request.userDeadline).toString(),
     sponsor: getAddress(request.sponsor as string),
-    sponsorSalt: request.sponsorSalt,
+    sponsorSalt: BigNumber.from(request.sponsorSalt).toString(),
     paymentType: request.paymentType,
     feeToken: getAddress(request.feeToken),
-    oneBalanceChainId: request.oneBalanceChainId,
+    oneBalanceChainId: BigNumber.from(request.oneBalanceChainId).toString(),
   };
 };
 

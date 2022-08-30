@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import {
@@ -28,17 +28,18 @@ const mapRequestToStruct = async (
   override: Partial<SponsorAuthCallWith1BalanceRequestOptionalParameters>
 ): Promise<SponsorAuthCallWith1BalanceStruct> => {
   return {
-    chainId: request.chainId,
+    chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
     data: request.data,
     sponsor: getAddress(request.sponsor as string),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    sponsorSalt: override.sponsorSalt ?? request.sponsorSalt!,
+    sponsorSalt:
+      override.sponsorSalt ?? BigNumber.from(request.sponsorSalt!).toString(),
     paymentType: PaymentType.OneBalance,
     feeToken: getAddress(
       await getFeeToken(request.chainId as number, request.sponsor as string)
     ),
-    oneBalanceChainId: request.oneBalanceChainId,
+    oneBalanceChainId: BigNumber.from(request.oneBalanceChainId).toString(),
   };
 };
 
