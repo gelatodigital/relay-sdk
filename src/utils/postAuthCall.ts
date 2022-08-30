@@ -10,36 +10,26 @@ export const postAuthCall = async <Request, Response>(
   request: Request
 ): Promise<Response> => {
   try {
+    let path: string;
     switch (authCall) {
       case AuthCall.User:
-        return (
-          await axios.post(
-            `${GELATO_RELAY_URL}/relays/v2/user-auth-call`,
-            request
-          )
-        ).data;
+        path = `${GELATO_RELAY_URL}/relays/v2/user-auth-call`;
+        break;
 
       case AuthCall.Sponsor:
-        return (
-          await axios.post(
-            `${GELATO_RELAY_URL}/relays/v2/sponsor-auth-call`,
-            request
-          )
-        ).data;
+        path = `${GELATO_RELAY_URL}/relays/v2/sponsor-auth-call`;
+        break;
 
       case AuthCall.UserSponsor:
-        return (
-          await axios.post(
-            `${GELATO_RELAY_URL}/relays/v2/user-sponsor-auth-call`,
-            request
-          )
-        ).data;
+        path = `${GELATO_RELAY_URL}/relays/v2/user-sponsor-auth-call`;
+        break;
 
       default: {
         const _exhaustiveCheck: never = authCall;
         return _exhaustiveCheck;
       }
     }
+    return (await axios.post(path, request)).data;
   } catch (error) {
     throw new Error(getHttpErrorMessage(error));
   }
