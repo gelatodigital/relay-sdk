@@ -8,7 +8,7 @@ import { CallWithSyncFeeRequest } from "./types";
 
 /**
  * @param {CallWithSyncFeeRequest} request - CallWithSyncFee request to be relayed by Gelato Executors
- * @param {RelayRequestOptions} options - Optional Relay configuration
+ * @param {RelayRequestOptions} [options] - Optional Relay configuration
  * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */

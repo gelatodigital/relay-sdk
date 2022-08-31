@@ -32,8 +32,8 @@ const mapRequestToStruct = async (
     target: getAddress(request.target as string),
     data: request.data,
     sponsor: getAddress(request.sponsor as string),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     sponsorSalt:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       override.sponsorSalt ?? BigNumber.from(request.sponsorSalt!).toString(),
     paymentType: PaymentType.OneBalance,
     feeToken: getAddress(

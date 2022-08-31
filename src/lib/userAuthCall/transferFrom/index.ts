@@ -54,11 +54,11 @@ const mapRequestToStruct = (
     throw new Error(`userDeadline is not found in the request, nor fetched`);
   }
   return {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     userNonce:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       override.userNonce ?? BigNumber.from(request.userNonce!).toString(),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     userDeadline:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
     chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),

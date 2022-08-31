@@ -15,7 +15,7 @@ import { SponsorSignatureRequest } from "./types";
  * @param {PT} paymentType - PaymentType.OneBalance or PaymentType.TransferFrom
  * @param {SponsorSignatureRequest<PT>} request - Depending on the paymentType, SponsorAuthCallWith1Balance or SponsorAuthCallWithTransferFrom request to be signed by the signer
  * @param {ethers.Wallet} signer - Wallet to sign the payload
- * @param {RelayRequestOptions} options - Optional Relay configuration
+ * @param {RelayRequestOptions} [options] - Optional Relay configuration
  * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */
