@@ -12,5 +12,4 @@ export {
   isOracleActive,
 } from "./oracle";
 export { getTaskStatus } from "./status";
-export { Service } from "./status/types";
 export { PaymentType, SignerProfile } from "./types";

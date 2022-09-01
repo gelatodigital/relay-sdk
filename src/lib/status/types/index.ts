@@ -20,8 +20,3 @@ enum TaskState {
   Cancelled = "Cancelled",
   NotFound = "NotFound",
 }
-
-export enum Service {
-  RELAY = "Relay",
-  RELAY_V2 = "RelayV2",
-}
