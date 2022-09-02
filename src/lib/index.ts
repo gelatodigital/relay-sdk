@@ -1,5 +1,5 @@
 export { relayWithSyncFee } from "./callWithSyncFee";
-export { relayWithSponsor as relayWithSponsorSignature } from "./sponsoredCall";
+export { relayWithSponsor } from "./sponsoredCall";
 export {
   generateUserSponsorSignature,
   relayWithSponsoredUserSignature,

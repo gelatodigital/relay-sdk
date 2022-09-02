@@ -28,6 +28,7 @@ export type OneBalancePayment = {
 export type RelayRequestOptions = {
   gasLimit?: BigNumberish;
   retries?: number;
+  sponsorApiKey: string;
 };
 
 export type RelayResponse = {

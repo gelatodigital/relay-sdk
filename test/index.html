@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gelato Relay Example</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';frame-ancestors * data: blob: 'unsafe-inline';"
+    />
+
+    <script type="text/javascript">
+      // 1 - Connect account
+      let account;
+      async function connectAccount() {
+        console.log("Getting account...");
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        account = accounts[0];
+        const showAccount = document.getElementById("showAccount");
+        showAccount.innerHTML = account;
+      }
+
+      // 2 - Sign authentication
+      let signature;
+      let bearerToken;
+      const message = "Hello, please sign this message to authenticate on Gelato Dashboard.";
+      async function signMessage() {
+        console.log("Signing message");
+        const params = [account, message];
+        signature = await window.ethereum.request({ method: "personal_sign", params });
+        bearerToken = btoa(JSON.stringify({ signature, message })); // base64 encode signature data
+
+        const showSignature = document.getElementById("showSignature");
+        showSignature.innerHTML = signature;
+
+        const showToken = document.getElementById("showToken");
+        showToken.innerHTML = bearerToken;
+      }
+
+    </script>
+  </head>
+
+  <body>
+    <h1>Gelato Relay Example</h1>
+
+    <h3>1 - Connect Wallet</h3>
+    <button onclick="connectAccount()">Connect</button>
+    <pre>Account: <span id="showAccount"></span></pre>
+
+    <h3>2 - Sign authentication</h3>
+    <button onclick="signMessage()">Sign</button>
+    <pre>Signature: <span id="showSignature"></span></pre>
+    <pre>Bearer Token: <span id="showToken"></span></pre>
+  </body>
+</html>

@@ -5,7 +5,12 @@ import {
   populateOptionalSponsorParameters,
   postAuthCall,
 } from "../../../utils";
-import { AuthCall, RelayRequestOptions, RelayResponse } from "../../types";
+import {
+  AuthCall,
+  PaymentType,
+  RelayRequestOptions,
+  RelayResponse,
+} from "../../types";
 
 import {
   SponsoredCallWith1BalanceRequest,
@@ -22,12 +27,13 @@ const mapRequestToStruct = async (
     chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
     data: request.data,
-    paymentType: request.paymentType,
+    paymentType: PaymentType.OneBalance,
   };
 };
 
 export const sponsoredCallWith1Balance = async (
   request: SponsoredCallWith1BalanceRequest,
+  sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
@@ -43,6 +49,7 @@ export const sponsoredCallWith1Balance = async (
     >(AuthCall.Sponsor, {
       ...struct,
       ...options,
+      sponsorApiKey,
     });
     return postResponse;
   } catch (error) {

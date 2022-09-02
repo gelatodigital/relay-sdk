@@ -77,6 +77,7 @@ export const generateUserSponsorSignature = async <
 export const relayWithSponsoredUserSignature = async <PT extends PaymentType>(
   struct: UserSponsorAuthCallStruct<PT>,
   userSignature: string,
+  sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
@@ -87,7 +88,7 @@ export const relayWithSponsoredUserSignature = async <PT extends PaymentType>(
           ...(struct as SponsoredUserAuthCallStruct),
           ...options,
           userSignature,
-          //TODO: Add sponsorApiKey
+          sponsorApiKey,
         }
       )
     ).data;

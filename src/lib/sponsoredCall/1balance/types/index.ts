@@ -15,7 +15,10 @@ export type SponsoredCallWith1BalanceStruct = {
   paymentType: BigNumberish;
 };
 
-export type SponsoredCallWith1BalanceRequest = SponsoredCallWith1BalanceStruct;
+export type SponsoredCallWith1BalanceRequest = Omit<
+  SponsoredCallWith1BalanceStruct,
+  "paymentType"
+>;
 export type SponsoredCallWith1BalanceRequestOptionalParameters = Record<
   string,
   never
