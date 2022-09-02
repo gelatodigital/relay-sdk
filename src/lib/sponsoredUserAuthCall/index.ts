@@ -15,8 +15,8 @@ import {
   generateUserSponsorSignatureWith1BalanceAndUser,
 } from "./1balance";
 import {
-  UserSponsorAuthCallWith1BalanceRequest,
-  UserSponsorAuthCallWith1BalanceStruct,
+  SponsoredUserAuthCallRequest,
+  SponsoredUserAuthCallStruct,
 } from "./1balance/types";
 import {
   SignatureResponse,
@@ -48,12 +48,12 @@ export const generateUserSponsorSignature = async <
   switch (signerProfile) {
     case SignerProfile.User:
       return await generateUserSponsorSignatureWith1BalanceAndUser(
-        request as UserSponsorAuthCallWith1BalanceRequest,
+        request as SponsoredUserAuthCallRequest,
         signer as ethers.providers.Web3Provider
       );
     case SignerProfile.Sponsor:
       return await generateUserSponsorSignatureWith1BalanceAndSponsor(
-        request as UserSponsorAuthCallWith1BalanceStruct,
+        request as SponsoredUserAuthCallStruct,
         signer as ethers.Wallet
       );
     default: {
@@ -67,28 +67,29 @@ export const generateUserSponsorSignature = async <
  * @function
  * @template PT
  * @extends {PaymentType}
- * @param {PT} paymentType - PaymentType.OneBalance or PaymentType.TransferFrom
- * @param {UserSponsorAuthCallStruct<PT>} request - Depending on the paymentType, UserSponsorAuthCallWith1Balance or UserSponsorAuthCallWithTransferFrom struct to be relayed by Gelato Executors
+ * @param {PT} paymentType - PaymentType.OneBalance
+ * @param {UserSponsorAuthCallStruct<PT>} request - SponsoredUserAuthCall struct to be relayed by Gelato Executors
  * @param {string} userSignature - user signature generated via generateUserSponsorSignature
- * @param {string} sponsorSignature - sponsor signature generated via generateUserSponsorSignature
  * @param {RelayRequestOptions} [options] - Optional Relay configuration
  * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */
-export const relayWithUserSponsorSignature = async <PT extends PaymentType>(
+export const relayWithSponsoredUserSignature = async <PT extends PaymentType>(
   struct: UserSponsorAuthCallStruct<PT>,
   userSignature: string,
-  sponsorSignature: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
     return (
-      await axios.post(`${GELATO_RELAY_URL}/relays/v2/user-sponsor-auth-call`, {
-        ...(struct as UserSponsorAuthCallWith1BalanceStruct),
-        ...options,
-        userSignature,
-        sponsorSignature,
-      })
+      await axios.post(
+        `${GELATO_RELAY_URL}/relays/v2/sponsored-user-auth-call`,
+        {
+          ...(struct as SponsoredUserAuthCallStruct),
+          ...options,
+          userSignature,
+          //TODO: Add sponsorApiKey
+        }
+      )
     ).data;
   } catch (error) {
     throw new Error(

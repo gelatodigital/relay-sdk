@@ -1,10 +1,9 @@
 export { relayWithSyncFee } from "./callWithSyncFee";
-export { relayWithUserSignature } from "./userAuthCall";
-export { relayWithSponsorSignature } from "./sponsorAuthCall";
+export { relayWithSponsor as relayWithSponsorSignature } from "./sponsoredCall";
 export {
   generateUserSponsorSignature,
-  relayWithUserSponsorSignature,
-} from "./userSponsorAuthCall";
+  relayWithSponsoredUserSignature,
+} from "./sponsoredUserAuthCall";
 export {
   getEstimatedFee,
   getGelatoOracles,

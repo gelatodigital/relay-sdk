@@ -9,7 +9,6 @@ type RelayV2EnabledChains =
 
 export type RelayAddresses = {
   relayAddress: string | null;
-  relayWithTransferFromAddress: string | null;
 };
 
 export const RELAY_ADDRESSES: {
@@ -17,14 +16,11 @@ export const RELAY_ADDRESSES: {
 } = {
   80_001: {
     relayAddress: "0xaBcC9b596420A9E9172FD5938620E265a0f9Df92",
-    relayWithTransferFromAddress: null,
   },
   5: {
     relayAddress: "0xaBcC9b596420A9E9172FD5938620E265a0f9Df92",
-    relayWithTransferFromAddress: null,
   },
   421_613: {
     relayAddress: "0xaBcC9b596420A9E9172FD5938620E265a0f9Df92",
-    relayWithTransferFromAddress: null,
   },
 };

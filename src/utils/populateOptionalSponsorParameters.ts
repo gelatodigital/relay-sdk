@@ -1,29 +1,23 @@
-import { BigNumber, utils } from "ethers";
-
 import {
-  SponsorAuthCallWith1BalanceRequest,
-  SponsorAuthCallWith1BalanceRequestOptionalParameters,
-} from "../lib/sponsorAuthCall/1balance/types";
+  SponsoredCallWith1BalanceRequest,
+  SponsoredCallWith1BalanceRequestOptionalParameters,
+} from "../lib/sponsoredCall/1balance/types";
 import {
-  UserSponsorAuthCallWith1BalanceRequest,
-  UserSponsorAuthCallWith1BalanceRequestOptionalParameters,
-} from "../lib/userSponsorAuthCall/1balance/types";
+  SponsoredUserAuthCallRequest,
+  SponsoredUserAuthCallRequestOptionalParameters,
+} from "../lib/sponsoredUserAuthCall/1balance/types";
 
 export const populateOptionalSponsorParameters = async <
   Request extends
-    | SponsorAuthCallWith1BalanceRequest
-    | UserSponsorAuthCallWith1BalanceRequest,
+    | SponsoredCallWith1BalanceRequest
+    | SponsoredUserAuthCallRequest,
   OptionalParameters extends
-    | SponsorAuthCallWith1BalanceRequestOptionalParameters
-    | UserSponsorAuthCallWith1BalanceRequestOptionalParameters
+    | SponsoredCallWith1BalanceRequestOptionalParameters
+    | SponsoredUserAuthCallRequestOptionalParameters
 >(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   request: Request
 ): Promise<Partial<OptionalParameters>> => {
   const parametersToOverride: Partial<OptionalParameters> = {};
-  if (!request.sponsorSalt) {
-    parametersToOverride.sponsorSalt = BigNumber.from(
-      utils.randomBytes(32)
-    ).toString();
-  }
   return parametersToOverride;
 };

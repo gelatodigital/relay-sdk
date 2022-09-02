@@ -2,29 +2,26 @@ import { ethers } from "ethers";
 
 import { PaymentType, SignerProfile } from "../../types";
 import {
-  UserSponsorAuthCallWith1BalanceRequest,
-  UserSponsorAuthCallWith1BalanceStruct,
+  SponsoredUserAuthCallRequest,
+  SponsoredUserAuthCallStruct,
 } from "../1balance/types";
 
 export type UserSponsorSignatureRequest<
   PT extends PaymentType,
   S extends SignerProfile
 > = PT extends PaymentType.OneBalance
-  ? UserSponsorAuthCallWith1BalanceSignatureRequest<S>
+  ? SponsoredUserAuthCallSignatureRequest<S>
   : never;
 
-export type UserSponsorAuthCallWith1BalanceSignatureRequest<
-  S extends SignerProfile
-> = S extends SignerProfile.User
-  ? UserSponsorAuthCallWith1BalanceRequest
-  : S extends SignerProfile.Sponsor
-  ? UserSponsorAuthCallWith1BalanceStruct
-  : never;
+export type SponsoredUserAuthCallSignatureRequest<S extends SignerProfile> =
+  S extends SignerProfile.User
+    ? SponsoredUserAuthCallRequest
+    : S extends SignerProfile.Sponsor
+    ? SponsoredUserAuthCallStruct
+    : never;
 
 export type UserSponsorAuthCallStruct<PT extends PaymentType> =
-  PT extends PaymentType.OneBalance
-    ? UserSponsorAuthCallWith1BalanceStruct
-    : never;
+  PT extends PaymentType.OneBalance ? SponsoredUserAuthCallStruct : never;
 
 export type Signer<S extends SignerProfile> = S extends SignerProfile.User
   ? ethers.providers.Web3Provider
@@ -34,5 +31,5 @@ export type Signer<S extends SignerProfile> = S extends SignerProfile.User
 
 export type SignatureResponse = {
   signature: string;
-  struct: UserSponsorAuthCallWith1BalanceStruct;
+  struct: SponsoredUserAuthCallStruct;
 };

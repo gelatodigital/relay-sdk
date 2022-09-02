@@ -12,19 +12,18 @@ import {
   PaymentType,
   RelayContract,
 } from "../../../types";
-import { getFeeToken } from "../../../../utils/getFeeToken";
 import {
-  EIP712_USER_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
-  UserSponsorAuthCallWith1BalancePayloadToSign,
-  UserSponsorAuthCallWith1BalanceRequest,
-  UserSponsorAuthCallWith1BalanceRequestOptionalParameters,
-  UserSponsorAuthCallWith1BalanceStruct,
+  EIP712_SPONSORED_USER_AUTH_CALL,
+  SponsoredUserAuthCallPayloadToSign,
+  SponsoredUserAuthCallRequest,
+  SponsoredUserAuthCallRequestOptionalParameters,
+  SponsoredUserAuthCallStruct,
 } from "../types";
 import { SignatureResponse } from "../../types";
 
 const getPayloadToSign = (
-  struct: UserSponsorAuthCallWith1BalanceStruct
-): UserSponsorAuthCallWith1BalancePayloadToSign => {
+  struct: SponsoredUserAuthCallStruct
+): SponsoredUserAuthCallPayloadToSign => {
   const domain = getEIP712Domain(
     struct.chainId as number,
     RelayContract.GelatoRelay
@@ -32,18 +31,18 @@ const getPayloadToSign = (
   return {
     domain,
     types: {
-      ...EIP712_USER_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
+      ...EIP712_SPONSORED_USER_AUTH_CALL,
       ...EIP712_DOMAIN_TYPE_DATA,
     },
-    primaryType: "UserSponsorAuthCallWith1Balance",
+    primaryType: "SponsoredUserAuthCall",
     message: struct,
   };
 };
 
 const mapRequestToStruct = async (
-  request: UserSponsorAuthCallWith1BalanceRequest,
-  override: Partial<UserSponsorAuthCallWith1BalanceRequestOptionalParameters>
-): Promise<UserSponsorAuthCallWith1BalanceStruct> => {
+  request: SponsoredUserAuthCallRequest,
+  override: Partial<SponsoredUserAuthCallRequestOptionalParameters>
+): Promise<SponsoredUserAuthCallStruct> => {
   if (!override.userNonce && !request.userNonce) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }
@@ -61,20 +60,12 @@ const mapRequestToStruct = async (
     userDeadline:
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
-    sponsor: getAddress(request.sponsor as string),
-    sponsorSalt:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      override.sponsorSalt ?? BigNumber.from(request.sponsorSalt!).toString(),
     paymentType: PaymentType.OneBalance,
-    feeToken: getAddress(
-      await getFeeToken(request.chainId as number, request.sponsor as string)
-    ),
-    oneBalanceChainId: BigNumber.from(request.oneBalanceChainId).toString(),
   };
 };
 
 export const generateUserSponsorSignatureWith1BalanceAndUser = async (
-  request: UserSponsorAuthCallWith1BalanceRequest,
+  request: SponsoredUserAuthCallRequest,
   signer: ethers.providers.Web3Provider
 ): Promise<SignatureResponse> => {
   try {
@@ -82,12 +73,12 @@ export const generateUserSponsorSignatureWith1BalanceAndUser = async (
       throw new Error(`No provider found to fetch the user nonce`);
     }
     const userParametersToOverride = await populateOptionalUserParameters<
-      UserSponsorAuthCallWith1BalanceRequest,
-      UserSponsorAuthCallWith1BalanceRequestOptionalParameters
+      SponsoredUserAuthCallRequest,
+      SponsoredUserAuthCallRequestOptionalParameters
     >(PaymentType.OneBalance, request, signer);
     const sponsorParametersToOverride = await populateOptionalSponsorParameters<
-      UserSponsorAuthCallWith1BalanceRequest,
-      UserSponsorAuthCallWith1BalanceRequestOptionalParameters
+      SponsoredUserAuthCallRequest,
+      SponsoredUserAuthCallRequestOptionalParameters
     >(request);
     const struct = await mapRequestToStruct(request, {
       ...userParametersToOverride,
@@ -95,7 +86,7 @@ export const generateUserSponsorSignatureWith1BalanceAndUser = async (
     });
     const signature = await signTypedDataV4(
       signer,
-      request.sponsor,
+      request.user,
       JSON.stringify(getPayloadToSign(struct))
     );
     return {

@@ -12,20 +12,16 @@ export const postAuthCall = async <Request, Response>(
   try {
     let path: string;
     switch (authCall) {
-      case AuthCall.User:
-        path = `${GELATO_RELAY_URL}/relays/v2/user-auth-call`;
-        break;
-
       case AuthCall.Sponsor:
-        path = `${GELATO_RELAY_URL}/relays/v2/sponsor-auth-call`;
+        path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call`;
         break;
 
       case AuthCall.UserSponsor:
-        path = `${GELATO_RELAY_URL}/relays/v2/user-sponsor-auth-call`;
+        path = `${GELATO_RELAY_URL}/relays/v2/sponsored-user-auth-call`;
         break;
 
       default: {
-        const _exhaustiveCheck: never = authCall;
+        const _exhaustiveCheck: never = authCall as never;
         return _exhaustiveCheck;
       }
     }

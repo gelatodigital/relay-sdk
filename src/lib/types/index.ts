@@ -2,7 +2,6 @@ import { BigNumberish } from "ethers";
 
 export enum RelayContract {
   GelatoRelay = "GelatoRelay",
-  GelatoRelayWithTransferFrom = "GelatoRelayWithTransferFrom",
 }
 
 export enum AuthCall {
@@ -15,7 +14,6 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 export enum PaymentType {
   OneBalance = 0,
-  TransferFrom = 1,
 }
 
 export enum SignerProfile {
@@ -25,9 +23,6 @@ export enum SignerProfile {
 
 export type OneBalancePayment = {
   paymentType: PaymentType.OneBalance;
-};
-export type TransferFromPayment = {
-  paymentType: PaymentType.TransferFrom;
 };
 
 export type RelayRequestOptions = {
