@@ -70,6 +70,7 @@ export const relayWithSponsoredUserAuthCall = async (
           ...options,
           userSignature,
           sponsorApiKey,
+          paymentType: PaymentType.OneBalance,
         }
       )
     ).data;

@@ -1,4 +1,4 @@
-export const GELATO_RELAY_URL = "https://gateway.api.gelato.digital"; //Relay GW
+export const GELATO_RELAY_URL = "https://relay.gelato.digital"; //Relay GW
 
 export const SIGN_TYPED_DATA_V4 = "eth_signTypedData_v4";
 

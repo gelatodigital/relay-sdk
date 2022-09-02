@@ -5,15 +5,27 @@ dotenv.config({ path: ".env" });
 
 import { GelatoRelaySDK } from "../src";
 import { SponsoredCallRequest } from "../src/lib/sponsoredCall/types";
-import { SponsoredUserAuthCallRequest } from "../src/lib/sponsoredUserAuthCall/1balance/types";
-import { PaymentType } from "../src/lib/types";
-import { JsonRpcProvider, Provider } from "@ethersproject/providers";
+import {
+  EIP712_SPONSORED_USER_AUTH_CALL,
+  SponsoredUserAuthCallRequest,
+} from "../src/lib/sponsoredUserAuthCall/1balance/types";
+import { PaymentType, RelayContract } from "../src/lib/types";
+import { getEIP712Domain } from "../src/utils";
+import { CallWithSyncFeeRequest } from "../src/lib/callWithSyncFee/types";
 
 const sponsorApiKey = "YOUR_API_KEY";
+const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
 const networks = [
   {
     chainId: 5,
     helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
+    helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
+  },
+  {
+    chainId: 137,
+    helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
+    helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
   },
 ];
 
@@ -21,6 +33,27 @@ const Counter = new Interface([
   "function increment() external",
   "function incrementContext() external",
 ]);
+const callWithSyncFee = async (
+  chainId: number,
+  target: string,
+  data: string
+) => {
+  const request: CallWithSyncFeeRequest = {
+    chainId,
+    target,
+    data,
+    feeToken: NATIVE_TOKEN,
+  };
+
+  console.log(`Testing callWithSyncFee for chainId: ${chainId}`);
+  const relayResponse = await GelatoRelaySDK.relayWithSyncFee(request);
+  console.log(relayResponse);
+  const status = await GelatoRelaySDK.getTaskStatus(relayResponse.taskId);
+
+  console.log(
+    `Status for task ${relayResponse.taskId}: ${JSON.stringify(status)}`
+  );
+};
 
 const sponsoredCall = async (chainId: number, target: string, data: string) => {
   const request: SponsoredCallRequest<PaymentType.OneBalance> = {
@@ -34,42 +67,42 @@ const sponsoredCall = async (chainId: number, target: string, data: string) => {
     request,
     sponsorApiKey
   );
-  /*console.log(relayResponse);
+  console.log(relayResponse);
   const status = await GelatoRelaySDK.getTaskStatus(relayResponse.taskId);
 
   console.log(
     `Status for task ${relayResponse.taskId}: ${JSON.stringify(status)}`
-  ); */
+  );
 };
 
 const sponsoredUserCall = async (
   chainId: number,
   target: string,
-  data: string,
-  provider: Provider
+  data: string
 ) => {
-  const wallet = Wallet.createRandom().connect(provider);
+  const wallet = Wallet.createRandom();
   const user = await wallet.getAddress();
 
-  console.log(`User address: ${user}`);
-  const userNonce = 0;
   const request: SponsoredUserAuthCallRequest = {
     chainId,
-    target,
     data,
+    target,
     user,
-    userNonce,
+    userDeadline: 1693648106,
+    userNonce: 0,
   };
-
-  const userSignature = await GelatoRelaySDK.generateUserSponsorSignature(
-    request,
-    wallet
+  const userSignature = await wallet._signTypedData(
+    getEIP712Domain(Number(request.chainId), RelayContract.GelatoRelay),
+    EIP712_SPONSORED_USER_AUTH_CALL,
+    request
   );
+
+  console.log(`User address: ${user} and signature: ${userSignature}`);
 
   console.log(`Testing relayWithSponsoredUserAuthCall for chainId: ${chainId}`);
   const relayResponse = await GelatoRelaySDK.relayWithSponsoredUserAuthCall(
     request,
-    userSignature.signature,
+    userSignature,
     sponsorApiKey
   );
   console.log(relayResponse);
@@ -81,16 +114,17 @@ const sponsoredUserCall = async (
 };
 
 async function main() {
+  const syncFeeCalldata = Counter.encodeFunctionData("increment", []);
   const data = Counter.encodeFunctionData("incrementContext", []);
 
   for (const network of networks) {
-    await sponsoredCall(network.chainId, network.helloWorldAddress, data);
-    /*await sponsoredUserCall(
+    await callWithSyncFee(
       network.chainId,
-      network.helloWorldAddress,
-      data,
-      new JsonRpcProvider(network.provider)
-    );*/
+      network.helloWorldSyncFee,
+      syncFeeCalldata
+    );
+    await sponsoredCall(network.chainId, network.helloWorldAddress, data);
+    await sponsoredUserCall(network.chainId, network.helloWorldAddress, data);
   }
 }
 

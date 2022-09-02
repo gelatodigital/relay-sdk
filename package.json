@@ -12,7 +12,8 @@
     "format:check": "prettier --check \"*/**/*.{js,json,md,ts}\"",
     "format": "prettier --write */**/*.{js,json,md,ts}",
     "lint": "eslint --cache .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test": "npx ts-node test/test.ts"
   },
   "keywords": [],
   "author": "",
