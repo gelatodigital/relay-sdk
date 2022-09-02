@@ -5,29 +5,17 @@ import {
   SponsorAuthCallWith1BalanceRequestOptionalParameters,
 } from "../lib/sponsorAuthCall/1balance/types";
 import {
-  SponsorAuthCallWithTransferFromRequest,
-  SponsorAuthCallWithTransferFromRequestOptionalParameters,
-} from "../lib/sponsorAuthCall/transferFrom/types";
-import {
   UserSponsorAuthCallWith1BalanceRequest,
   UserSponsorAuthCallWith1BalanceRequestOptionalParameters,
 } from "../lib/userSponsorAuthCall/1balance/types";
-import {
-  UserSponsorAuthCallWithTransferFromRequest,
-  UserSponsorAuthCallWithTransferFromRequestOptionalParameters,
-} from "../lib/userSponsorAuthCall/transferFrom/types";
 
 export const populateOptionalSponsorParameters = async <
   Request extends
     | SponsorAuthCallWith1BalanceRequest
-    | SponsorAuthCallWithTransferFromRequest
-    | UserSponsorAuthCallWith1BalanceRequest
-    | UserSponsorAuthCallWithTransferFromRequest,
+    | UserSponsorAuthCallWith1BalanceRequest,
   OptionalParameters extends
     | SponsorAuthCallWith1BalanceRequestOptionalParameters
-    | SponsorAuthCallWithTransferFromRequestOptionalParameters
     | UserSponsorAuthCallWith1BalanceRequestOptionalParameters
-    | UserSponsorAuthCallWithTransferFromRequestOptionalParameters
 >(
   request: Request
 ): Promise<Partial<OptionalParameters>> => {
