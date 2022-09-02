@@ -4,14 +4,14 @@ import { getAddress } from "ethers/lib/utils";
 import { getEIP712Domain } from "../../../../utils";
 import { RelayContract } from "../../../types";
 import {
-  EIP712_USER_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
-  UserSponsorAuthCallWith1BalanceStruct,
+  EIP712_SPONSORED_USER_AUTH_CALL,
+  SponsoredUserAuthCallStruct,
 } from "../types";
 import { SignatureResponse } from "../../types";
 
 const mapRequestToStruct = (
-  request: UserSponsorAuthCallWith1BalanceStruct
-): UserSponsorAuthCallWith1BalanceStruct => {
+  request: SponsoredUserAuthCallStruct
+): SponsoredUserAuthCallStruct => {
   return {
     chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
@@ -19,16 +19,12 @@ const mapRequestToStruct = (
     user: getAddress(request.user),
     userNonce: BigNumber.from(request.userNonce).toString(),
     userDeadline: BigNumber.from(request.userDeadline).toString(),
-    sponsor: getAddress(request.sponsor as string),
-    sponsorSalt: BigNumber.from(request.sponsorSalt).toString(),
     paymentType: request.paymentType,
-    feeToken: getAddress(request.feeToken),
-    oneBalanceChainId: BigNumber.from(request.oneBalanceChainId).toString(),
   };
 };
 
 export const generateUserSponsorSignatureWith1BalanceAndSponsor = async (
-  request: UserSponsorAuthCallWith1BalanceStruct,
+  request: SponsoredUserAuthCallStruct,
   signer: ethers.Wallet
 ): Promise<SignatureResponse> => {
   try {
@@ -39,7 +35,7 @@ export const generateUserSponsorSignatureWith1BalanceAndSponsor = async (
     );
     const signature = await signer._signTypedData(
       domain,
-      EIP712_USER_SPONSOR_AUTH_CALL_WITH_1BALANCE_TYPE_DATA,
+      EIP712_SPONSORED_USER_AUTH_CALL,
       struct
     );
     return {

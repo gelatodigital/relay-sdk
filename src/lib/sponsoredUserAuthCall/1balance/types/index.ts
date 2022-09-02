@@ -2,37 +2,34 @@ import { BigNumberish, BytesLike } from "ethers";
 
 import { EIP712Domain, Optional } from "../../../types";
 
-export const EIP712_USER_AUTH_CALL_WITH_1BALANCE_TYPE_DATA = {
-  UserAuthCallWith1Balance: [
+export const EIP712_SPONSORED_USER_AUTH_CALL = {
+  SponsoredUserAuthCall: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
     { name: "data", type: "bytes" },
     { name: "user", type: "address" },
     { name: "userNonce", type: "uint256" },
     { name: "userDeadline", type: "uint256" },
-    { name: "paymentType", type: "uint8" },
-    { name: "feeToken", type: "address" },
-    { name: "oneBalanceChainId", type: "uint256" },
   ],
 };
 
-export type UserAuthCallWith1BalancePayloadToSign = {
+export type SponsoredUserAuthCallPayloadToSign = {
   domain: EIP712Domain;
   types: {
     EIP712Domain: {
       name: string;
       type: string;
     }[];
-    UserAuthCallWith1Balance: {
+    SponsoredUserAuthCall: {
       name: string;
       type: string;
     }[];
   };
-  primaryType: "UserAuthCallWith1Balance";
-  message: UserAuthCallWith1BalanceStruct;
+  primaryType: "SponsoredUserAuthCall";
+  message: SponsoredUserAuthCallStruct;
 };
 
-export type UserAuthCallWith1BalanceStruct = {
+export type SponsoredUserAuthCallStruct = {
   chainId: BigNumberish;
   target: string;
   data: BytesLike;
@@ -40,16 +37,14 @@ export type UserAuthCallWith1BalanceStruct = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
   paymentType: BigNumberish;
-  feeToken: string;
-  oneBalanceChainId: BigNumberish;
 };
 
-export type UserAuthCallWith1BalanceRequest = Optional<
-  Omit<UserAuthCallWith1BalanceStruct, "paymentType" | "feeToken">,
-  keyof UserAuthCallWith1BalanceRequestOptionalParameters
+export type SponsoredUserAuthCallRequest = Optional<
+  Omit<SponsoredUserAuthCallStruct, "paymentType">,
+  keyof SponsoredUserAuthCallRequestOptionalParameters
 >;
 
-export type UserAuthCallWith1BalanceRequestOptionalParameters = {
+export type SponsoredUserAuthCallRequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
 };

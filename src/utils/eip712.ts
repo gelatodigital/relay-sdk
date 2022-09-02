@@ -1,9 +1,6 @@
 import { EIP712Domain, RelayContract } from "../lib/types";
 
-import {
-  getRelayAddress,
-  getRelayWithTransferFromAddress,
-} from "./getRelayAddresses";
+import { getRelayAddress } from "./getRelayAddresses";
 
 export const getEIP712Domain = (
   chainId: number,
@@ -16,13 +13,6 @@ export const getEIP712Domain = (
         version: "1",
         chainId,
         verifyingContract: getRelayAddress(chainId),
-      };
-    case RelayContract.GelatoRelayWithTransferFrom:
-      return {
-        name: "GelatoRelayWithTransferFrom",
-        version: "1",
-        chainId,
-        verifyingContract: getRelayWithTransferFromAddress(chainId),
       };
     default: {
       const _exhaustiveCheck: never = relayContract;

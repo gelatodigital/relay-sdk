@@ -9,13 +9,3 @@ export const getRelayAddress = (chainId: number): string => {
   }
   return getAddress(addresses.relayAddress);
 };
-
-export const getRelayWithTransferFromAddress = (chainId: number): string => {
-  const addresses: RelayAddresses = RELAY_ADDRESSES[chainId];
-  if (!addresses || !addresses.relayWithTransferFromAddress) {
-    throw new Error(
-      `Relay With Transfer From is not supported on chainId [${chainId}]`
-    );
-  }
-  return getAddress(addresses.relayWithTransferFromAddress);
-};

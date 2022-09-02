@@ -12,18 +12,18 @@ import {
   PaymentType,
   RelayContract,
 } from "../../../types";
-import { SignatureResponse } from "../../types";
 import {
-  EIP712_USER_SPONSOR_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA,
-  UserSponsorAuthCallWithTransferFromPayloadToSign,
-  UserSponsorAuthCallWithTransferFromRequest,
-  UserSponsorAuthCallWithTransferFromRequestOptionalParameters,
-  UserSponsorAuthCallWithTransferFromStruct,
+  EIP712_SPONSORED_USER_AUTH_CALL,
+  SponsoredUserAuthCallPayloadToSign,
+  SponsoredUserAuthCallRequest,
+  SponsoredUserAuthCallRequestOptionalParameters,
+  SponsoredUserAuthCallStruct,
 } from "../types";
+import { SignatureResponse } from "../../types";
 
 const getPayloadToSign = (
-  struct: UserSponsorAuthCallWithTransferFromStruct
-): UserSponsorAuthCallWithTransferFromPayloadToSign => {
+  struct: SponsoredUserAuthCallStruct
+): SponsoredUserAuthCallPayloadToSign => {
   const domain = getEIP712Domain(
     struct.chainId as number,
     RelayContract.GelatoRelay
@@ -31,18 +31,18 @@ const getPayloadToSign = (
   return {
     domain,
     types: {
-      ...EIP712_USER_SPONSOR_AUTH_CALL_WITH_TRANSFER_FROM_TYPE_DATA,
+      ...EIP712_SPONSORED_USER_AUTH_CALL,
       ...EIP712_DOMAIN_TYPE_DATA,
     },
-    primaryType: "UserSponsorAuthCallWithTransferFrom",
+    primaryType: "SponsoredUserAuthCall",
     message: struct,
   };
 };
 
 const mapRequestToStruct = async (
-  request: UserSponsorAuthCallWithTransferFromRequest,
-  override: Partial<UserSponsorAuthCallWithTransferFromRequestOptionalParameters>
-): Promise<UserSponsorAuthCallWithTransferFromStruct> => {
+  request: SponsoredUserAuthCallRequest,
+  override: Partial<SponsoredUserAuthCallRequestOptionalParameters>
+): Promise<SponsoredUserAuthCallStruct> => {
   if (!override.userNonce && !request.userNonce) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }
@@ -60,18 +60,12 @@ const mapRequestToStruct = async (
     userDeadline:
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
-    sponsor: getAddress(request.sponsor as string),
-    sponsorSalt:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      override.sponsorSalt ?? BigNumber.from(request.sponsorSalt!).toString(),
-    paymentType: PaymentType.TransferFrom,
-    feeToken: getAddress(request.feeToken as string),
-    maxFee: BigNumber.from(request.maxFee).toString(),
+    paymentType: PaymentType.OneBalance,
   };
 };
 
-export const generateUserSponsorSignatureWithTransferFromAndUser = async (
-  request: UserSponsorAuthCallWithTransferFromRequest,
+export const generateUserSponsorSignatureWith1BalanceAndUser = async (
+  request: SponsoredUserAuthCallRequest,
   signer: ethers.providers.Web3Provider
 ): Promise<SignatureResponse> => {
   try {
@@ -79,12 +73,12 @@ export const generateUserSponsorSignatureWithTransferFromAndUser = async (
       throw new Error(`No provider found to fetch the user nonce`);
     }
     const userParametersToOverride = await populateOptionalUserParameters<
-      UserSponsorAuthCallWithTransferFromRequest,
-      UserSponsorAuthCallWithTransferFromRequestOptionalParameters
-    >(PaymentType.TransferFrom, request, signer);
+      SponsoredUserAuthCallRequest,
+      SponsoredUserAuthCallRequestOptionalParameters
+    >(PaymentType.OneBalance, request, signer);
     const sponsorParametersToOverride = await populateOptionalSponsorParameters<
-      UserSponsorAuthCallWithTransferFromRequest,
-      UserSponsorAuthCallWithTransferFromRequestOptionalParameters
+      SponsoredUserAuthCallRequest,
+      SponsoredUserAuthCallRequestOptionalParameters
     >(request);
     const struct = await mapRequestToStruct(request, {
       ...userParametersToOverride,
@@ -92,7 +86,7 @@ export const generateUserSponsorSignatureWithTransferFromAndUser = async (
     });
     const signature = await signTypedDataV4(
       signer,
-      request.sponsor,
+      request.user,
       JSON.stringify(getPayloadToSign(struct))
     );
     return {
@@ -102,7 +96,7 @@ export const generateUserSponsorSignatureWithTransferFromAndUser = async (
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
-      `GelatoRelaySDK/generateUserSponsorSignature/transferFrom/user: Failed with error: ${errorMessage}`
+      `GelatoRelaySDK/generateUserSponsorSignature/1balance/user: Failed with error: ${errorMessage}`
     );
   }
 };
