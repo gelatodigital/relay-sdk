@@ -1,8 +1,8 @@
 export { relayWithSyncFee } from "./callWithSyncFee";
-export { relayWithSponsor } from "./sponsoredCall";
+export { relayWithSponsoredCall } from "./sponsoredCall";
 export {
   generateUserSponsorSignature,
-  relayWithSponsoredUserSignature,
+  relayWithSponsoredUserAuthCall,
 } from "./sponsoredUserAuthCall";
 export {
   getEstimatedFee,

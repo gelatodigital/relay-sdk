@@ -14,7 +14,7 @@ import { SponsoredCallRequest } from "./types";
  * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */
-export const relayWithSponsor = async <PT extends PaymentType>(
+export const relayWithSponsoredCall = async <PT extends PaymentType>(
   request: SponsoredCallRequest<PT>,
   sponsorApiKey: string,
   options?: RelayRequestOptions
