@@ -106,7 +106,7 @@ export const generateUserSponsorSignature = async <
  * @param {UserSponsorAuthCallStruct<PT>} request - Depending on the paymentType, UserSponsorAuthCallWith1Balance or UserSponsorAuthCallWithTransferFrom struct to be relayed by Gelato Executors
  * @param {string} userSignature - user signature generated via generateUserSponsorSignature
  * @param {string} sponsorSignature - sponsor signature generated via generateUserSponsorSignature
- * @param {RelayRequestOptions} options - Optional Relay configuration
+ * @param {RelayRequestOptions} [options] - Optional Relay configuration
  * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */

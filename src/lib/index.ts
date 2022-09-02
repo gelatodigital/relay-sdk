@@ -5,4 +5,11 @@ export {
   generateUserSponsorSignature,
   relayWithUserSponsorSignature,
 } from "./userSponsorAuthCall";
+export {
+  getEstimatedFee,
+  getGelatoOracles,
+  getPaymentTokens,
+  isOracleActive,
+} from "./oracle";
+export { getTaskStatus } from "./status";
 export { PaymentType, SignerProfile } from "./types";
