@@ -18,12 +18,27 @@ const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 const networks = [
   {
-    chainId: 5,
+    chainId: 4, //Rinkeby
     helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
     helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
   },
   {
-    chainId: 137,
+    chainId: 5, // Goerly
+    helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
+    helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
+  },
+  {
+    chainId: 137, // Polygon
+    helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
+    helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
+  },
+  {
+    chainId: 420, // Optimism Goerli
+    helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
+    helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
+  },
+  {
+    chainId: 44787, // Celo Alfajores
     helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
     helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
   },
