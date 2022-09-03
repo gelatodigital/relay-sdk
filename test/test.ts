@@ -71,7 +71,7 @@ const callWithSyncFee = async (
 };
 
 const sponsoredCall = async (chainId: number, target: string, data: string) => {
-  const request: SponsoredCallRequest<PaymentType.OneBalance> = {
+  const request: SponsoredCallRequest = {
     chainId,
     target,
     data,
