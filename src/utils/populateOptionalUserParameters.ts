@@ -1,11 +1,11 @@
 import { BigNumber, ethers, providers } from "ethers";
 
 import { DEFAULT_DEADLINE_GAP } from "../constants";
-import { PaymentType } from "../lib";
 import {
   SponsoredUserAuthCallRequest,
   SponsoredUserAuthCallRequestOptionalParameters,
-} from "../lib/sponsoredUserAuthCall/1balance/types";
+} from "../lib/sponsoredUserAuthCall/types";
+import { PaymentType } from "../lib/types";
 
 import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";

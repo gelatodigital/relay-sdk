@@ -1,35 +1,53 @@
-import { ethers } from "ethers";
+import { BigNumberish, BytesLike } from "ethers";
 
-import { PaymentType, SignerProfile } from "../../types";
-import {
-  SponsoredUserAuthCallRequest,
+import { EIP712Domain, Optional } from "../../types";
+
+export const EIP712_SPONSORED_USER_AUTH_CALL_TYPE_DATA = {
+  SponsoredUserAuthCall: [
+    { name: "chainId", type: "uint256" },
+    { name: "target", type: "address" },
+    { name: "data", type: "bytes" },
+    { name: "user", type: "address" },
+    { name: "userNonce", type: "uint256" },
+    { name: "userDeadline", type: "uint256" },
+  ],
+};
+
+export type UserAuthSignature = {
+  userSignature: string;
+};
+
+export type SponsoredUserAuthCallPayloadToSign = {
+  domain: EIP712Domain;
+  types: {
+    EIP712Domain: {
+      name: string;
+      type: string;
+    }[];
+    SponsoredUserAuthCall: {
+      name: string;
+      type: string;
+    }[];
+  };
+  primaryType: "SponsoredUserAuthCall";
+  message: SponsoredUserAuthCallStruct;
+};
+
+export type SponsoredUserAuthCallStruct = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+  user: string;
+  userNonce: BigNumberish;
+  userDeadline: BigNumberish;
+};
+
+export type SponsoredUserAuthCallRequest = Optional<
   SponsoredUserAuthCallStruct,
-} from "../1balance/types";
+  keyof SponsoredUserAuthCallRequestOptionalParameters
+>;
 
-export type UserSponsorSignatureRequest<
-  PT extends PaymentType,
-  S extends SignerProfile
-> = PT extends PaymentType.OneBalance
-  ? SponsoredUserAuthCallSignatureRequest<S>
-  : never;
-
-export type SponsoredUserAuthCallSignatureRequest<S extends SignerProfile> =
-  S extends SignerProfile.User
-    ? SponsoredUserAuthCallRequest
-    : S extends SignerProfile.Sponsor
-    ? SponsoredUserAuthCallStruct
-    : never;
-
-export type UserSponsorAuthCallStruct<PT extends PaymentType> =
-  PT extends PaymentType.OneBalance ? SponsoredUserAuthCallStruct : never;
-
-export type Signer<S extends SignerProfile> = S extends SignerProfile.User
-  ? ethers.providers.Web3Provider
-  : S extends SignerProfile.Sponsor
-  ? ethers.Wallet
-  : never;
-
-export type SignatureResponse = {
-  signature: string;
-  struct: SponsoredUserAuthCallStruct;
+export type SponsoredUserAuthCallRequestOptionalParameters = {
+  userNonce: BigNumberish;
+  userDeadline: BigNumberish;
 };

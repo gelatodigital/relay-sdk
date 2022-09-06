@@ -4,10 +4,9 @@ export enum RelayContract {
   GelatoRelay = "GelatoRelay",
 }
 
-export enum AuthCall {
-  User,
-  Sponsor,
-  UserSponsor,
+export enum RelayCall {
+  Sponsored,
+  SponsoredUserAuth,
 }
 
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
@@ -16,18 +15,16 @@ export enum PaymentType {
   OneBalance = 0,
 }
 
-export enum SignerProfile {
-  User,
-  Sponsor,
-}
-
-export type OneBalancePayment = {
+export type OneBalancePaymentType = {
   paymentType: PaymentType.OneBalance;
 };
 
 export type RelayRequestOptions = {
   gasLimit?: BigNumberish;
   retries?: number;
+};
+
+export type ApiKey = {
   sponsorApiKey: string;
 };
 

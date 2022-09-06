@@ -1,7 +1,7 @@
 import { ethers, providers } from "ethers";
 
 import { USER_NONCE_ABI } from "../constants";
-import { PaymentType } from "../lib";
+import { PaymentType } from "../lib/types";
 
 import { getRelayAddress } from "./getRelayAddresses";
 

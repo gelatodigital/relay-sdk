@@ -1,55 +1,45 @@
 import { BigNumber } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
+import { postAuthCall } from "../../../utils";
 import {
-  populateOptionalSponsorParameters,
-  postAuthCall,
-} from "../../../utils";
-import {
-  AuthCall,
+  RelayCall,
   PaymentType,
   RelayRequestOptions,
   RelayResponse,
+  ApiKey,
+  OneBalancePaymentType,
 } from "../../types";
-
-import {
-  SponsoredCallWith1BalanceRequest,
-  SponsoredCallWith1BalanceRequestOptionalParameters,
-  SponsoredCallWith1BalanceStruct,
-} from "./types";
+import { SponsoredCallRequest, SponsoredCallStruct } from "../types";
 
 const mapRequestToStruct = async (
-  request: SponsoredCallWith1BalanceRequest,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override: Partial<SponsoredCallWith1BalanceRequestOptionalParameters>
-): Promise<SponsoredCallWith1BalanceStruct> => {
+  request: SponsoredCallRequest
+): Promise<SponsoredCallStruct> => {
   return {
     chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
     data: request.data,
-    paymentType: PaymentType.OneBalance,
   };
 };
 
 export const sponsoredCallWith1Balance = async (
-  request: SponsoredCallWith1BalanceRequest,
+  request: SponsoredCallRequest,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
-    const parametersToOverride = await populateOptionalSponsorParameters<
-      SponsoredCallWith1BalanceRequest,
-      SponsoredCallWith1BalanceRequestOptionalParameters
-    >(request);
-    const struct = await mapRequestToStruct(request, parametersToOverride);
-
+    const struct = await mapRequestToStruct(request);
     const postResponse = await postAuthCall<
-      SponsoredCallWith1BalanceStruct & RelayRequestOptions,
+      SponsoredCallStruct &
+        RelayRequestOptions &
+        ApiKey &
+        OneBalancePaymentType,
       RelayResponse
-    >(AuthCall.Sponsor, {
+    >(RelayCall.Sponsored, {
       ...struct,
       ...options,
       sponsorApiKey,
+      paymentType: PaymentType.OneBalance,
     });
     return postResponse;
   } catch (error) {

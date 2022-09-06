@@ -1,27 +1,27 @@
 import axios from "axios";
 
 import { GELATO_RELAY_URL } from "../constants";
-import { AuthCall } from "../lib/types";
+import { RelayCall } from "../lib/types";
 
 import { getHttpErrorMessage } from "./getHttpErrorMessage";
 
 export const postAuthCall = async <Request, Response>(
-  authCall: AuthCall,
+  relayCall: RelayCall,
   request: Request
 ): Promise<Response> => {
   try {
     let path: string;
-    switch (authCall) {
-      case AuthCall.Sponsor:
+    switch (relayCall) {
+      case RelayCall.Sponsored:
         path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call`;
         break;
 
-      case AuthCall.UserSponsor:
+      case RelayCall.SponsoredUserAuth:
         path = `${GELATO_RELAY_URL}/relays/v2/sponsored-user-auth-call`;
         break;
 
       default: {
-        const _exhaustiveCheck: never = authCall as never;
+        const _exhaustiveCheck: never = relayCall;
         return _exhaustiveCheck;
       }
     }
