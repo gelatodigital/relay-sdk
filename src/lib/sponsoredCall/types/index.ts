@@ -1,3 +1,9 @@
-import { SponsoredCallWith1BalanceRequest } from "../1balance/types";
+import { BigNumberish, BytesLike } from "ethers";
 
-export type SponsoredCallRequest = SponsoredCallWith1BalanceRequest;
+export type SponsoredCallStruct = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+};
+
+export type SponsoredCallRequest = SponsoredCallStruct;

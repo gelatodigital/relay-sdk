@@ -1,84 +1,124 @@
-import axios from "axios";
-import { ethers } from "ethers";
+// eslint-disable-next-line import/no-named-as-default
+import ethers, { BigNumber, providers } from "ethers";
+import { getAddress } from "ethers/lib/utils";
 
-import { GELATO_RELAY_URL } from "../../constants";
-import { getHttpErrorMessage } from "../../utils";
 import {
-  PaymentType,
+  getEIP712Domain,
+  populateOptionalUserParameters,
+  signTypedDataV4,
+  postAuthCall,
+} from "../../utils";
+import {
+  ApiKey,
+  EIP712_DOMAIN_TYPE_DATA,
+  RelayCall,
+  RelayContract,
   RelayRequestOptions,
   RelayResponse,
-  SignerProfile,
 } from "../types";
 
-import { generateUserSponsorSignatureWith1BalanceAndUser } from "./1balance";
 import {
+  EIP712_SPONSORED_USER_AUTH_CALL_TYPE_DATA,
+  SponsoredUserAuthCallPayloadToSign,
   SponsoredUserAuthCallRequest,
+  SponsoredUserAuthCallRequestOptionalParameters,
   SponsoredUserAuthCallStruct,
-} from "./1balance/types";
-import {
-  SignatureResponse,
-  Signer,
-  UserSponsorSignatureRequest,
+  UserAuthSignature,
 } from "./types";
 
 /**
- * @function
- * @template PT
- * @extends {PaymentType}
- * @template S
- * @param {UserSponsorSignatureRequest<PT, S>} request - Depending on the paymentType and signerProfile, the request to be signed by the signer
- * @param {Signer<S>} signer - Depending on the signerProfile, Wallet or Web3Provider to sign the payload
- * @returns {Promise<SignatureResponse>} Response body with signature and signed struct
- *
- */
-export const generateUserSponsorSignature = async <
-  PT extends PaymentType,
-  S extends SignerProfile
->(
-  request: UserSponsorSignatureRequest<PT, S>,
-  signer: Signer<S>
-): Promise<SignatureResponse> => {
-  return await generateUserSponsorSignatureWith1BalanceAndUser(
-    request as SponsoredUserAuthCallRequest,
-    signer as ethers.providers.Web3Provider
-  );
-};
-
-/**
- * @function
- * @template PT
- * @extends {PaymentType}
- * @param {PT} paymentType - PaymentType.OneBalance
- * @param {UserSponsorAuthCall} request - SponsoredUserAuthCall struct to be relayed by Gelato Executors
- * @param {string} userSignature - user signature generated via generateUserSponsorSignature
+ * @param {SponsoredUserAuthCallRequest} request - SponsoredUserAuthCallRequest to be relayed by Gelato Executors
+ * @param {ethers.providers.Web3Provider} provider - Web3Provider to sign the payload
+ * @param {string} sponsorApiKey - Sponsor API key
  * @param {RelayRequestOptions} [options] - Optional Relay configuration
  * @returns {Promise<RelayResponse>} Response object with taskId parameter
  *
  */
 export const relayWithSponsoredUserAuthCall = async (
-  struct: SponsoredUserAuthCallRequest,
-  userSignature: string,
+  request: SponsoredUserAuthCallRequest,
+  provider: ethers.providers.Web3Provider,
+  sponsorApiKey: string,
+  options?: RelayRequestOptions
+): Promise<RelayResponse> => {
+  return await sponsoredUserAuthCall(request, provider, sponsorApiKey, options);
+};
+
+const getPayloadToSign = (
+  struct: SponsoredUserAuthCallStruct
+): SponsoredUserAuthCallPayloadToSign => {
+  const domain = getEIP712Domain(
+    struct.chainId as number,
+    RelayContract.GelatoRelay
+  );
+  return {
+    domain,
+    types: {
+      ...EIP712_SPONSORED_USER_AUTH_CALL_TYPE_DATA,
+      ...EIP712_DOMAIN_TYPE_DATA,
+    },
+    primaryType: "SponsoredUserAuthCall",
+    message: struct,
+  };
+};
+
+const mapRequestToStruct = async (
+  request: SponsoredUserAuthCallRequest,
+  override: Partial<SponsoredUserAuthCallRequestOptionalParameters>
+): Promise<SponsoredUserAuthCallStruct> => {
+  if (!override.userNonce && !request.userNonce) {
+    throw new Error(`userNonce is not found in the request, nor fetched`);
+  }
+  if (!override.userDeadline && !request.userDeadline) {
+    throw new Error(`userDeadline is not found in the request, nor fetched`);
+  }
+  return {
+    userNonce:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      override.userNonce ?? BigNumber.from(request.userNonce!).toString(),
+    userDeadline:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
+    chainId: BigNumber.from(request.chainId).toString(),
+    target: getAddress(request.target as string),
+    data: request.data,
+    user: getAddress(request.user as string),
+  };
+};
+
+const sponsoredUserAuthCall = async (
+  request: SponsoredUserAuthCallRequest,
+  provider: providers.Web3Provider,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
-    return (
-      await axios.post(
-        `${GELATO_RELAY_URL}/relays/v2/sponsored-user-auth-call`,
-        {
-          ...(struct as SponsoredUserAuthCallStruct),
-          ...options,
-          userSignature,
-          sponsorApiKey,
-          paymentType: PaymentType.OneBalance,
-        }
-      )
-    ).data;
+    const parametersToOverride = await populateOptionalUserParameters<
+      SponsoredUserAuthCallRequest,
+      SponsoredUserAuthCallRequestOptionalParameters
+    >(request, provider);
+    const struct = await mapRequestToStruct(request, parametersToOverride);
+    const signature = await signTypedDataV4(
+      provider,
+      request.user as string,
+      JSON.stringify(getPayloadToSign(struct))
+    );
+    const postResponse = await postAuthCall<
+      SponsoredUserAuthCallStruct &
+        RelayRequestOptions &
+        UserAuthSignature &
+        ApiKey,
+      RelayResponse
+    >(RelayCall.SponsoredUserAuth, {
+      ...struct,
+      ...options,
+      userSignature: signature,
+      sponsorApiKey,
+    });
+    return postResponse;
   } catch (error) {
+    const errorMessage = (error as Error).message;
     throw new Error(
-      `GelatoRelaySDK/relayWithSponsoredUserAuthCall: Failed with error: ${getHttpErrorMessage(
-        error
-      )}`
+      `GelatoRelaySDK/sponsoredUserAuthCall: Failed with error: ${errorMessage}`
     );
   }
 };

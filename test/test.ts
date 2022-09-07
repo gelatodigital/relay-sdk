@@ -1,16 +1,9 @@
-import { Wallet } from "ethers";
 import dotenv from "dotenv";
 import { Interface } from "ethers/lib/utils";
 dotenv.config({ path: ".env" });
 
 import { GelatoRelaySDK } from "../src";
 import { SponsoredCallRequest } from "../src/lib/sponsoredCall/types";
-import {
-  EIP712_SPONSORED_USER_AUTH_CALL,
-  SponsoredUserAuthCallRequest,
-} from "../src/lib/sponsoredUserAuthCall/1balance/types";
-import { PaymentType, RelayContract } from "../src/lib/types";
-import { getEIP712Domain } from "../src/utils";
 import { CallWithSyncFeeRequest } from "../src/lib/callWithSyncFee/types";
 
 const sponsorApiKey = "YOUR_API_KEY";
@@ -90,44 +83,6 @@ const sponsoredCall = async (chainId: number, target: string, data: string) => {
   );
 };
 
-const sponsoredUserCall = async (
-  chainId: number,
-  target: string,
-  data: string
-) => {
-  const wallet = Wallet.createRandom();
-  const user = await wallet.getAddress();
-
-  const request: SponsoredUserAuthCallRequest = {
-    chainId,
-    data,
-    target,
-    user,
-    userDeadline: 1693648106,
-    userNonce: 0,
-  };
-  const userSignature = await wallet._signTypedData(
-    getEIP712Domain(Number(request.chainId), RelayContract.GelatoRelay),
-    EIP712_SPONSORED_USER_AUTH_CALL,
-    request
-  );
-
-  console.log(`User address: ${user} and signature: ${userSignature}`);
-
-  console.log(`Testing relayWithSponsoredUserAuthCall for chainId: ${chainId}`);
-  const relayResponse = await GelatoRelaySDK.relayWithSponsoredUserAuthCall(
-    request,
-    userSignature,
-    sponsorApiKey
-  );
-  console.log(relayResponse);
-  const status = await GelatoRelaySDK.getTaskStatus(relayResponse.taskId);
-
-  console.log(
-    `Status for task ${relayResponse.taskId}: ${JSON.stringify(status)}`
-  );
-};
-
 async function main() {
   const syncFeeCalldata = Counter.encodeFunctionData("increment", []);
   const data = Counter.encodeFunctionData("incrementContext", []);
@@ -139,7 +94,6 @@ async function main() {
       syncFeeCalldata
     );
     await sponsoredCall(network.chainId, network.helloWorldAddress, data);
-    await sponsoredUserCall(network.chainId, network.helloWorldAddress, data);
   }
 }
 
