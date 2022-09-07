@@ -5,7 +5,6 @@ import {
   SponsoredUserAuthCallRequest,
   SponsoredUserAuthCallRequestOptionalParameters,
 } from "../lib/sponsoredUserAuthCall/types";
-import { PaymentType } from "../lib/types";
 
 import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";
@@ -14,7 +13,6 @@ export const populateOptionalUserParameters = async <
   Request extends SponsoredUserAuthCallRequest,
   OptionalParameters extends SponsoredUserAuthCallRequestOptionalParameters
 >(
-  paymentType: PaymentType,
   request: Request,
   provider: providers.Web3Provider | ethers.providers.Provider
 ): Promise<Partial<OptionalParameters>> => {
@@ -26,7 +24,6 @@ export const populateOptionalUserParameters = async <
     parametersToOverride.userNonce = BigNumber.from(
       (
         (await getUserNonce(
-          paymentType,
           request.chainId as number,
           request.user as string,
           provider

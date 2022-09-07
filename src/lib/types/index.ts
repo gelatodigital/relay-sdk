@@ -11,14 +11,6 @@ export enum RelayCall {
 
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-export enum PaymentType {
-  OneBalance = 0,
-}
-
-export type OneBalancePaymentType = {
-  paymentType: PaymentType.OneBalance;
-};
-
 export type RelayRequestOptions = {
   gasLimit?: BigNumberish;
   retries?: number;
