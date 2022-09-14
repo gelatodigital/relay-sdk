@@ -17,12 +17,12 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: yarn install and build
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-          yarn install
-          yarn build
-          rm .npmrc
+#      - name: yarn install and build
+#        run: |
+#          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+#          yarn install
+#          yarn build
+#          rm .npmrc
 
 #      - name: Run unit and integration test
 #        run: yarn test:unit --coverage
