@@ -1,0 +1,44 @@
+name: Scan
+
+on:
+  push:
+    branches:
+      - master
+      - feature/sonarcloud
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+#      - name: yarn install and build
+#        run: |
+#          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+#          yarn install
+#          yarn build
+#          rm .npmrc
+
+#      - name: Run unit and integration test
+#        run: yarn test:unit --coverage
+
+#      - name: Upload coverage report
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: test-coverage
+#          path: ${{ github.workspace }}/coverage
+#          retention-days: 2
+
+      - name: Cleanup for SonarCloud
+        run: rm -rf ./node_modules .ops .github docs
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
