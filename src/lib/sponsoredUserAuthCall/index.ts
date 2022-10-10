@@ -8,6 +8,7 @@ import {
   signTypedDataV4,
   postAuthCall,
 } from "../../utils";
+import { isNetworkSupported } from "../network";
 import {
   ApiKey,
   EIP712_DOMAIN_TYPE_DATA,
@@ -92,6 +93,10 @@ const sponsoredUserAuthCall = async (
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
+    const isSupported = await isNetworkSupported(Number(request.chainId));
+    if (!isSupported) {
+      throw new Error(`Chain id [${request.chainId}] is not supported`);
+    }
     const parametersToOverride = await populateOptionalUserParameters<
       SponsoredUserAuthCallRequest,
       SponsoredUserAuthCallRequestOptionalParameters

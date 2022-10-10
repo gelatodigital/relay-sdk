@@ -23,11 +23,7 @@ export const populateOptionalUserParameters = async <
   if (!request.userNonce) {
     parametersToOverride.userNonce = BigNumber.from(
       (
-        (await getUserNonce(
-          request.chainId as number,
-          request.user as string,
-          provider
-        )) as BigNumber
+        (await getUserNonce(request.user as string, provider)) as BigNumber
       ).toNumber()
     ).toString();
   }

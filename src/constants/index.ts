@@ -8,3 +8,6 @@ export const DEFAULT_DEADLINE_GAP = 86_400; //24H
 export const USER_NONCE_ABI = [
   "function userNonce(address account) external view returns (uint256)",
 ];
+
+export const GELATO_RELAY_ADDRESS =
+  "0xaBcC9b596420A9E9172FD5938620E265a0f9Df92";

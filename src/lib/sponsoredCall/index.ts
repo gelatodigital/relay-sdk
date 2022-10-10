@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import { postAuthCall } from "../../utils";
+import { isNetworkSupported } from "../network";
 import {
   ApiKey,
   RelayCall,
@@ -47,6 +48,10 @@ const sponsoredCall = async (
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
+    const isSupported = await isNetworkSupported(Number(request.chainId));
+    if (!isSupported) {
+      throw new Error(`Chain id [${request.chainId}] is not supported`);
+    }
     const struct = await mapRequestToStruct(request);
     const postResponse = await postAuthCall<
       SponsoredCallStruct & RelayRequestOptions & ApiKey,
