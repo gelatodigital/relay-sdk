@@ -5,4 +5,5 @@ export type CallWithSyncFeeRequest = {
   target: string;
   data: BytesLike;
   feeToken: string;
+  isRelayContext?: boolean;
 };
