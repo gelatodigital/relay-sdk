@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { GELATO_RELAY_URL } from "../../constants";
 import { getHttpErrorMessage } from "../../utils";
+import { isNetworkSupported } from "../network";
 import { RelayRequestOptions, RelayResponse } from "../types";
 
 import { CallWithSyncFeeRequest } from "./types";
@@ -17,6 +18,10 @@ export const relayWithSyncFee = async (
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
+    const isSupported = await isNetworkSupported(Number(request.chainId));
+    if (!isSupported) {
+      throw new Error(`Chain id [${request.chainId}] is not supported`);
+    }
     const response = await axios.post(
       `${GELATO_RELAY_URL}/relays/v2/call-with-sync-fee`,
       { ...request, ...options }

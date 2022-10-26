@@ -7,4 +7,5 @@ export {
   getPaymentTokens,
   isOracleActive,
 } from "./oracle";
+export { getSupportedNetworks, isNetworkSupported } from "./network";
 export { getTaskStatus } from "./status";

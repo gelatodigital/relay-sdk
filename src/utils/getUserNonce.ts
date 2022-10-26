@@ -1,15 +1,15 @@
 import { ethers, providers } from "ethers";
 
-import { USER_NONCE_ABI } from "../constants";
-
-import { getRelayAddress } from "./getRelayAddresses";
+import { GELATO_RELAY_ADDRESS, USER_NONCE_ABI } from "../constants";
 
 export const getUserNonce = async (
-  chainId: number,
   account: string,
   provider: providers.Web3Provider | ethers.providers.Provider
 ) => {
-  const address = getRelayAddress(chainId);
-  const contract = new ethers.Contract(address, USER_NONCE_ABI, provider);
+  const contract = new ethers.Contract(
+    GELATO_RELAY_ADDRESS,
+    USER_NONCE_ABI,
+    provider
+  );
   return await contract.userNonce(account);
 };

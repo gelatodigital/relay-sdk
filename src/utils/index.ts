@@ -5,4 +5,3 @@ export * from "./eip712";
 export * from "./getHttpErrorMessage";
 export * from "./populateOptionalUserParameters";
 export * from "./postAuthCall";
-export * from "./getRelayAddresses";
