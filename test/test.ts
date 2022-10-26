@@ -11,12 +11,7 @@ const NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 const networks = [
   {
-    chainId: 4, //Rinkeby
-    helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
-    helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
-  },
-  {
-    chainId: 5, // Goerly
+    chainId: 5, // Goerli
     helloWorldAddress: "0x30d97B13e29B0cd42e6ebd48dbD9063465bF1997",
     helloWorldSyncFee: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
   },

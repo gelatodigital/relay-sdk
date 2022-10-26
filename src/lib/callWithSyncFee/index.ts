@@ -24,7 +24,7 @@ export const relayWithSyncFee = async (
     }
     const response = await axios.post(
       `${GELATO_RELAY_URL}/relays/v2/call-with-sync-fee`,
-      { ...request, ...options }
+      { ...request, isRelayContext: request.isRelayContext ?? true, ...options }
     );
     return response.data;
   } catch (error) {
