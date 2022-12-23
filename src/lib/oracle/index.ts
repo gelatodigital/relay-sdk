@@ -4,20 +4,11 @@ import { BigNumber } from "ethers";
 import { GELATO_RELAY_URL } from "../../constants";
 import { getHttpErrorMessage } from "../../utils";
 
-/**
- * @param {number} chainId - Chain Id
- * @returns {Promise<boolean>} Boolean to demonstrate if the oracle is active on the provided chain
- *
- */
 export const isOracleActive = async (chainId: number): Promise<boolean> => {
   const oracles = await getGelatoOracles();
   return oracles.includes(chainId.toString());
 };
 
-/**
- * @returns {Promise<string[]>} List of chain ids where the Gelato Oracle is active
- *
- */
 export const getGelatoOracles = async (): Promise<string[]> => {
   try {
     return (await axios.get(`${GELATO_RELAY_URL}/oracles/`)).data.oracles;
@@ -30,11 +21,6 @@ export const getGelatoOracles = async (): Promise<string[]> => {
   }
 };
 
-/**
- * @param {number} chainId - Chain Id
- * @returns {Promise<string[]>} List of all payment tokens on the provided chain
- *
- */
 export const getPaymentTokens = async (chainId: number): Promise<string[]> => {
   try {
     return (
@@ -49,15 +35,6 @@ export const getPaymentTokens = async (chainId: number): Promise<string[]> => {
   }
 };
 
-/**
- * @param {number} chainId - Chain Id
- * @param {string} paymentToken - Payment Token
- * @param {BigNumber} gasLimit - Gas Limit
- * @param {boolean} isHighPriority - Priority Level
- * @param {BigNumber} [gasLimitL1=BigNumber.from(0)] - Gas Limit for Layer 1
- * @returns {Promise<BigNumber>} Estimated Fee
- *
- */
 export const getEstimatedFee = async (
   chainId: number,
   paymentToken: string,

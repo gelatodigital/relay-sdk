@@ -3,16 +3,11 @@ import axios from "axios";
 import { GELATO_RELAY_URL } from "../../constants";
 import { getHttpErrorMessage } from "../../utils";
 
-import { TransactionStatus } from "./types";
+import { TransactionStatusResponse } from "./types";
 
-/**
- * @param {string} taskId - Task Id
- * @returns {Promise<TransactionStatus | undefined>} Transaction status of the task id
- *
- */
 export const getTaskStatus = async (
   taskId: string
-): Promise<TransactionStatus | undefined> => {
+): Promise<TransactionStatusResponse | undefined> => {
   try {
     return (await axios.get(`${GELATO_RELAY_URL}/tasks/status/${taskId}`)).data
       .task;

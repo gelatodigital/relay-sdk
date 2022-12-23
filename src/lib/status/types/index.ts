@@ -1,4 +1,4 @@
-export type TransactionStatus = {
+export type TransactionStatusResponse = {
   chainId: number;
   taskId: string;
   taskState: TaskState;

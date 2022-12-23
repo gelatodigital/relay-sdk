@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
-import { postAuthCall } from "../../utils";
+import { postSponsoredCall } from "../../utils";
 import { isNetworkSupported } from "../network";
 import {
   ApiKey,
@@ -12,14 +12,6 @@ import {
 
 import { SponsoredCallRequest, SponsoredCallStruct } from "./types";
 
-/**
- * @function
- * @param {SponsoredCallRequest} request SponsoredCallRequest to be relayed by the Gelato Executors.
- * @param {string} sponsorApiKey Sponsor API key to be used for the call
- * @param {RelayRequestOptions} [options] Optional Relay configuration
- * @returns {Promise<RelayResponse>} Response object with taskId parameter
- *
- */
 export const relayWithSponsoredCall = async (
   request: SponsoredCallRequest,
   sponsorApiKey: string,
@@ -53,7 +45,7 @@ const sponsoredCall = async (
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
     const struct = await mapRequestToStruct(request);
-    const postResponse = await postAuthCall<
+    const postResponse = await postSponsoredCall<
       SponsoredCallStruct & RelayRequestOptions & ApiKey,
       RelayResponse
     >(RelayCall.Sponsored, {
