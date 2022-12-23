@@ -5,7 +5,7 @@ import { RelayCall } from "../lib/types";
 
 import { getHttpErrorMessage } from "./getHttpErrorMessage";
 
-export const postAuthCall = async <Request, Response>(
+export const postSponsoredCall = async <Request, Response>(
   relayCall: RelayCall,
   request: Request
 ): Promise<Response> => {
@@ -16,8 +16,8 @@ export const postAuthCall = async <Request, Response>(
         path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call`;
         break;
 
-      case RelayCall.SponsoredUserAuth:
-        path = `${GELATO_RELAY_URL}/relays/v2/sponsored-user-auth-call`;
+      case RelayCall.SponsoredCallERC2771:
+        path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call-erc2771`;
         break;
 
       default: {

@@ -2,8 +2,8 @@ import { BigNumberish, BytesLike } from "ethers";
 
 import { EIP712Domain, Optional } from "../../types";
 
-export const EIP712_SPONSORED_USER_AUTH_CALL_TYPE_DATA = {
-  SponsoredUserAuthCall: [
+export const EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA = {
+  SponsoredCallERC2771: [
     { name: "chainId", type: "uint256" },
     { name: "target", type: "address" },
     { name: "data", type: "bytes" },
@@ -17,23 +17,23 @@ export type UserAuthSignature = {
   userSignature: string;
 };
 
-export type SponsoredUserAuthCallPayloadToSign = {
+export type SponsoredCallERC2771PayloadToSign = {
   domain: EIP712Domain;
   types: {
     EIP712Domain: {
       name: string;
       type: string;
     }[];
-    SponsoredUserAuthCall: {
+    SponsoredCallERC2771: {
       name: string;
       type: string;
     }[];
   };
-  primaryType: "SponsoredUserAuthCall";
-  message: SponsoredUserAuthCallStruct;
+  primaryType: "SponsoredCallERC2771";
+  message: SponsoredCallERC2771Struct;
 };
 
-export type SponsoredUserAuthCallStruct = {
+export type SponsoredCallERC2771Struct = {
   chainId: BigNumberish;
   target: string;
   data: BytesLike;
@@ -42,12 +42,12 @@ export type SponsoredUserAuthCallStruct = {
   userDeadline: BigNumberish;
 };
 
-export type SponsoredUserAuthCallRequest = Optional<
-  SponsoredUserAuthCallStruct,
-  keyof SponsoredUserAuthCallRequestOptionalParameters
+export type SponsoredCallERC2771Request = Optional<
+  SponsoredCallERC2771Struct,
+  keyof SponsoredCallERC2771RequestOptionalParameters
 >;
 
-export type SponsoredUserAuthCallRequestOptionalParameters = {
+export type SponsoredCallERC2771RequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
 };

@@ -6,66 +6,54 @@ import {
   getEIP712Domain,
   populateOptionalUserParameters,
   signTypedDataV4,
-  postAuthCall,
+  postSponsoredCall,
 } from "../../utils";
 import { isNetworkSupported } from "../network";
 import {
   ApiKey,
   EIP712_DOMAIN_TYPE_DATA,
   RelayCall,
-  RelayContract,
   RelayRequestOptions,
   RelayResponse,
 } from "../types";
 
 import {
-  EIP712_SPONSORED_USER_AUTH_CALL_TYPE_DATA,
-  SponsoredUserAuthCallPayloadToSign,
-  SponsoredUserAuthCallRequest,
-  SponsoredUserAuthCallRequestOptionalParameters,
-  SponsoredUserAuthCallStruct,
+  EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA,
+  SponsoredCallERC2771PayloadToSign,
+  SponsoredCallERC2771Request,
+  SponsoredCallERC2771RequestOptionalParameters,
+  SponsoredCallERC2771Struct,
   UserAuthSignature,
 } from "./types";
 
-/**
- * @param {SponsoredUserAuthCallRequest} request - SponsoredUserAuthCallRequest to be relayed by Gelato Executors
- * @param {ethers.providers.Web3Provider} provider - Web3Provider to sign the payload
- * @param {string} sponsorApiKey - Sponsor API key
- * @param {RelayRequestOptions} [options] - Optional Relay configuration
- * @returns {Promise<RelayResponse>} Response object with taskId parameter
- *
- */
-export const relayWithSponsoredUserAuthCall = async (
-  request: SponsoredUserAuthCallRequest,
+export const relayWithSponsoredCallERC2771 = async (
+  request: SponsoredCallERC2771Request,
   provider: ethers.providers.Web3Provider,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
-  return await sponsoredUserAuthCall(request, provider, sponsorApiKey, options);
+  return await sponsoredCallERC2771(request, provider, sponsorApiKey, options);
 };
 
 const getPayloadToSign = (
-  struct: SponsoredUserAuthCallStruct
-): SponsoredUserAuthCallPayloadToSign => {
-  const domain = getEIP712Domain(
-    struct.chainId as number,
-    RelayContract.GelatoRelay
-  );
+  struct: SponsoredCallERC2771Struct
+): SponsoredCallERC2771PayloadToSign => {
+  const domain = getEIP712Domain(struct.chainId as number);
   return {
     domain,
     types: {
-      ...EIP712_SPONSORED_USER_AUTH_CALL_TYPE_DATA,
+      ...EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA,
       ...EIP712_DOMAIN_TYPE_DATA,
     },
-    primaryType: "SponsoredUserAuthCall",
+    primaryType: "SponsoredCallERC2771",
     message: struct,
   };
 };
 
 const mapRequestToStruct = async (
-  request: SponsoredUserAuthCallRequest,
-  override: Partial<SponsoredUserAuthCallRequestOptionalParameters>
-): Promise<SponsoredUserAuthCallStruct> => {
+  request: SponsoredCallERC2771Request,
+  override: Partial<SponsoredCallERC2771RequestOptionalParameters>
+): Promise<SponsoredCallERC2771Struct> => {
   if (!override.userNonce && !request.userNonce) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }
@@ -86,8 +74,8 @@ const mapRequestToStruct = async (
   };
 };
 
-const sponsoredUserAuthCall = async (
-  request: SponsoredUserAuthCallRequest,
+const sponsoredCallERC2771 = async (
+  request: SponsoredCallERC2771Request,
   provider: providers.Web3Provider,
   sponsorApiKey: string,
   options?: RelayRequestOptions
@@ -98,8 +86,8 @@ const sponsoredUserAuthCall = async (
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
     const parametersToOverride = await populateOptionalUserParameters<
-      SponsoredUserAuthCallRequest,
-      SponsoredUserAuthCallRequestOptionalParameters
+      SponsoredCallERC2771Request,
+      SponsoredCallERC2771RequestOptionalParameters
     >(request, provider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
@@ -107,13 +95,13 @@ const sponsoredUserAuthCall = async (
       request.user as string,
       JSON.stringify(getPayloadToSign(struct))
     );
-    const postResponse = await postAuthCall<
-      SponsoredUserAuthCallStruct &
+    const postResponse = await postSponsoredCall<
+      SponsoredCallERC2771Struct &
         RelayRequestOptions &
         UserAuthSignature &
         ApiKey,
       RelayResponse
-    >(RelayCall.SponsoredUserAuth, {
+    >(RelayCall.SponsoredCallERC2771, {
       ...struct,
       ...options,
       userSignature: signature,
@@ -123,7 +111,7 @@ const sponsoredUserAuthCall = async (
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
-      `GelatoRelaySDK/sponsoredUserAuthCall: Failed with error: ${errorMessage}`
+      `GelatoRelaySDK/sponsoredCallERC2771: Failed with error: ${errorMessage}`
     );
   }
 };

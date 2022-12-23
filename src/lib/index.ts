@@ -1,6 +1,6 @@
 export { relayWithSyncFee } from "./callWithSyncFee";
 export { relayWithSponsoredCall } from "./sponsoredCall";
-export { relayWithSponsoredUserAuthCall } from "./sponsoredUserAuthCall";
+export { relayWithSponsoredCallERC2771 } from "./sponsoredCallERC2771";
 export {
   getEstimatedFee,
   getGelatoOracles,
