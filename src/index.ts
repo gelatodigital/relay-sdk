@@ -24,7 +24,7 @@ export class GelatoRelay {
    */
   callWithSyncFee = (
     request: CallWithSyncFeeRequest,
-    options: RelayRequestOptions
+    options?: RelayRequestOptions
   ): Promise<RelayResponse> => library.relayWithSyncFee(request, options);
 
   /**
