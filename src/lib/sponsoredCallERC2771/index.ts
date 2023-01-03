@@ -93,7 +93,7 @@ const sponsoredCallERC2771 = async (
     const signature = await signTypedDataV4(
       provider,
       request.user as string,
-      JSON.stringify(getPayloadToSign(struct))
+      getPayloadToSign(struct)
     );
     const postResponse = await postSponsoredCall<
       SponsoredCallERC2771Struct &
