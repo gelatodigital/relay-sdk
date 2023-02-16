@@ -1,9 +1,12 @@
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 
 import * as library from "./lib";
 import { CallWithSyncFeeRequest } from "./lib/callWithSyncFee/types";
 import { SponsoredCallRequest } from "./lib/sponsoredCall/types";
-import { SponsoredCallERC2771Request } from "./lib/sponsoredCallERC2771/types";
+import {
+  SponsoredCallERC2771Request,
+  WalletOrProvider,
+} from "./lib/sponsoredCallERC2771/types";
 import { TransactionStatusResponse } from "./lib/status/types";
 import { RelayRequestOptions, RelayResponse } from "./lib/types";
 
@@ -51,7 +54,7 @@ export class GelatoRelay {
    */
   sponsoredCallERC2771 = (
     request: SponsoredCallERC2771Request,
-    provider: ethers.providers.Web3Provider,
+    provider: WalletOrProvider,
     sponsorApiKey: string,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> =>

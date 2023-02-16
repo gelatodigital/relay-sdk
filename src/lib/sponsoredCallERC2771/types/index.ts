@@ -1,4 +1,4 @@
-import { BigNumberish, BytesLike } from "ethers";
+import { BigNumberish, BytesLike, providers, Wallet } from "ethers";
 
 import { EIP712Domain, Optional } from "../../types";
 
@@ -12,6 +12,8 @@ export const EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA = {
     { name: "userDeadline", type: "uint256" },
   ],
 };
+
+export type WalletOrProvider = providers.Web3Provider | Wallet;
 
 export type UserAuthSignature = {
   userSignature: string;

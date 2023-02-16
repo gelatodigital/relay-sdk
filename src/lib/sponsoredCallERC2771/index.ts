@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-named-as-default
-import ethers, { BigNumber, providers } from "ethers";
+import { BigNumber, Wallet } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import {
@@ -24,11 +24,12 @@ import {
   SponsoredCallERC2771RequestOptionalParameters,
   SponsoredCallERC2771Struct,
   UserAuthSignature,
+  WalletOrProvider,
 } from "./types";
 
 export const relayWithSponsoredCallERC2771 = async (
   request: SponsoredCallERC2771Request,
-  provider: ethers.providers.Web3Provider,
+  provider: WalletOrProvider,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
@@ -76,7 +77,7 @@ const mapRequestToStruct = async (
 
 const sponsoredCallERC2771 = async (
   request: SponsoredCallERC2771Request,
-  provider: providers.Web3Provider,
+  provider: WalletOrProvider,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
@@ -85,10 +86,12 @@ const sponsoredCallERC2771 = async (
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
+    const onlyProvider =
+      provider instanceof Wallet ? provider.provider : provider;
     const parametersToOverride = await populateOptionalUserParameters<
       SponsoredCallERC2771Request,
       SponsoredCallERC2771RequestOptionalParameters
-    >(request, provider);
+    >(request, onlyProvider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       provider,
