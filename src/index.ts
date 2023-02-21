@@ -3,7 +3,10 @@ import { BigNumber, ethers } from "ethers";
 import * as library from "./lib";
 import { CallWithSyncFeeRequest } from "./lib/callWithSyncFee/types";
 import { SponsoredCallRequest } from "./lib/sponsoredCall/types";
-import { SponsoredCallERC2771Request } from "./lib/sponsoredCallERC2771/types";
+import {
+  SignatureData,
+  SponsoredCallERC2771Request,
+} from "./lib/erc2771/types";
 import { TransactionStatusResponse } from "./lib/status/types";
 import { RelayRequestOptions, RelayResponse } from "./lib/types";
 
@@ -14,6 +17,7 @@ export {
   RelayRequestOptions,
   TransactionStatusResponse,
   RelayResponse,
+  SignatureData,
 };
 export class GelatoRelay {
   /**
@@ -58,6 +62,39 @@ export class GelatoRelay {
     library.relayWithSponsoredCallERC2771(
       request,
       provider,
+      sponsorApiKey,
+      options
+    );
+
+  /**
+   * @param {SponsoredCallERC2771Request} request - SponsoredCallERC2771Request to be relayed by Gelato Executors
+   * @param {ethers.providers.Web3Provider} provider - Web3Provider to sign the payload
+   * @returns {Promise<SignatureData>} Response object with taskId parameter
+   *
+   */
+  getSignatureDataERC2771 = (
+    request: SponsoredCallERC2771Request,
+    provider: ethers.providers.Web3Provider
+  ): Promise<SignatureData> =>
+    library.getSignatureDataERC2771(request, provider);
+
+  /**
+   * @param {SignatureData["struct"]} struct - Struct that can be obtained from getSignatureDataERC2771
+   * @param {SignatureData["signature"]} signature - Signature that can be obtained from getSignatureDataERC2771
+   * @param {string} sponsorApiKey - Sponsor API key
+   * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @returns {Promise<RelayResponse>} Response object with taskId parameter
+   *
+   */
+  sponsoredCallERC2771WithSignature = (
+    struct: SignatureData["struct"],
+    signature: SignatureData["signature"],
+    sponsorApiKey: string,
+    options?: RelayRequestOptions
+  ): Promise<RelayResponse> =>
+    library.sponsoredCallERC2771WithSignature(
+      struct,
+      signature,
       sponsorApiKey,
       options
     );

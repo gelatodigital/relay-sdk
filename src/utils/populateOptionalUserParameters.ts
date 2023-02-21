@@ -4,7 +4,7 @@ import { DEFAULT_DEADLINE_GAP } from "../constants";
 import {
   SponsoredCallERC2771Request,
   SponsoredCallERC2771RequestOptionalParameters,
-} from "../lib/sponsoredCallERC2771/types";
+} from "../lib/erc2771/types";
 
 import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";
