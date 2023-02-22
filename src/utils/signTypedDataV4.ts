@@ -1,19 +1,17 @@
-import { Wallet } from "ethers";
+import { providers, Wallet } from "ethers";
 
 import { SIGN_TYPED_DATA_V4 } from "../constants";
-import {
-  SponsoredCallERC2771PayloadToSign,
-  WalletOrProvider,
-} from "../lib/sponsoredCallERC2771/types";
+import { SponsoredCallERC2771PayloadToSign } from "../lib/sponsoredCallERC2771/types";
 
 export const signTypedDataV4 = async (
-  provider: WalletOrProvider,
+  provider: providers.Web3Provider,
   address: string,
-  payload: SponsoredCallERC2771PayloadToSign
+  payload: SponsoredCallERC2771PayloadToSign,
+  wallet?: Wallet
 ): Promise<string> => {
-  if (provider instanceof Wallet) {
+  if (wallet) {
     // All properties on a domain are optional
-    return await provider._signTypedData(
+    return await wallet._signTypedData(
       payload.domain,
       payload.types,
       payload.message

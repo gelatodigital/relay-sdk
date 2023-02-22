@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-named-as-default
-import { BigNumber, Wallet } from "ethers";
+import { BigNumber, providers, Wallet } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import {
@@ -24,28 +24,38 @@ import {
   SponsoredCallERC2771RequestOptionalParameters,
   SponsoredCallERC2771Struct,
   UserAuthSignature,
-  WalletOrProvider,
 } from "./types";
 
 export const relayWithSponsoredCallERC2771 = async (
   request: SponsoredCallERC2771Request,
-  provider: WalletOrProvider,
+  provider: providers.Web3Provider,
   sponsorApiKey: string,
-  options?: RelayRequestOptions
+  options?: RelayRequestOptions,
+  wallet?: Wallet
 ): Promise<RelayResponse> => {
-  return await sponsoredCallERC2771(request, provider, sponsorApiKey, options);
+  return await sponsoredCallERC2771(
+    request,
+    provider,
+    sponsorApiKey,
+    options,
+    wallet
+  );
 };
 
 const getPayloadToSign = (
-  struct: SponsoredCallERC2771Struct
+  struct: SponsoredCallERC2771Struct,
+  wallet?: Wallet
 ): SponsoredCallERC2771PayloadToSign => {
   const domain = getEIP712Domain(struct.chainId as number);
+  const types = wallet
+    ? EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA
+    : {
+        ...EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA,
+        ...EIP712_DOMAIN_TYPE_DATA,
+      };
   return {
     domain,
-    types: {
-      ...EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA,
-      ...EIP712_DOMAIN_TYPE_DATA,
-    },
+    types,
     primaryType: "SponsoredCallERC2771",
     message: struct,
   };
@@ -77,26 +87,26 @@ const mapRequestToStruct = async (
 
 const sponsoredCallERC2771 = async (
   request: SponsoredCallERC2771Request,
-  provider: WalletOrProvider,
+  provider: providers.Web3Provider,
   sponsorApiKey: string,
-  options?: RelayRequestOptions
+  options?: RelayRequestOptions,
+  wallet?: Wallet
 ): Promise<RelayResponse> => {
   try {
     const isSupported = await isNetworkSupported(Number(request.chainId));
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
-    const onlyProvider =
-      provider instanceof Wallet ? provider.provider : provider;
     const parametersToOverride = await populateOptionalUserParameters<
       SponsoredCallERC2771Request,
       SponsoredCallERC2771RequestOptionalParameters
-    >(request, onlyProvider);
+    >(request, provider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       provider,
       request.user as string,
-      getPayloadToSign(struct)
+      getPayloadToSign(struct, wallet),
+      wallet
     );
     const postResponse = await postSponsoredCall<
       SponsoredCallERC2771Struct &
