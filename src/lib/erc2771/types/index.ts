@@ -51,3 +51,8 @@ export type SponsoredCallERC2771RequestOptionalParameters = {
   userNonce: BigNumberish;
   userDeadline: BigNumberish;
 };
+
+export type SignatureData = {
+  struct: SponsoredCallERC2771Struct;
+  signature: string;
+};
