@@ -1,18 +1,27 @@
-import { providers } from "ethers";
+import { ethers } from "ethers";
 
 import { SIGN_TYPED_DATA_V4 } from "../constants";
 import { SponsoredCallERC2771PayloadToSign } from "../lib/erc2771/types";
 
+import { isWallet } from "./isWallet";
+
 export const signTypedDataV4 = async (
-  provider: providers.Web3Provider,
+  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
   address: string,
   payload: SponsoredCallERC2771PayloadToSign
 ): Promise<string> => {
-  // Magic Connect accepts payload as an object
-  if ((provider.provider as { isMagic: boolean }).isMagic) {
-    return await provider.send(SIGN_TYPED_DATA_V4, [address, payload]);
+  if (isWallet(walletOrProvider)) {
+    return await walletOrProvider._signTypedData(
+      payload.domain,
+      payload.types,
+      payload.message
+    );
   }
-  return await provider.send(SIGN_TYPED_DATA_V4, [
+  // Magic Connect accepts payload as an object
+  if ((walletOrProvider.provider as { isMagic: boolean }).isMagic) {
+    return await walletOrProvider.send(SIGN_TYPED_DATA_V4, [address, payload]);
+  }
+  return await walletOrProvider.send(SIGN_TYPED_DATA_V4, [
     address,
     JSON.stringify(payload),
   ]);

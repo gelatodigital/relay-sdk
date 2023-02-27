@@ -20,7 +20,7 @@ export type UserAuthSignature = {
 export type SponsoredCallERC2771PayloadToSign = {
   domain: EIP712Domain;
   types: {
-    EIP712Domain: {
+    EIP712Domain?: {
       name: string;
       type: string;
     }[];
@@ -29,7 +29,7 @@ export type SponsoredCallERC2771PayloadToSign = {
       type: string;
     }[];
   };
-  primaryType: "SponsoredCallERC2771";
+  primaryType?: "SponsoredCallERC2771";
   message: SponsoredCallERC2771Struct;
 };
 

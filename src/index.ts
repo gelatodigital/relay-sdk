@@ -47,7 +47,7 @@ export class GelatoRelay {
 
   /**
    * @param {SponsoredCallERC2771Request} request - SponsoredCallERC2771Request to be relayed by Gelato Executors
-   * @param {ethers.providers.Web3Provider} provider - Web3Provider to sign the payload
+   * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
    * @param {string} sponsorApiKey - Sponsor API key
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
@@ -55,28 +55,28 @@ export class GelatoRelay {
    */
   sponsoredCallERC2771 = (
     request: SponsoredCallERC2771Request,
-    provider: ethers.providers.Web3Provider,
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
     sponsorApiKey: string,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> =>
     library.relayWithSponsoredCallERC2771(
       request,
-      provider,
+      walletOrProvider,
       sponsorApiKey,
       options
     );
 
   /**
    * @param {SponsoredCallERC2771Request} request - SponsoredCallERC2771Request to be relayed by Gelato Executors
-   * @param {ethers.providers.Web3Provider} provider - Web3Provider to sign the payload
+   * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
    * @returns {Promise<SignatureData>} Response object with taskId parameter
    *
    */
   getSignatureDataERC2771 = (
     request: SponsoredCallERC2771Request,
-    provider: ethers.providers.Web3Provider
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet
   ): Promise<SignatureData> =>
-    library.getSignatureDataERC2771(request, provider);
+    library.getSignatureDataERC2771(request, walletOrProvider);
 
   /**
    * @param {SignatureData["struct"]} struct - Struct that can be obtained from getSignatureDataERC2771

@@ -7,9 +7,19 @@ import {
 } from "../types";
 
 export const getPayloadToSign = (
-  struct: SponsoredCallERC2771Struct
+  struct: SponsoredCallERC2771Struct,
+  isWallet: boolean
 ): SponsoredCallERC2771PayloadToSign => {
   const domain = getEIP712Domain(struct.chainId as number);
+  if (isWallet) {
+    return {
+      domain,
+      types: {
+        ...EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA,
+      },
+      message: struct,
+    };
+  }
   return {
     domain,
     types: {

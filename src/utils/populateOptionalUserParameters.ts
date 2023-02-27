@@ -1,4 +1,4 @@
-import { BigNumber, ethers, providers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 import { DEFAULT_DEADLINE_GAP } from "../constants";
 import {
@@ -14,7 +14,7 @@ export const populateOptionalUserParameters = async <
   OptionalParameters extends SponsoredCallERC2771RequestOptionalParameters
 >(
   request: Request,
-  provider: providers.Web3Provider | ethers.providers.Provider
+  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet
 ): Promise<Partial<OptionalParameters>> => {
   const parametersToOverride: Partial<OptionalParameters> = {};
   if (!request.userDeadline) {
@@ -23,7 +23,10 @@ export const populateOptionalUserParameters = async <
   if (!request.userNonce) {
     parametersToOverride.userNonce = BigNumber.from(
       (
-        (await getUserNonce(request.user as string, provider)) as BigNumber
+        (await getUserNonce(
+          request.user as string,
+          walletOrProvider
+        )) as BigNumber
       ).toNumber()
     ).toString();
   }
