@@ -21,8 +21,11 @@ export const signTypedDataV4 = async (
   if ((walletOrProvider.provider as { isMagic: boolean }).isMagic) {
     return await walletOrProvider.send(SIGN_TYPED_DATA_V4, [address, payload]);
   }
-  return await walletOrProvider.send(SIGN_TYPED_DATA_V4, [
+  const signature = await walletOrProvider.send(SIGN_TYPED_DATA_V4, [
     address,
     JSON.stringify(payload),
   ]);
+
+  // Support both versions of `eth_sign` responses
+  return signature.replace(/00$/, "1b").replace(/01$/, "1c");
 };
