@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 import {
+  isWallet,
   populateOptionalUserParameters,
   postSponsoredCall,
   signTypedDataV4,
@@ -22,20 +23,28 @@ import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const relayWithSponsoredCallERC2771 = async (
   request: SponsoredCallERC2771Request,
-  provider: ethers.providers.Web3Provider,
+  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
-  return await sponsoredCallERC2771(request, provider, sponsorApiKey, options);
+  return await sponsoredCallERC2771(
+    request,
+    walletOrProvider,
+    sponsorApiKey,
+    options
+  );
 };
 
 const sponsoredCallERC2771 = async (
   request: SponsoredCallERC2771Request,
-  provider: ethers.providers.Web3Provider,
+  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
   sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
+    if (!walletOrProvider.provider) {
+      throw new Error(`Missing provider`);
+    }
     const isSupported = await isNetworkSupported(Number(request.chainId));
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
@@ -44,12 +53,12 @@ const sponsoredCallERC2771 = async (
     const parametersToOverride = await populateOptionalUserParameters<
       SponsoredCallERC2771Request,
       SponsoredCallERC2771RequestOptionalParameters
-    >(request, provider);
+    >(request, walletOrProvider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
-      provider,
+      walletOrProvider,
       request.user as string,
-      getPayloadToSign(struct)
+      getPayloadToSign(struct, isWallet(walletOrProvider))
     );
 
     const postResponse = await postSponsoredCall<
