@@ -8,7 +8,7 @@ import {
 } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
-  ApiKey,
+  BaseCallWithSyncFeeParams,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -17,29 +17,15 @@ import {
   CallWithERC2771Request,
   CallWithERC2771RequestOptionalParameters,
   CallWithERC2771Struct,
+  CallWithSyncFeeERC2771Request,
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
 import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
-export const relayWithSponsoredCallERC2771 = async (
-  request: CallWithERC2771Request,
+export const relayWithCallWithSyncFeeERC2771 = async (
+  request: CallWithSyncFeeERC2771Request,
   walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
-  sponsorApiKey: string,
-  options?: RelayRequestOptions
-): Promise<RelayResponse> => {
-  return await sponsoredCallERC2771(
-    request,
-    walletOrProvider,
-    sponsorApiKey,
-    options
-  );
-};
-
-const sponsoredCallERC2771 = async (
-  request: CallWithERC2771Request,
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
-  sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
@@ -50,35 +36,42 @@ const sponsoredCallERC2771 = async (
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
-
+    const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >(request, walletOrProvider);
-    const struct = await mapRequestToStruct(request, parametersToOverride);
+    >(callWithSyncFeeRequest, walletOrProvider);
+    const struct = await mapRequestToStruct(
+      callWithSyncFeeRequest,
+      parametersToOverride
+    );
     const signature = await signTypedDataV4(
       walletOrProvider,
-      request.user as string,
+      callWithSyncFeeRequest.user as string,
       getPayloadToSign(
         struct,
-        ERC2771Type.SponsoredCall,
+        ERC2771Type.CallWithSyncFee,
         isWallet(walletOrProvider)
       )
     );
 
     return await post<
-      CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
+      CallWithERC2771Struct &
+        BaseCallWithSyncFeeParams &
+        RelayRequestOptions &
+        UserAuthSignature,
       RelayResponse
-    >(RelayCall.SponsoredCallERC2771, {
+    >(RelayCall.CallWithSyncFeeERC2771, {
       ...struct,
       ...options,
+      feeToken,
+      isRelayContext: isRelayContext ?? true,
       userSignature: signature,
-      sponsorApiKey,
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
-      `GelatoRelaySDK/sponsoredCallERC2771: Failed with error: ${errorMessage}`
+      `GelatoRelaySDK/callWithSyncFeeERC2771: Failed with error: ${errorMessage}`
     );
   }
 };

@@ -4,6 +4,8 @@ export {
   relayWithSponsoredCallERC2771,
   getSignatureDataERC2771,
   sponsoredCallERC2771WithSignature,
+  callWithSyncFeeERC2771WithSignature,
+  relayWithCallWithSyncFeeERC2771,
 } from "./erc2771";
 export {
   getEstimatedFee,

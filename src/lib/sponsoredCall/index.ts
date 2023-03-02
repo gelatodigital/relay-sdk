@@ -1,16 +1,17 @@
 import { BigNumber } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
-import { postSponsoredCall } from "../../utils";
+import { post } from "../../utils";
 import { isNetworkSupported } from "../network";
 import {
   ApiKey,
+  BaseRelayParams,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
 } from "../types";
 
-import { SponsoredCallRequest, SponsoredCallStruct } from "./types";
+import { SponsoredCallRequest } from "./types";
 
 export const relayWithSponsoredCall = async (
   request: SponsoredCallRequest,
@@ -26,7 +27,7 @@ export const relayWithSponsoredCall = async (
 
 const mapRequestToStruct = async (
   request: SponsoredCallRequest
-): Promise<SponsoredCallStruct> => {
+): Promise<BaseRelayParams> => {
   return {
     chainId: BigNumber.from(request.chainId).toString(),
     target: getAddress(request.target as string),
@@ -45,8 +46,8 @@ const sponsoredCall = async (
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
     const struct = await mapRequestToStruct(request);
-    const postResponse = await postSponsoredCall<
-      SponsoredCallStruct & RelayRequestOptions & ApiKey,
+    const postResponse = await post<
+      BaseRelayParams & RelayRequestOptions & ApiKey,
       RelayResponse
     >(RelayCall.Sponsored, {
       ...struct,

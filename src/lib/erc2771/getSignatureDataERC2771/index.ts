@@ -8,14 +8,16 @@ import {
 import { isNetworkSupported } from "../../network";
 import {
   SignatureData,
-  SponsoredCallERC2771Request,
-  SponsoredCallERC2771RequestOptionalParameters,
+  CallWithERC2771Request,
+  CallWithERC2771RequestOptionalParameters,
+  ERC2771Type,
 } from "../types";
 import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const getSignatureDataERC2771 = async (
-  request: SponsoredCallERC2771Request,
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet
+  request: CallWithERC2771Request,
+  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
+  type: ERC2771Type
 ): Promise<SignatureData> => {
   try {
     if (!walletOrProvider.provider) {
@@ -27,14 +29,14 @@ export const getSignatureDataERC2771 = async (
     }
 
     const parametersToOverride = await populateOptionalUserParameters<
-      SponsoredCallERC2771Request,
-      SponsoredCallERC2771RequestOptionalParameters
+      CallWithERC2771Request,
+      CallWithERC2771RequestOptionalParameters
     >(request, walletOrProvider);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       walletOrProvider,
       request.user as string,
-      getPayloadToSign(struct, isWallet(walletOrProvider))
+      getPayloadToSign(struct, type, isWallet(walletOrProvider))
     );
     return {
       struct,
