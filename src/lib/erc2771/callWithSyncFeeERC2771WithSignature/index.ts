@@ -30,6 +30,7 @@ export const callWithSyncFeeERC2771WithSignature = async (
       ...struct,
       ...syncFeeParams,
       ...options,
+      isRelayContext: syncFeeParams.isRelayContext ?? true,
       userSignature: signature,
     });
   } catch (error) {
