@@ -2,16 +2,16 @@ import { BigNumber, ethers } from "ethers";
 
 import { DEFAULT_DEADLINE_GAP } from "../constants";
 import {
-  SponsoredCallERC2771Request,
-  SponsoredCallERC2771RequestOptionalParameters,
+  CallWithERC2771Request,
+  CallWithERC2771RequestOptionalParameters,
 } from "../lib/erc2771/types";
 
 import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";
 
 export const populateOptionalUserParameters = async <
-  Request extends SponsoredCallERC2771Request,
-  OptionalParameters extends SponsoredCallERC2771RequestOptionalParameters
+  Request extends CallWithERC2771Request,
+  OptionalParameters extends CallWithERC2771RequestOptionalParameters
 >(
   request: Request,
   walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet

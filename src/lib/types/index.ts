@@ -1,7 +1,9 @@
-import { BigNumberish } from "ethers";
+import { BigNumberish, BytesLike } from "ethers";
 
 export enum RelayCall {
-  Sponsored,
+  CallWithSyncFee,
+  CallWithSyncFeeERC2771,
+  SponsoredCall,
   SponsoredCallERC2771,
 }
 
@@ -34,4 +36,15 @@ export const EIP712_DOMAIN_TYPE_DATA = {
     { name: "chainId", type: "uint256" },
     { name: "verifyingContract", type: "address" },
   ],
+};
+
+export type BaseRelayParams = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+};
+
+export type BaseCallWithSyncFeeParams = {
+  feeToken: string;
+  isRelayContext?: boolean;
 };

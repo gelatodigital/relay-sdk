@@ -2,15 +2,15 @@ import { BigNumber } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 
 import {
-  SponsoredCallERC2771Request,
-  SponsoredCallERC2771RequestOptionalParameters,
-  SponsoredCallERC2771Struct,
+  CallWithERC2771Request,
+  CallWithERC2771RequestOptionalParameters,
+  CallWithERC2771Struct,
 } from "../types";
 
 export const mapRequestToStruct = async (
-  request: SponsoredCallERC2771Request,
-  override: Partial<SponsoredCallERC2771RequestOptionalParameters>
-): Promise<SponsoredCallERC2771Struct> => {
+  request: CallWithERC2771Request,
+  override: Partial<CallWithERC2771RequestOptionalParameters>
+): Promise<CallWithERC2771Struct> => {
   if (!override.userNonce && !request.userNonce) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }

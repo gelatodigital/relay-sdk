@@ -5,19 +5,28 @@ import { CallWithSyncFeeRequest } from "./lib/callWithSyncFee/types";
 import { SponsoredCallRequest } from "./lib/sponsoredCall/types";
 import {
   SignatureData,
-  SponsoredCallERC2771Request,
+  CallWithERC2771Request,
+  ERC2771Type,
+  CallWithSyncFeeERC2771Request,
 } from "./lib/erc2771/types";
 import { TransactionStatusResponse } from "./lib/status/types";
-import { RelayRequestOptions, RelayResponse } from "./lib/types";
+import {
+  BaseCallWithSyncFeeParams,
+  RelayRequestOptions,
+  RelayResponse,
+} from "./lib/types";
 
 export {
   CallWithSyncFeeRequest,
-  SponsoredCallERC2771Request,
+  CallWithERC2771Request,
   SponsoredCallRequest,
   RelayRequestOptions,
   TransactionStatusResponse,
   RelayResponse,
   SignatureData,
+  ERC2771Type,
+  CallWithSyncFeeERC2771Request,
+  BaseCallWithSyncFeeParams,
 };
 export class GelatoRelay {
   /**
@@ -30,6 +39,20 @@ export class GelatoRelay {
     request: CallWithSyncFeeRequest,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> => library.relayWithSyncFee(request, options);
+
+  /**
+   * @param {CallWithSyncFeeERC2771Request} request - CallWithSyncFeeERC2771 request to be relayed by Gelato Executors
+   * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
+   * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @returns {Promise<RelayResponse>} Response object with taskId parameter
+   *
+   */
+  callWithSyncFeeERC2771 = (
+    request: CallWithSyncFeeERC2771Request,
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
+    options?: RelayRequestOptions
+  ): Promise<RelayResponse> =>
+    library.relayWithCallWithSyncFeeERC2771(request, walletOrProvider, options);
 
   /**
    * @param {SponsoredCallRequest} request SponsoredCallRequest to be relayed by the Gelato Executors.
@@ -46,7 +69,7 @@ export class GelatoRelay {
     library.relayWithSponsoredCall(request, sponsorApiKey, options);
 
   /**
-   * @param {SponsoredCallERC2771Request} request - SponsoredCallERC2771Request to be relayed by Gelato Executors
+   * @param {CallWithERC2771Request} request - CallWithERC2771Request to be relayed by Gelato Executors
    * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
    * @param {string} sponsorApiKey - Sponsor API key
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
@@ -54,7 +77,7 @@ export class GelatoRelay {
    *
    */
   sponsoredCallERC2771 = (
-    request: SponsoredCallERC2771Request,
+    request: CallWithERC2771Request,
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
     sponsorApiKey: string,
     options?: RelayRequestOptions
@@ -67,16 +90,18 @@ export class GelatoRelay {
     );
 
   /**
-   * @param {SponsoredCallERC2771Request} request - SponsoredCallERC2771Request to be relayed by Gelato Executors
+   * @param {CallWithERC2771Request} request - CallWithERC2771Request to be relayed by Gelato Executors
    * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
+   * @param {ERC2771Type} type - ERC2771Type.CallWithSyncFee or ERC2771Type.SponsoredCall
    * @returns {Promise<SignatureData>} Response object with taskId parameter
    *
    */
   getSignatureDataERC2771 = (
-    request: SponsoredCallERC2771Request,
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet
+    request: CallWithERC2771Request,
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
+    type: ERC2771Type
   ): Promise<SignatureData> =>
-    library.getSignatureDataERC2771(request, walletOrProvider);
+    library.getSignatureDataERC2771(request, walletOrProvider, type);
 
   /**
    * @param {SignatureData["struct"]} struct - Struct that can be obtained from getSignatureDataERC2771
@@ -96,6 +121,27 @@ export class GelatoRelay {
       struct,
       signature,
       sponsorApiKey,
+      options
+    );
+
+  /**
+   * @param {SignatureData["struct"]} struct - Struct that can be obtained from getSignatureDataERC2771
+   * @param {BaseCallWithSyncFeeParams} syncFeeParams - Call with Sync Fee parameters
+   * @param {SignatureData["signature"]} signature - Signature that can be obtained from getSignatureDataERC2771
+   * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @returns {Promise<RelayResponse>} Response object with taskId parameter
+   *
+   */
+  callWithSyncFeeERC2771WithSignature = (
+    struct: SignatureData["struct"],
+    syncFeeParams: BaseCallWithSyncFeeParams,
+    signature: SignatureData["signature"],
+    options?: RelayRequestOptions
+  ): Promise<RelayResponse> =>
+    library.callWithSyncFeeERC2771WithSignature(
+      struct,
+      syncFeeParams,
+      signature,
       options
     );
 

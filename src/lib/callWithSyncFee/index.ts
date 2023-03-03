@@ -1,9 +1,6 @@
-import axios from "axios";
-
-import { GELATO_RELAY_URL } from "../../constants";
-import { getHttpErrorMessage } from "../../utils";
+import { getHttpErrorMessage, post } from "../../utils";
 import { isNetworkSupported } from "../network";
-import { RelayRequestOptions, RelayResponse } from "../types";
+import { RelayCall, RelayRequestOptions, RelayResponse } from "../types";
 
 import { CallWithSyncFeeRequest } from "./types";
 
@@ -16,11 +13,14 @@ export const relayWithSyncFee = async (
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
-    const response = await axios.post(
-      `${GELATO_RELAY_URL}/relays/v2/call-with-sync-fee`,
-      { ...request, isRelayContext: request.isRelayContext ?? true, ...options }
-    );
-    return response.data;
+    return await post<
+      CallWithSyncFeeRequest & RelayRequestOptions,
+      RelayResponse
+    >(RelayCall.CallWithSyncFee, {
+      ...request,
+      isRelayContext: request.isRelayContext ?? true,
+      ...options,
+    });
   } catch (error) {
     throw new Error(
       `GelatoRelaySDK/relayWithSyncFee: Failed with error: ${getHttpErrorMessage(

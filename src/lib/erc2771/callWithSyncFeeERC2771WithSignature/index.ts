@@ -1,17 +1,17 @@
 import { post } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
-  ApiKey,
+  BaseCallWithSyncFeeParams,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
 } from "../../types";
 import { CallWithERC2771Struct, UserAuthSignature } from "../types";
 
-export const sponsoredCallERC2771WithSignature = async (
+export const callWithSyncFeeERC2771WithSignature = async (
   struct: CallWithERC2771Struct,
+  syncFeeParams: BaseCallWithSyncFeeParams,
   signature: string,
-  sponsorApiKey: string,
   options?: RelayRequestOptions
 ): Promise<RelayResponse> => {
   try {
@@ -21,18 +21,22 @@ export const sponsoredCallERC2771WithSignature = async (
     }
 
     return await post<
-      CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
+      CallWithERC2771Struct &
+        BaseCallWithSyncFeeParams &
+        RelayRequestOptions &
+        UserAuthSignature,
       RelayResponse
-    >(RelayCall.SponsoredCallERC2771, {
+    >(RelayCall.CallWithSyncFeeERC2771, {
       ...struct,
+      ...syncFeeParams,
       ...options,
+      isRelayContext: syncFeeParams.isRelayContext ?? true,
       userSignature: signature,
-      sponsorApiKey,
     });
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
-      `GelatoRelaySDK/sponsoredCallERC2771WithSignature: Failed with error: ${errorMessage}`
+      `GelatoRelaySDK/callWithSyncFeeERC2771WithSignature: Failed with error: ${errorMessage}`
     );
   }
 };

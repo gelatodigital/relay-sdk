@@ -1,9 +1,3 @@
-import { BigNumberish, BytesLike } from "ethers";
+import { BaseRelayParams } from "../../types";
 
-export type SponsoredCallStruct = {
-  chainId: BigNumberish;
-  target: string;
-  data: BytesLike;
-};
-
-export type SponsoredCallRequest = SponsoredCallStruct;
+export type SponsoredCallRequest = BaseRelayParams;
