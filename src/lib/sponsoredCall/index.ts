@@ -49,7 +49,7 @@ const sponsoredCall = async (
     const postResponse = await post<
       BaseRelayParams & RelayRequestOptions & ApiKey,
       RelayResponse
-    >(RelayCall.Sponsored, {
+    >(RelayCall.SponsoredCall, {
       ...struct,
       ...options,
       sponsorApiKey,

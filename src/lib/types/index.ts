@@ -3,7 +3,7 @@ import { BigNumberish, BytesLike } from "ethers";
 export enum RelayCall {
   CallWithSyncFee,
   CallWithSyncFeeERC2771,
-  Sponsored,
+  SponsoredCall,
   SponsoredCallERC2771,
 }
 

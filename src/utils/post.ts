@@ -20,7 +20,7 @@ export const post = async <Request, Response>(
         path = `${GELATO_RELAY_URL}/relays/v2/call-with-sync-fee-erc2771`;
         break;
 
-      case RelayCall.Sponsored:
+      case RelayCall.SponsoredCall:
         path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call`;
         break;
 
