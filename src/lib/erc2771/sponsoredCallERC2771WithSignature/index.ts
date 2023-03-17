@@ -2,6 +2,7 @@ import { post } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
   ApiKey,
+  Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -9,13 +10,20 @@ import {
 import { CallWithERC2771Struct, UserAuthSignature } from "../types";
 
 export const sponsoredCallERC2771WithSignature = async (
-  struct: CallWithERC2771Struct,
-  signature: string,
-  sponsorApiKey: string,
-  options?: RelayRequestOptions
+  payload: {
+    struct: CallWithERC2771Struct;
+    signature: string;
+    sponsorApiKey: string;
+    options?: RelayRequestOptions;
+  },
+  config: Config
 ): Promise<RelayResponse> => {
   try {
-    const isSupported = await isNetworkSupported(Number(struct.chainId));
+    const { signature, sponsorApiKey, struct, options } = payload;
+    const isSupported = await isNetworkSupported(
+      { chainId: Number(struct.chainId) },
+      config
+    );
     if (!isSupported) {
       throw new Error(`Chain id [${struct.chainId}] is not supported`);
     }
@@ -23,12 +31,18 @@ export const sponsoredCallERC2771WithSignature = async (
     return await post<
       CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
       RelayResponse
-    >(RelayCall.SponsoredCallERC2771, {
-      ...struct,
-      ...options,
-      userSignature: signature,
-      sponsorApiKey,
-    });
+    >(
+      {
+        relayCall: RelayCall.SponsoredCallERC2771,
+        request: {
+          ...struct,
+          ...options,
+          userSignature: signature,
+          sponsorApiKey,
+        },
+      },
+      config
+    );
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

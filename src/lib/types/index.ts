@@ -48,3 +48,10 @@ export type BaseCallWithSyncFeeParams = {
   feeToken: string;
   isRelayContext?: boolean;
 };
+
+export type Config = {
+  url: string;
+  contract: {
+    relayERC2771: string;
+  };
+};

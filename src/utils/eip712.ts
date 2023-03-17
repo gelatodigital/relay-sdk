@@ -1,11 +1,15 @@
-import { GELATO_RELAY_ERC2771_ADDRESS } from "../constants";
-import { EIP712Domain } from "../lib/types";
+import { getAddress } from "ethers/lib/utils";
 
-export const getEIP712Domain = (chainId: number): EIP712Domain => {
+import { Config, EIP712Domain } from "../lib/types";
+
+export const getEIP712Domain = (
+  payload: { chainId: number },
+  config: Config
+): EIP712Domain => {
   return {
     name: "GelatoRelayERC2771",
     version: "1",
-    chainId,
-    verifyingContract: GELATO_RELAY_ERC2771_ADDRESS,
+    chainId: payload.chainId,
+    verifyingContract: getAddress(config.contract.relayERC2771),
   };
 };

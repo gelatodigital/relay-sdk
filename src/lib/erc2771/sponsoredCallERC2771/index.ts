@@ -9,6 +9,7 @@ import {
 import { isNetworkSupported } from "../../network";
 import {
   ApiKey,
+  Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -23,30 +24,35 @@ import {
 import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const relayWithSponsoredCallERC2771 = async (
-  request: CallWithERC2771Request,
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
-  sponsorApiKey: string,
-  options?: RelayRequestOptions
+  payload: {
+    request: CallWithERC2771Request;
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    sponsorApiKey: string;
+    options?: RelayRequestOptions;
+  },
+  config: Config
 ): Promise<RelayResponse> => {
-  return await sponsoredCallERC2771(
-    request,
-    walletOrProvider,
-    sponsorApiKey,
-    options
-  );
+  return await sponsoredCallERC2771(payload, config);
 };
 
 const sponsoredCallERC2771 = async (
-  request: CallWithERC2771Request,
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
-  sponsorApiKey: string,
-  options?: RelayRequestOptions
+  payload: {
+    request: CallWithERC2771Request;
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    sponsorApiKey: string;
+    options?: RelayRequestOptions;
+  },
+  config: Config
 ): Promise<RelayResponse> => {
   try {
+    const { request, sponsorApiKey, walletOrProvider, options } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(Number(request.chainId));
+    const isSupported = await isNetworkSupported(
+      { chainId: Number(request.chainId) },
+      config
+    );
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
@@ -54,27 +60,36 @@ const sponsoredCallERC2771 = async (
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >(request, walletOrProvider);
+    >({ request, walletOrProvider }, config);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       walletOrProvider,
       request.user as string,
       getPayloadToSign(
-        struct,
-        ERC2771Type.SponsoredCall,
-        isWallet(walletOrProvider)
+        {
+          struct,
+          type: ERC2771Type.SponsoredCall,
+          isWallet: isWallet(walletOrProvider),
+        },
+        config
       )
     );
 
     return await post<
       CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
       RelayResponse
-    >(RelayCall.SponsoredCallERC2771, {
-      ...struct,
-      ...options,
-      userSignature: signature,
-      sponsorApiKey,
-    });
+    >(
+      {
+        relayCall: RelayCall.SponsoredCallERC2771,
+        request: {
+          ...struct,
+          ...options,
+          userSignature: signature,
+          sponsorApiKey,
+        },
+      },
+      config
+    );
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
