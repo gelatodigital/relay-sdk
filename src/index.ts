@@ -31,16 +31,29 @@ export {
   BaseCallWithSyncFeeParams,
 };
 export class GelatoRelay {
-  public config: Config;
+  #config: Config;
 
-  constructor(config?: Config) {
-    this.config = config ?? {
-      url: GELATO_RELAY_URL,
+  constructor(config?: Partial<Config>) {
+    this.#config = this._getConfiguration(config);
+  }
+
+  /**
+   * @param {Config} config Configuration
+   */
+  configure = (config: Partial<Config>) => {
+    this.#config = this._getConfiguration(config);
+  };
+
+  private _getConfiguration = (config?: Partial<Config>): Config => {
+    return {
+      url: config?.url ?? GELATO_RELAY_URL,
       contract: {
-        relayERC2771: GELATO_RELAY_ERC2771_ADDRESS,
+        relayERC2771:
+          config?.contract?.relayERC2771 ?? GELATO_RELAY_ERC2771_ADDRESS,
       },
     };
-  }
+  };
+
   /**
    * @param {CallWithSyncFeeRequest} request - CallWithSyncFee request to be relayed by Gelato Executors
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
@@ -51,7 +64,7 @@ export class GelatoRelay {
     request: CallWithSyncFeeRequest,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> =>
-    library.relayWithSyncFee({ request, options }, this.config);
+    library.relayWithSyncFee({ request, options }, this.#config);
 
   /**
    * @param {CallWithSyncFeeERC2771Request} request - CallWithSyncFeeERC2771 request to be relayed by Gelato Executors
@@ -71,7 +84,7 @@ export class GelatoRelay {
         walletOrProvider,
         options,
       },
-      this.config
+      this.#config
     );
 
   /**
@@ -88,7 +101,7 @@ export class GelatoRelay {
   ): Promise<RelayResponse> =>
     library.relayWithSponsoredCall(
       { request, sponsorApiKey, options },
-      this.config
+      this.#config
     );
 
   /**
@@ -112,7 +125,7 @@ export class GelatoRelay {
         sponsorApiKey,
         options,
       },
-      this.config
+      this.#config
     );
 
   /**
@@ -129,7 +142,7 @@ export class GelatoRelay {
   ): Promise<SignatureData> =>
     library.getSignatureDataERC2771(
       { request, walletOrProvider, type },
-      this.config
+      this.#config
     );
 
   /**
@@ -153,7 +166,7 @@ export class GelatoRelay {
         sponsorApiKey,
         options,
       },
-      this.config
+      this.#config
     );
 
   /**
@@ -177,7 +190,7 @@ export class GelatoRelay {
         signature,
         options,
       },
-      this.config
+      this.#config
     );
 
   /**
@@ -185,26 +198,26 @@ export class GelatoRelay {
    * @returns {Promise<boolean>} Boolean to demonstrate if Relay V2 is supported on the provided chain
    */
   isNetworkSupported = (chainId: number): Promise<boolean> =>
-    library.isNetworkSupported({ chainId }, this.config);
+    library.isNetworkSupported({ chainId }, this.#config);
 
   /**
    * @returns {Promise<string[]>} List of networks where Relay V2 is supported
    */
   getSupportedNetworks = (): Promise<string[]> =>
-    library.getSupportedNetworks(this.config);
+    library.getSupportedNetworks(this.#config);
 
   /**
    * @param {number} chainId - Chain Id
    * @returns {Promise<boolean>} Boolean to demonstrate if the oracle is active on the provided chain
    */
   isOracleActive = (chainId: number): Promise<boolean> =>
-    library.isOracleActive({ chainId }, this.config);
+    library.isOracleActive({ chainId }, this.#config);
 
   /**
    * @returns {Promise<string[]>} List of chain ids where the Gelato Oracle is active
    */
   getGelatoOracles = (): Promise<string[]> =>
-    library.getGelatoOracles(this.config);
+    library.getGelatoOracles(this.#config);
 
   /**
    * @param {number} chainId - Chain Id
@@ -212,7 +225,7 @@ export class GelatoRelay {
    *
    */
   getPaymentTokens = (chainId: number): Promise<string[]> =>
-    library.getPaymentTokens({ chainId }, this.config);
+    library.getPaymentTokens({ chainId }, this.#config);
 
   /**
    * @param {number} chainId - Chain Id
@@ -232,7 +245,7 @@ export class GelatoRelay {
   ): Promise<BigNumber> =>
     library.getEstimatedFee(
       { chainId, paymentToken, gasLimit, isHighPriority, gasLimitL1 },
-      this.config
+      this.#config
     );
 
   /**
@@ -243,5 +256,5 @@ export class GelatoRelay {
   getTaskStatus = (
     taskId: string
   ): Promise<TransactionStatusResponse | undefined> =>
-    library.getTaskStatus({ taskId }, this.config);
+    library.getTaskStatus({ taskId }, this.#config);
 }
