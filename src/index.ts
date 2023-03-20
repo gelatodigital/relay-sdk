@@ -29,6 +29,7 @@ export {
   ERC2771Type,
   CallWithSyncFeeERC2771Request,
   BaseCallWithSyncFeeParams,
+  Config,
 };
 export class GelatoRelay {
   #config: Config;
