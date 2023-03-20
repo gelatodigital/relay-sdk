@@ -9,6 +9,7 @@ import {
 import { isNetworkSupported } from "../../network";
 import {
   BaseCallWithSyncFeeParams,
+  Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -24,15 +25,22 @@ import {
 import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const relayWithCallWithSyncFeeERC2771 = async (
-  request: CallWithSyncFeeERC2771Request,
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
-  options?: RelayRequestOptions
+  payload: {
+    request: CallWithSyncFeeERC2771Request;
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    options?: RelayRequestOptions;
+  },
+  config: Config
 ): Promise<RelayResponse> => {
   try {
+    const { request, walletOrProvider, options } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(Number(request.chainId));
+    const isSupported = await isNetworkSupported(
+      { chainId: Number(request.chainId) },
+      config
+    );
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
@@ -40,7 +48,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >(callWithSyncFeeRequest, walletOrProvider);
+    >({ request: callWithSyncFeeRequest, walletOrProvider }, config);
     const struct = await mapRequestToStruct(
       callWithSyncFeeRequest,
       parametersToOverride
@@ -49,9 +57,12 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       walletOrProvider,
       callWithSyncFeeRequest.user as string,
       getPayloadToSign(
-        struct,
-        ERC2771Type.CallWithSyncFee,
-        isWallet(walletOrProvider)
+        {
+          struct,
+          type: ERC2771Type.CallWithSyncFee,
+          isWallet: isWallet(walletOrProvider),
+        },
+        config
       )
     );
 
@@ -61,13 +72,19 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         RelayRequestOptions &
         UserAuthSignature,
       RelayResponse
-    >(RelayCall.CallWithSyncFeeERC2771, {
-      ...struct,
-      ...options,
-      feeToken,
-      isRelayContext: isRelayContext ?? true,
-      userSignature: signature,
-    });
+    >(
+      {
+        relayCall: RelayCall.CallWithSyncFeeERC2771,
+        request: {
+          ...struct,
+          ...options,
+          feeToken,
+          isRelayContext: isRelayContext ?? true,
+          userSignature: signature,
+        },
+      },
+      config
+    );
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

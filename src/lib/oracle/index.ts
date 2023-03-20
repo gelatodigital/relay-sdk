@@ -1,17 +1,22 @@
 import axios from "axios";
 import { BigNumber } from "ethers";
 
-import { GELATO_RELAY_URL } from "../../constants";
 import { getHttpErrorMessage } from "../../utils";
+import { Config } from "../types";
 
-export const isOracleActive = async (chainId: number): Promise<boolean> => {
-  const oracles = await getGelatoOracles();
-  return oracles.includes(chainId.toString());
+export const isOracleActive = async (
+  payload: {
+    chainId: number;
+  },
+  config: Config
+): Promise<boolean> => {
+  const oracles = await getGelatoOracles(config);
+  return oracles.includes(payload.chainId.toString());
 };
 
-export const getGelatoOracles = async (): Promise<string[]> => {
+export const getGelatoOracles = async (config: Config): Promise<string[]> => {
   try {
-    return (await axios.get(`${GELATO_RELAY_URL}/oracles/`)).data.oracles;
+    return (await axios.get(`${config.url}/oracles/`)).data.oracles;
   } catch (error) {
     throw new Error(
       `GelatoRelaySDK/getGelatoOracles: Failed with error: ${getHttpErrorMessage(
@@ -21,10 +26,13 @@ export const getGelatoOracles = async (): Promise<string[]> => {
   }
 };
 
-export const getPaymentTokens = async (chainId: number): Promise<string[]> => {
+export const getPaymentTokens = async (
+  payload: { chainId: number },
+  config: Config
+): Promise<string[]> => {
   try {
     return (
-      await axios.get(`${GELATO_RELAY_URL}/oracles/${chainId}/paymentTokens/`)
+      await axios.get(`${config.url}/oracles/${payload.chainId}/paymentTokens/`)
     ).data.paymentTokens;
   } catch (error) {
     throw new Error(
@@ -36,12 +44,17 @@ export const getPaymentTokens = async (chainId: number): Promise<string[]> => {
 };
 
 export const getEstimatedFee = async (
-  chainId: number,
-  paymentToken: string,
-  gasLimit: BigNumber,
-  isHighPriority: boolean,
-  gasLimitL1 = BigNumber.from(0)
+  payload: {
+    chainId: number;
+    paymentToken: string;
+    gasLimit: BigNumber;
+    isHighPriority: boolean;
+    gasLimitL1: BigNumber;
+  },
+  config: Config
 ): Promise<BigNumber> => {
+  const { chainId, gasLimit, gasLimitL1, isHighPriority, paymentToken } =
+    payload;
   const params = {
     paymentToken,
     gasLimit: gasLimit.toString(),
@@ -49,12 +62,9 @@ export const getEstimatedFee = async (
     gasLimitL1: gasLimitL1.toString(),
   };
   try {
-    const res = await axios.get(
-      `${GELATO_RELAY_URL}/oracles/${chainId}/estimate`,
-      {
-        params,
-      }
-    );
+    const res = await axios.get(`${config.url}/oracles/${chainId}/estimate`, {
+      params,
+    });
     return BigNumber.from(res.data.estimatedFee);
   } catch (error) {
     throw new Error(

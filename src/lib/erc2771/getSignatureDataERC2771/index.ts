@@ -6,6 +6,7 @@ import {
   signTypedDataV4,
 } from "../../../utils";
 import { isNetworkSupported } from "../../network";
+import { Config } from "../../types";
 import {
   SignatureData,
   CallWithERC2771Request,
@@ -15,15 +16,22 @@ import {
 import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const getSignatureDataERC2771 = async (
-  request: CallWithERC2771Request,
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
-  type: ERC2771Type
+  payload: {
+    request: CallWithERC2771Request;
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    type: ERC2771Type;
+  },
+  config: Config
 ): Promise<SignatureData> => {
   try {
+    const { request, type, walletOrProvider } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(Number(request.chainId));
+    const isSupported = await isNetworkSupported(
+      { chainId: Number(request.chainId) },
+      config
+    );
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
@@ -31,12 +39,15 @@ export const getSignatureDataERC2771 = async (
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >(request, walletOrProvider);
+    >({ request, walletOrProvider }, config);
     const struct = await mapRequestToStruct(request, parametersToOverride);
     const signature = await signTypedDataV4(
       walletOrProvider,
       request.user as string,
-      getPayloadToSign(struct, type, isWallet(walletOrProvider))
+      getPayloadToSign(
+        { struct, type, isWallet: isWallet(walletOrProvider) },
+        config
+      )
     );
     return {
       struct,

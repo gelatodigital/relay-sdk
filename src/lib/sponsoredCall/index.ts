@@ -6,6 +6,7 @@ import { isNetworkSupported } from "../network";
 import {
   ApiKey,
   BaseRelayParams,
+  Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -14,15 +15,14 @@ import {
 import { SponsoredCallRequest } from "./types";
 
 export const relayWithSponsoredCall = async (
-  request: SponsoredCallRequest,
-  sponsorApiKey: string,
-  options?: RelayRequestOptions
+  payload: {
+    request: SponsoredCallRequest;
+    sponsorApiKey: string;
+    options?: RelayRequestOptions;
+  },
+  config: Config
 ): Promise<RelayResponse> => {
-  return await sponsoredCall(
-    request as SponsoredCallRequest,
-    sponsorApiKey,
-    options
-  );
+  return await sponsoredCall(payload, config);
 };
 
 const mapRequestToStruct = async (
@@ -36,12 +36,19 @@ const mapRequestToStruct = async (
 };
 
 const sponsoredCall = async (
-  request: SponsoredCallRequest,
-  sponsorApiKey: string,
-  options?: RelayRequestOptions
+  payload: {
+    request: SponsoredCallRequest;
+    sponsorApiKey: string;
+    options?: RelayRequestOptions;
+  },
+  config: Config
 ): Promise<RelayResponse> => {
   try {
-    const isSupported = await isNetworkSupported(Number(request.chainId));
+    const { request, sponsorApiKey, options } = payload;
+    const isSupported = await isNetworkSupported(
+      { chainId: Number(request.chainId) },
+      config
+    );
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
@@ -49,11 +56,17 @@ const sponsoredCall = async (
     const postResponse = await post<
       BaseRelayParams & RelayRequestOptions & ApiKey,
       RelayResponse
-    >(RelayCall.SponsoredCall, {
-      ...struct,
-      ...options,
-      sponsorApiKey,
-    });
+    >(
+      {
+        relayCall: RelayCall.SponsoredCall,
+        request: {
+          ...struct,
+          ...options,
+          sponsorApiKey,
+        },
+      },
+      config
+    );
     return postResponse;
   } catch (error) {
     const errorMessage = (error as Error).message;

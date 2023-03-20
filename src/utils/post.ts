@@ -1,31 +1,31 @@
 import axios from "axios";
 
-import { GELATO_RELAY_URL } from "../constants";
-import { RelayCall } from "../lib/types";
+import { Config, RelayCall } from "../lib/types";
 
 import { getHttpErrorMessage } from "./getHttpErrorMessage";
 
 export const post = async <Request, Response>(
-  relayCall: RelayCall,
-  request: Request
+  payload: { relayCall: RelayCall; request: Request },
+  config: Config
 ): Promise<Response> => {
   try {
+    const { relayCall, request } = payload;
     let path: string;
     switch (relayCall) {
       case RelayCall.CallWithSyncFee:
-        path = `${GELATO_RELAY_URL}/relays/v2/call-with-sync-fee`;
+        path = `${config.url}/relays/v2/call-with-sync-fee`;
         break;
 
       case RelayCall.CallWithSyncFeeERC2771:
-        path = `${GELATO_RELAY_URL}/relays/v2/call-with-sync-fee-erc2771`;
+        path = `${config.url}/relays/v2/call-with-sync-fee-erc2771`;
         break;
 
       case RelayCall.SponsoredCall:
-        path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call`;
+        path = `${config.url}/relays/v2/sponsored-call`;
         break;
 
       case RelayCall.SponsoredCallERC2771:
-        path = `${GELATO_RELAY_URL}/relays/v2/sponsored-call-erc2771`;
+        path = `${config.url}/relays/v2/sponsored-call-erc2771`;
         break;
 
       default: {
