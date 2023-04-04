@@ -1,7 +1,9 @@
 import { getHttpErrorMessage, post } from "../../utils";
 import { isNetworkSupported } from "../network";
 import {
+  ApiKey,
   Config,
+  Optional,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -12,12 +14,13 @@ import { CallWithSyncFeeRequest } from "./types";
 export const relayWithSyncFee = async (
   payload: {
     request: CallWithSyncFeeRequest;
+    sponsorApiKey?: string;
     options?: RelayRequestOptions;
   },
   config: Config
 ): Promise<RelayResponse> => {
   try {
-    const { request, options } = payload;
+    const { request, options, sponsorApiKey } = payload;
     const isSupported = await isNetworkSupported(
       { chainId: Number(request.chainId) },
       config
@@ -26,7 +29,9 @@ export const relayWithSyncFee = async (
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
     return await post<
-      CallWithSyncFeeRequest & RelayRequestOptions,
+      CallWithSyncFeeRequest &
+        RelayRequestOptions &
+        Optional<ApiKey, "sponsorApiKey">,
       RelayResponse
     >(
       {
@@ -35,6 +40,7 @@ export const relayWithSyncFee = async (
           ...request,
           isRelayContext: request.isRelayContext ?? true,
           ...options,
+          sponsorApiKey,
         },
       },
       config

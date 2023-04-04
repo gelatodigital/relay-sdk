@@ -8,8 +8,10 @@ import {
 } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
+  ApiKey,
   BaseCallWithSyncFeeParams,
   Config,
+  Optional,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -28,12 +30,13 @@ export const relayWithCallWithSyncFeeERC2771 = async (
   payload: {
     request: CallWithSyncFeeERC2771Request;
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    sponsorApiKey?: string;
     options?: RelayRequestOptions;
   },
   config: Config
 ): Promise<RelayResponse> => {
   try {
-    const { request, walletOrProvider, options } = payload;
+    const { request, walletOrProvider, options, sponsorApiKey } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
@@ -70,7 +73,8 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       CallWithERC2771Struct &
         BaseCallWithSyncFeeParams &
         RelayRequestOptions &
-        UserAuthSignature,
+        UserAuthSignature &
+        Optional<ApiKey, "sponsorApiKey">,
       RelayResponse
     >(
       {
@@ -81,6 +85,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           feeToken,
           isRelayContext: isRelayContext ?? true,
           userSignature: signature,
+          sponsorApiKey,
         },
       },
       config

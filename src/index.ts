@@ -57,19 +57,22 @@ export class GelatoRelay {
 
   /**
    * @param {CallWithSyncFeeRequest} request - CallWithSyncFee request to be relayed by Gelato Executors
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
   callWithSyncFee = (
     request: CallWithSyncFeeRequest,
+    sponsorApiKey?: string,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> =>
-    library.relayWithSyncFee({ request, options }, this.#config);
+    library.relayWithSyncFee({ request, sponsorApiKey, options }, this.#config);
 
   /**
    * @param {CallWithSyncFeeERC2771Request} request - CallWithSyncFeeERC2771 request to be relayed by Gelato Executors
    * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
@@ -77,12 +80,14 @@ export class GelatoRelay {
   callWithSyncFeeERC2771 = (
     request: CallWithSyncFeeERC2771Request,
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
+    sponsorApiKey?: string,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> =>
     library.relayWithCallWithSyncFeeERC2771(
       {
         request,
         walletOrProvider,
+        sponsorApiKey,
         options,
       },
       this.#config
