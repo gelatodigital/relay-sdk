@@ -20,6 +20,7 @@ export const callWithSyncFeeERC2771WithSignature = async (
 ): Promise<RelayResponse> => {
   try {
     const { signature, struct, syncFeeParams, options } = payload;
+
     const isSupported = await isNetworkSupported(
       { chainId: Number(struct.chainId) },
       config

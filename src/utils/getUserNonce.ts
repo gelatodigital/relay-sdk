@@ -1,19 +1,23 @@
 import { ethers } from "ethers";
-import { getAddress } from "ethers/lib/utils";
 
 import { USER_NONCE_ABI } from "../constants";
 import { Config } from "../lib/types";
+import { ERC2771Type } from "../lib/erc2771/types/index.js";
+
+import { getGelatoRelayAddress } from "./relayAddress.js";
 
 export const getUserNonce = async (
   payload: {
     account: string;
+    chainId: number;
+    type: ERC2771Type;
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
   },
   config: Config
 ) => {
-  const { account, walletOrProvider } = payload;
+  const { account, chainId, type, walletOrProvider } = payload;
   const contract = new ethers.Contract(
-    getAddress(config.contract.relayERC2771),
+    getGelatoRelayAddress({ chainId, type }, config),
     USER_NONCE_ABI,
     walletOrProvider
   );

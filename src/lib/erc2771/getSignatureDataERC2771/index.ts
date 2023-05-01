@@ -28,10 +28,9 @@ export const getSignatureDataERC2771 = async (
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
-      config
-    );
+
+    const chainId = Number(request.chainId);
+    const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
@@ -39,8 +38,10 @@ export const getSignatureDataERC2771 = async (
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >({ request, walletOrProvider }, config);
+    >({ request, chainId, type, walletOrProvider }, config);
+
     const struct = await mapRequestToStruct(request, parametersToOverride);
+
     const signature = await signTypedDataV4(
       walletOrProvider,
       request.user as string,
@@ -49,6 +50,7 @@ export const getSignatureDataERC2771 = async (
         config
       )
     );
+
     return {
       struct,
       signature,

@@ -14,9 +14,11 @@ export const mapRequestToStruct = async (
   if (!override.userNonce && !request.userNonce) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }
+
   if (!override.userDeadline && !request.userDeadline) {
     throw new Error(`userDeadline is not found in the request, nor fetched`);
   }
+
   return {
     userNonce:
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

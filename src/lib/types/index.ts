@@ -53,5 +53,8 @@ export type Config = {
   url: string;
   contract: {
     relayERC2771: string;
+    relay1BalanceERC2771: string;
+    relayERC2771zkSync: string;
+    relay1BalanceERC2771zkSync: string;
   };
 };
