@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 import {
+  getProviderChainId,
   isWallet,
   populateOptionalUserParameters,
   signTypedDataV4,
@@ -35,10 +36,17 @@ export const getSignatureDataERC2771 = async (
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
 
+    const providerChainId = await getProviderChainId(walletOrProvider);
+    if (chainId !== providerChainId) {
+      throw new Error(
+        `Request and provider chain id mismatch. Request: [${chainId}], provider: [${providerChainId}]`
+      );
+    }
+
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >({ request, chainId, type, walletOrProvider }, config);
+    >({ request, type, walletOrProvider }, config);
 
     const struct = await mapRequestToStruct(request, parametersToOverride);
 

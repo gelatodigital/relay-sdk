@@ -17,13 +17,12 @@ export const populateOptionalUserParameters = async <
 >(
   payload: {
     request: Request;
-    chainId: number;
     type: ERC2771Type;
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
   },
   config: Config
 ): Promise<Partial<OptionalParameters>> => {
-  const { request, chainId, type, walletOrProvider } = payload;
+  const { request, type, walletOrProvider } = payload;
   const parametersToOverride: Partial<OptionalParameters> = {};
   if (!request.userDeadline) {
     parametersToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
@@ -34,7 +33,6 @@ export const populateOptionalUserParameters = async <
         (await getUserNonce(
           {
             account: request.user as string,
-            chainId,
             type,
             walletOrProvider,
           },

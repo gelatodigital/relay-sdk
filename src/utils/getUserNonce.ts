@@ -5,17 +5,20 @@ import { Config } from "../lib/types";
 import { ERC2771Type } from "../lib/erc2771/types";
 
 import { getGelatoRelayERC2771Address } from "./relayAddress";
+import { getProviderChainId } from "./getProviderChainId";
 
 export const getUserNonce = async (
   payload: {
     account: string;
-    chainId: number;
     type: ERC2771Type;
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
   },
   config: Config
 ) => {
-  const { account, chainId, type, walletOrProvider } = payload;
+  const { account, type, walletOrProvider } = payload;
+
+  const chainId = await getProviderChainId(walletOrProvider);
+
   const contract = new ethers.Contract(
     getGelatoRelayERC2771Address({ chainId, type }, config),
     USER_NONCE_ABI,

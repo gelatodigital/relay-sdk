@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 import {
+  getProviderChainId,
   isWallet,
   populateOptionalUserParameters,
   post,
@@ -44,6 +45,13 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
 
+    const providerChainId = await getProviderChainId(walletOrProvider);
+    if (chainId !== providerChainId) {
+      throw new Error(
+        `Request and provider chain id mismatch. Request: [${chainId}], provider: [${providerChainId}]`
+      );
+    }
+
     const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
 
     const type = ERC2771Type.CallWithSyncFee;
@@ -51,10 +59,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >(
-      { request: callWithSyncFeeRequest, chainId, type, walletOrProvider },
-      config
-    );
+    >({ request: callWithSyncFeeRequest, type, walletOrProvider }, config);
 
     const struct = await mapRequestToStruct(
       callWithSyncFeeRequest,
