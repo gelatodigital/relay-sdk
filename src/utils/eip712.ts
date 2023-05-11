@@ -1,7 +1,7 @@
 import { Config, EIP712Domain } from "../lib/types";
-import { ERC2771Type } from "../lib/erc2771/types/index.js";
+import { ERC2771Type } from "../lib/erc2771/types";
 
-import { getGelatoRelayAddress } from "./relayAddress.js";
+import { getGelatoRelayERC2771Address } from "./relayAddress";
 
 export const getEIP712Domain = (
   payload: {
@@ -17,14 +17,20 @@ export const getEIP712Domain = (
         name: "GelatoRelayERC2771",
         version: "1",
         chainId: chainId,
-        verifyingContract: getGelatoRelayAddress({ chainId, type }, config),
+        verifyingContract: getGelatoRelayERC2771Address(
+          { chainId, type },
+          config
+        ),
       };
     case ERC2771Type.SponsoredCall:
       return {
         name: "GelatoRelay1BalanceERC2771",
         version: "1",
         chainId: chainId,
-        verifyingContract: getGelatoRelayAddress({ chainId, type }, config),
+        verifyingContract: getGelatoRelayERC2771Address(
+          { chainId, type },
+          config
+        ),
       };
     default:
       // eslint-disable-next-line no-case-declarations
