@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 import {
+  getProviderChainId,
   isWallet,
   populateOptionalUserParameters,
   post,
@@ -37,29 +38,41 @@ export const relayWithCallWithSyncFeeERC2771 = async (
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
-      config
-    );
+
+    const chainId = Number(request.chainId);
+    const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
       throw new Error(`Chain id [${request.chainId}] is not supported`);
     }
+
+    const providerChainId = await getProviderChainId(walletOrProvider);
+    if (chainId !== providerChainId) {
+      throw new Error(
+        `Request and provider chain id mismatch. Request: [${chainId}], provider: [${providerChainId}]`
+      );
+    }
+
     const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
+
+    const type = ERC2771Type.CallWithSyncFee;
+
     const parametersToOverride = await populateOptionalUserParameters<
       CallWithERC2771Request,
       CallWithERC2771RequestOptionalParameters
-    >({ request: callWithSyncFeeRequest, walletOrProvider }, config);
+    >({ request: callWithSyncFeeRequest, type, walletOrProvider }, config);
+
     const struct = await mapRequestToStruct(
       callWithSyncFeeRequest,
       parametersToOverride
     );
+
     const signature = await signTypedDataV4(
       walletOrProvider,
       callWithSyncFeeRequest.user as string,
       getPayloadToSign(
         {
           struct,
-          type: ERC2771Type.CallWithSyncFee,
+          type,
           isWallet: isWallet(walletOrProvider),
         },
         config

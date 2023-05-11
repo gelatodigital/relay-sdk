@@ -20,6 +20,7 @@ export const sponsoredCallERC2771WithSignature = async (
 ): Promise<RelayResponse> => {
   try {
     const { signature, sponsorApiKey, struct, options } = payload;
+
     const isSupported = await isNetworkSupported(
       { chainId: Number(struct.chainId) },
       config

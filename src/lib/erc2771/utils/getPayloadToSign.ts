@@ -18,7 +18,10 @@ export const getPayloadToSign = (
   config: Config
 ): SponsoredCallERC2771PayloadToSign | CallWithSyncFeeERC2771PayloadToSign => {
   const { isWallet, struct, type } = payload;
-  const domain = getEIP712Domain({ chainId: struct.chainId as number }, config);
+  const domain = getEIP712Domain(
+    { chainId: struct.chainId as number, type },
+    config
+  );
 
   switch (type) {
     case ERC2771Type.SponsoredCall:

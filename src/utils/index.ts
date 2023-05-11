@@ -6,3 +6,6 @@ export * from "./getHttpErrorMessage";
 export * from "./populateOptionalUserParameters";
 export * from "./post";
 export * from "./isWallet";
+export * from "./relayAddress";
+export * from "./isZkSync";
+export * from "./getProviderChainId";

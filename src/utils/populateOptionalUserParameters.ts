@@ -4,6 +4,7 @@ import { DEFAULT_DEADLINE_GAP } from "../constants";
 import {
   CallWithERC2771Request,
   CallWithERC2771RequestOptionalParameters,
+  ERC2771Type,
 } from "../lib/erc2771/types";
 import { Config } from "../lib/types";
 
@@ -16,11 +17,12 @@ export const populateOptionalUserParameters = async <
 >(
   payload: {
     request: Request;
+    type: ERC2771Type;
     walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
   },
   config: Config
 ): Promise<Partial<OptionalParameters>> => {
-  const { request, walletOrProvider } = payload;
+  const { request, type, walletOrProvider } = payload;
   const parametersToOverride: Partial<OptionalParameters> = {};
   if (!request.userDeadline) {
     parametersToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
@@ -31,6 +33,7 @@ export const populateOptionalUserParameters = async <
         (await getUserNonce(
           {
             account: request.user as string,
+            type,
             walletOrProvider,
           },
           config

@@ -16,7 +16,13 @@ import {
   RelayRequestOptions,
   RelayResponse,
 } from "./lib/types";
-import { GELATO_RELAY_ERC2771_ADDRESS, GELATO_RELAY_URL } from "./constants";
+import {
+  GELATO_RELAY_1BALANCE_ERC2771_ADDRESS,
+  GELATO_RELAY_1BALANCE_ERC2771_ZKSYNC_ADDRESS,
+  GELATO_RELAY_ERC2771_ADDRESS,
+  GELATO_RELAY_ERC2771_ZKSYNC_ADDRESS,
+  GELATO_RELAY_URL,
+} from "./constants";
 
 export {
   CallWithSyncFeeRequest,
@@ -51,6 +57,15 @@ export class GelatoRelay {
       contract: {
         relayERC2771:
           config?.contract?.relayERC2771 ?? GELATO_RELAY_ERC2771_ADDRESS,
+        relay1BalanceERC2771:
+          config?.contract?.relay1BalanceERC2771 ??
+          GELATO_RELAY_1BALANCE_ERC2771_ADDRESS,
+        relayERC2771zkSync:
+          config?.contract?.relayERC2771zkSync ??
+          GELATO_RELAY_ERC2771_ZKSYNC_ADDRESS,
+        relay1BalanceERC2771zkSync:
+          config?.contract?.relay1BalanceERC2771zkSync ??
+          GELATO_RELAY_1BALANCE_ERC2771_ZKSYNC_ADDRESS,
       },
     };
   };
