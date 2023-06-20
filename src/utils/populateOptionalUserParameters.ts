@@ -10,6 +10,7 @@ import { Config } from "../lib/types";
 
 import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";
+import { getProviderChainId } from "./getProviderChainId.js";
 
 export const populateOptionalUserParameters = async <
   Request extends CallWithERC2771Request,
@@ -18,7 +19,7 @@ export const populateOptionalUserParameters = async <
   payload: {
     request: Request;
     type: ERC2771Type;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    walletOrProvider?: ethers.providers.Web3Provider | ethers.Wallet;
   },
   config: Config
 ): Promise<Partial<OptionalParameters>> => {
@@ -28,6 +29,17 @@ export const populateOptionalUserParameters = async <
     parametersToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
   }
   if (!request.userNonce) {
+    if (!walletOrProvider?.provider) {
+      throw new Error(`Missing provider`);
+    }
+
+    const providerChainId = await getProviderChainId(walletOrProvider);
+    if (request.chainId !== providerChainId) {
+      throw new Error(
+        `Request and provider chain id mismatch. Request: [${request.chainId}], provider: [${providerChainId}]`
+      );
+    }
+
     parametersToOverride.userNonce = BigNumber.from(
       (
         (await getUserNonce(
