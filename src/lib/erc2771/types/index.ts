@@ -86,6 +86,13 @@ export type CallWithERC2771RequestOptionalParameters = {
   userDeadline: BigNumberish;
 };
 
+export type DataToSign = {
+  struct: CallWithERC2771Struct;
+  payloadToSign:
+    | SponsoredCallERC2771PayloadToSign
+    | CallWithSyncFeeERC2771PayloadToSign;
+};
+
 export type SignatureData = {
   struct: CallWithERC2771Struct;
   signature: string;

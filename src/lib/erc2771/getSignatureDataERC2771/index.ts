@@ -1,20 +1,9 @@
 import { ethers } from "ethers";
 
-import {
-  getProviderChainId,
-  isWallet,
-  populateOptionalUserParameters,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { signTypedDataV4 } from "../../../utils";
 import { Config } from "../../types";
-import {
-  SignatureData,
-  CallWithERC2771Request,
-  CallWithERC2771RequestOptionalParameters,
-  ERC2771Type,
-} from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { SignatureData, CallWithERC2771Request, ERC2771Type } from "../types";
+import { getDataToSignERC2771 } from "../getDataToSignERC2771/index.js";
 
 export const getSignatureDataERC2771 = async (
   payload: {
@@ -25,42 +14,21 @@ export const getSignatureDataERC2771 = async (
   config: Config
 ): Promise<SignatureData> => {
   try {
-    const { request, type, walletOrProvider } = payload;
+    const { request, walletOrProvider } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
 
-    const chainId = Number(request.chainId);
-    const isSupported = await isNetworkSupported({ chainId }, config);
-    if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
-    }
-
-    const providerChainId = await getProviderChainId(walletOrProvider);
-    if (chainId !== providerChainId) {
-      throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId}], provider: [${providerChainId}]`
-      );
-    }
-
-    const parametersToOverride = await populateOptionalUserParameters<
-      CallWithERC2771Request,
-      CallWithERC2771RequestOptionalParameters
-    >({ request, type, walletOrProvider }, config);
-
-    const struct = await mapRequestToStruct(request, parametersToOverride);
+    const dataToSign = await getDataToSignERC2771(payload, config);
 
     const signature = await signTypedDataV4(
       walletOrProvider,
       request.user as string,
-      getPayloadToSign(
-        { struct, type, isWallet: isWallet(walletOrProvider) },
-        config
-      )
+      dataToSign.payloadToSign
     );
 
     return {
-      struct,
+      struct: dataToSign.struct,
       signature,
     };
   } catch (error) {

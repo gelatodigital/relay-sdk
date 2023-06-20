@@ -8,6 +8,7 @@ import {
   CallWithERC2771Request,
   ERC2771Type,
   CallWithSyncFeeERC2771Request,
+  DataToSign,
 } from "./lib/erc2771/types";
 import { TransactionStatusResponse } from "./lib/status/types";
 import {
@@ -148,7 +149,24 @@ export class GelatoRelay {
    * @param {CallWithERC2771Request} request - CallWithERC2771Request to be relayed by Gelato Executors
    * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
    * @param {ERC2771Type} type - ERC2771Type.CallWithSyncFee or ERC2771Type.SponsoredCall
-   * @returns {Promise<SignatureData>} Response object with taskId parameter
+   * @returns {Promise<DataToSign>} Struct and data to be signed by the user externally to produce a signature for sponsoredCallERC2771WithSignature
+   *
+   */
+  getDataToSignERC2771 = (
+    request: CallWithERC2771Request,
+    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
+    type: ERC2771Type
+  ): Promise<DataToSign> =>
+    library.getDataToSignERC2771(
+      { request, walletOrProvider, type },
+      this.#config
+    );
+
+  /**
+   * @param {CallWithERC2771Request} request - CallWithERC2771Request to be relayed by Gelato Executors
+   * @param {ethers.providers.Web3Provider | ethers.Wallet} walletOrProvider - Web3Provider [front-end] or Wallet [back-end] to sign the payload
+   * @param {ERC2771Type} type - ERC2771Type.CallWithSyncFee or ERC2771Type.SponsoredCall
+   * @returns {Promise<SignatureData>} Struct and signature to be used with sponsoredCallERC2771WithSignature
    *
    */
   getSignatureDataERC2771 = (
