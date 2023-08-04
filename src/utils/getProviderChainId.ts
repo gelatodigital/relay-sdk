@@ -3,10 +3,13 @@ import { ethers } from "ethers";
 import { isWallet } from "./isWallet";
 
 export const getProviderChainId = async (
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet
-): Promise<number> => {
-  let provider: ethers.providers.Provider;
+  walletOrProvider: ethers.BrowserProvider | ethers.Wallet
+): Promise<bigint> => {
+  let provider: ethers.Provider;
   if (isWallet(walletOrProvider)) {
+    if (!walletOrProvider.provider) {
+      throw new Error(`Missing provider`);
+    }
     provider = walletOrProvider.provider;
   } else {
     provider = walletOrProvider;

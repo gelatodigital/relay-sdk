@@ -11,10 +11,10 @@ export const getUserNonce = async (
   payload: {
     account: string;
     type: ERC2771Type;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
   },
   config: Config
-) => {
+): Promise<bigint> => {
   const { account, type, walletOrProvider } = payload;
 
   const chainId = await getProviderChainId(walletOrProvider);
@@ -24,5 +24,5 @@ export const getUserNonce = async (
     USER_NONCE_ABI,
     walletOrProvider
   );
-  return await contract.userNonce(account);
+  return (await contract.userNonce(account)) as bigint;
 };

@@ -1,12 +1,9 @@
-import axios from "axios";
-import { BigNumber } from "ethers";
-
-import { getHttpErrorMessage } from "../../utils";
+import { axiosInstance, getHttpErrorMessage } from "../../utils";
 import { Config } from "../types";
 
 export const isOracleActive = async (
   payload: {
-    chainId: number;
+    chainId: bigint;
   },
   config: Config
 ): Promise<boolean> => {
@@ -16,7 +13,7 @@ export const isOracleActive = async (
 
 export const getGelatoOracles = async (config: Config): Promise<string[]> => {
   try {
-    return (await axios.get(`${config.url}/oracles/`)).data.oracles;
+    return (await axiosInstance.get(`${config.url}/oracles/`)).data.oracles;
   } catch (error) {
     throw new Error(
       `GelatoRelaySDK/getGelatoOracles: Failed with error: ${getHttpErrorMessage(
@@ -27,12 +24,14 @@ export const getGelatoOracles = async (config: Config): Promise<string[]> => {
 };
 
 export const getPaymentTokens = async (
-  payload: { chainId: number },
+  payload: { chainId: bigint },
   config: Config
 ): Promise<string[]> => {
   try {
     return (
-      await axios.get(`${config.url}/oracles/${payload.chainId}/paymentTokens/`)
+      await axiosInstance.get(
+        `${config.url}/oracles/${payload.chainId.toString()}/paymentTokens/`
+      )
     ).data.paymentTokens;
   } catch (error) {
     throw new Error(
@@ -45,14 +44,14 @@ export const getPaymentTokens = async (
 
 export const getEstimatedFee = async (
   payload: {
-    chainId: number;
+    chainId: bigint;
     paymentToken: string;
-    gasLimit: BigNumber;
+    gasLimit: bigint;
     isHighPriority: boolean;
-    gasLimitL1: BigNumber;
+    gasLimitL1: bigint;
   },
   config: Config
-): Promise<BigNumber> => {
+): Promise<bigint> => {
   const { chainId, gasLimit, gasLimitL1, isHighPriority, paymentToken } =
     payload;
   const params = {
@@ -62,10 +61,13 @@ export const getEstimatedFee = async (
     gasLimitL1: gasLimitL1.toString(),
   };
   try {
-    const res = await axios.get(`${config.url}/oracles/${chainId}/estimate`, {
-      params,
-    });
-    return BigNumber.from(res.data.estimatedFee);
+    const res = await axiosInstance.get(
+      `${config.url}/oracles/${chainId.toString()}/estimate`,
+      {
+        params,
+      }
+    );
+    return BigInt(res.data.estimatedFee);
   } catch (error) {
     throw new Error(
       `GelatoRelaySDK/getEstimatedFee: Failed with error: ${getHttpErrorMessage(

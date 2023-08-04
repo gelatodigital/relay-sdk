@@ -28,7 +28,7 @@ import { getPayloadToSign, mapRequestToStruct } from "../utils";
 export const relayWithCallWithSyncFeeERC2771 = async (
   payload: {
     request: CallWithSyncFeeERC2771Request;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     options?: RelayRequestOptions;
   },
   config: Config
@@ -39,16 +39,16 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       throw new Error(`Missing provider`);
     }
 
-    const chainId = Number(request.chainId);
+    const { chainId } = request;
     const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
+      throw new Error(`Chain id [${chainId.toString()}] is not supported`);
     }
 
     const providerChainId = await getProviderChainId(walletOrProvider);
     if (chainId !== providerChainId) {
       throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId}], provider: [${providerChainId}]`
+        `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
       );
     }
 
@@ -71,7 +71,11 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       callWithSyncFeeRequest.user as string,
       getPayloadToSign(
         {
-          struct,
+          struct: {
+            ...struct,
+            chainId: struct.chainId.toString(),
+            userNonce: struct.userNonce.toString(),
+          },
           type,
           isWallet: isWallet(walletOrProvider),
         },
@@ -94,6 +98,8 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           feeToken,
           isRelayContext: isRelayContext ?? true,
           userSignature: signature,
+          chainId: struct.chainId.toString(),
+          userNonce: struct.userNonce.toString(),
         },
       },
       config

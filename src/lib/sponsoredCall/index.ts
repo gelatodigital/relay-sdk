@@ -1,5 +1,4 @@
-import { BigNumber } from "ethers";
-import { getAddress } from "ethers/lib/utils";
+import { getAddress } from "ethers";
 
 import { post } from "../../utils";
 import { isNetworkSupported } from "../network";
@@ -29,7 +28,7 @@ const mapRequestToStruct = async (
   request: SponsoredCallRequest
 ): Promise<BaseRelayParams> => {
   return {
-    chainId: BigNumber.from(request.chainId).toString(),
+    chainId: request.chainId,
     target: getAddress(request.target as string),
     data: request.data,
   };
@@ -46,7 +45,7 @@ const sponsoredCall = async (
   try {
     const { request, sponsorApiKey, options } = payload;
     const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
+      { chainId: request.chainId },
       config
     );
     if (!isSupported) {
@@ -63,6 +62,7 @@ const sponsoredCall = async (
           ...struct,
           ...options,
           sponsorApiKey,
+          chainId: struct.chainId.toString(),
         },
       },
       config

@@ -1,4 +1,4 @@
-import { getAddress } from "ethers/lib/utils";
+import { getAddress } from "ethers";
 
 import { ERC2771Type } from "../lib/erc2771/types";
 import { Config } from "../lib/types";
@@ -7,7 +7,7 @@ import { isZkSync } from "./isZkSync";
 
 export const getGelatoRelayERC2771Address = (
   payload: {
-    chainId: number;
+    chainId: bigint;
     type: ERC2771Type;
   },
   config: Config
