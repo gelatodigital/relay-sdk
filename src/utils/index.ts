@@ -9,3 +9,4 @@ export * from "./isWallet";
 export * from "./relayAddress";
 export * from "./isZkSync";
 export * from "./getProviderChainId";
+export * from "./axios";

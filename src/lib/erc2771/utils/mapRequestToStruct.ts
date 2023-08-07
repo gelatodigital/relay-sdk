@@ -1,5 +1,4 @@
-import { BigNumber } from "ethers";
-import { getAddress } from "ethers/lib/utils";
+import { getAddress } from "ethers";
 
 import {
   CallWithERC2771Request,
@@ -11,7 +10,7 @@ export const mapRequestToStruct = async (
   request: CallWithERC2771Request,
   override: Partial<CallWithERC2771RequestOptionalParameters>
 ): Promise<CallWithERC2771Struct> => {
-  if (!override.userNonce && !request.userNonce) {
+  if (override.userNonce === undefined && request.userNonce === undefined) {
     throw new Error(`userNonce is not found in the request, nor fetched`);
   }
 
@@ -21,12 +20,14 @@ export const mapRequestToStruct = async (
 
   return {
     userNonce:
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      override.userNonce ?? BigNumber.from(request.userNonce!).toString(),
+      override.userNonce !== undefined
+        ? override.userNonce
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          request.userNonce!,
     userDeadline:
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      override.userDeadline ?? BigNumber.from(request.userDeadline!).toString(),
-    chainId: BigNumber.from(request.chainId).toString(),
+      override.userDeadline ?? request.userDeadline!,
+    chainId: request.chainId,
     target: getAddress(request.target as string),
     data: request.data,
     user: getAddress(request.user as string),

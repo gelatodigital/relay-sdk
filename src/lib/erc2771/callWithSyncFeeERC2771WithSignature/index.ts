@@ -22,7 +22,7 @@ export const callWithSyncFeeERC2771WithSignature = async (
     const { signature, struct, syncFeeParams, options } = payload;
 
     const isSupported = await isNetworkSupported(
-      { chainId: Number(struct.chainId) },
+      { chainId: struct.chainId },
       config
     );
     if (!isSupported) {
@@ -44,6 +44,8 @@ export const callWithSyncFeeERC2771WithSignature = async (
           ...options,
           isRelayContext: syncFeeParams.isRelayContext ?? true,
           userSignature: signature,
+          chainId: struct.chainId.toString(),
+          userNonce: struct.userNonce.toString(),
         },
       },
       config

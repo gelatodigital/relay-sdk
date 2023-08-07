@@ -19,7 +19,7 @@ import { getPayloadToSign, mapRequestToStruct } from "../utils";
 export const getSignatureDataERC2771 = async (
   payload: {
     request: CallWithERC2771Request;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     type: ERC2771Type;
   },
   config: Config
@@ -30,16 +30,16 @@ export const getSignatureDataERC2771 = async (
       throw new Error(`Missing provider`);
     }
 
-    const chainId = Number(request.chainId);
+    const { chainId } = request;
     const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
+      throw new Error(`Chain id [${chainId.toString()}] is not supported`);
     }
 
     const providerChainId = await getProviderChainId(walletOrProvider);
     if (chainId !== providerChainId) {
       throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId}], provider: [${providerChainId}]`
+        `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
       );
     }
 
@@ -54,7 +54,15 @@ export const getSignatureDataERC2771 = async (
       walletOrProvider,
       request.user as string,
       getPayloadToSign(
-        { struct, type, isWallet: isWallet(walletOrProvider) },
+        {
+          struct: {
+            ...struct,
+            chainId: struct.chainId.toString(),
+            userNonce: struct.userNonce.toString(),
+          },
+          type,
+          isWallet: isWallet(walletOrProvider),
+        },
         config
       )
     );

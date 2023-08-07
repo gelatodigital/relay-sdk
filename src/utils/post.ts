@@ -1,11 +1,10 @@
-import axios from "axios";
+import { Config, RelayCall, SafeRequestPayload } from "../lib/types";
 
-import { Config, RelayCall } from "../lib/types";
-
+import { axiosInstance } from "./axios";
 import { getHttpErrorMessage } from "./getHttpErrorMessage";
 
 export const post = async <Request, Response>(
-  payload: { relayCall: RelayCall; request: Request },
+  payload: { relayCall: RelayCall; request: SafeRequestPayload<Request> },
   config: Config
 ): Promise<Response> => {
   try {
@@ -33,7 +32,7 @@ export const post = async <Request, Response>(
         return _exhaustiveCheck;
       }
     }
-    return (await axios.post(path, request)).data;
+    return (await axiosInstance.post(path, request)).data;
   } catch (error) {
     throw new Error(getHttpErrorMessage(error));
   }

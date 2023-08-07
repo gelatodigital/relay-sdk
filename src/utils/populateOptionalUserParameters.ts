@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 
 import { DEFAULT_DEADLINE_GAP } from "../constants";
 import {
@@ -18,7 +18,7 @@ export const populateOptionalUserParameters = async <
   payload: {
     request: Request;
     type: ERC2771Type;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
   },
   config: Config
 ): Promise<Partial<OptionalParameters>> => {
@@ -27,20 +27,15 @@ export const populateOptionalUserParameters = async <
   if (!request.userDeadline) {
     parametersToOverride.userDeadline = calculateDeadline(DEFAULT_DEADLINE_GAP);
   }
-  if (!request.userNonce) {
-    parametersToOverride.userNonce = BigNumber.from(
-      (
-        (await getUserNonce(
-          {
-            account: request.user as string,
-            type,
-            walletOrProvider,
-          },
-          config
-        )) as BigNumber
-      ).toNumber()
-    ).toString();
+  if (request.userNonce === undefined) {
+    parametersToOverride.userNonce = await getUserNonce(
+      {
+        account: request.user as string,
+        type,
+        walletOrProvider,
+      },
+      config
+    );
   }
-
   return parametersToOverride;
 };

@@ -22,7 +22,7 @@ export const sponsoredCallERC2771WithSignature = async (
     const { signature, sponsorApiKey, struct, options } = payload;
 
     const isSupported = await isNetworkSupported(
-      { chainId: Number(struct.chainId) },
+      { chainId: struct.chainId },
       config
     );
     if (!isSupported) {
@@ -40,6 +40,8 @@ export const sponsoredCallERC2771WithSignature = async (
           ...options,
           userSignature: signature,
           sponsorApiKey,
+          chainId: struct.chainId.toString(),
+          userNonce: struct.userNonce.toString(),
         },
       },
       config

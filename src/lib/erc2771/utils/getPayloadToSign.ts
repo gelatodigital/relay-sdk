@@ -1,5 +1,9 @@
 import { getEIP712Domain } from "../../../utils";
-import { Config, EIP712_DOMAIN_TYPE_DATA } from "../../types";
+import {
+  Config,
+  EIP712_DOMAIN_TYPE_DATA,
+  SafeRequestPayload,
+} from "../../types";
 import {
   EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA,
   SponsoredCallERC2771PayloadToSign,
@@ -11,7 +15,7 @@ import {
 
 export const getPayloadToSign = (
   payload: {
-    struct: CallWithERC2771Struct;
+    struct: SafeRequestPayload<CallWithERC2771Struct>;
     type: ERC2771Type;
     isWallet: boolean;
   },
@@ -19,7 +23,7 @@ export const getPayloadToSign = (
 ): SponsoredCallERC2771PayloadToSign | CallWithSyncFeeERC2771PayloadToSign => {
   const { isWallet, struct, type } = payload;
   const domain = getEIP712Domain(
-    { chainId: struct.chainId as number, type },
+    { chainId: BigInt(struct.chainId), type },
     config
   );
 

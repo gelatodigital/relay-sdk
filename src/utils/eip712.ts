@@ -5,7 +5,7 @@ import { getGelatoRelayERC2771Address } from "./relayAddress";
 
 export const getEIP712Domain = (
   payload: {
-    chainId: number;
+    chainId: bigint;
     type: ERC2771Type;
   },
   config: Config
@@ -16,7 +16,7 @@ export const getEIP712Domain = (
       return {
         name: "GelatoRelayERC2771",
         version: "1",
-        chainId: chainId,
+        chainId: chainId.toString(),
         verifyingContract: getGelatoRelayERC2771Address(
           { chainId, type },
           config
@@ -26,7 +26,7 @@ export const getEIP712Domain = (
       return {
         name: "GelatoRelay1BalanceERC2771",
         version: "1",
-        chainId: chainId,
+        chainId: chainId.toString(),
         verifyingContract: getGelatoRelayERC2771Address(
           { chainId, type },
           config

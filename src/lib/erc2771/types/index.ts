@@ -1,10 +1,9 @@
-import { BigNumberish } from "ethers";
-
 import {
   BaseCallWithSyncFeeParams,
   BaseRelayParams,
   EIP712Domain,
   Optional,
+  SafeRequestPayload,
 } from "../../types";
 
 export const EIP712_SPONSORED_CALL_ERC2771_TYPE_DATA = {
@@ -46,7 +45,7 @@ export type SponsoredCallERC2771PayloadToSign = {
     }[];
   };
   primaryType?: "SponsoredCallERC2771";
-  message: CallWithERC2771Struct;
+  message: SafeRequestPayload<CallWithERC2771Struct>;
 };
 
 export type CallWithSyncFeeERC2771PayloadToSign = {
@@ -62,15 +61,15 @@ export type CallWithSyncFeeERC2771PayloadToSign = {
     }[];
   };
   primaryType?: "CallWithSyncFeeERC2771";
-  message: CallWithERC2771Struct;
+  message: SafeRequestPayload<CallWithERC2771Struct>;
 };
 
 export type CallWithERC2771Struct = BaseRelayParams & ERC2771UserParams;
 
 export type ERC2771UserParams = {
   user: string;
-  userNonce: BigNumberish;
-  userDeadline: BigNumberish;
+  userNonce: bigint;
+  userDeadline: number;
 };
 
 export type CallWithERC2771Request = Optional<
@@ -82,8 +81,8 @@ export type CallWithSyncFeeERC2771Request = CallWithERC2771Request &
   BaseCallWithSyncFeeParams;
 
 export type CallWithERC2771RequestOptionalParameters = {
-  userNonce: BigNumberish;
-  userDeadline: BigNumberish;
+  userNonce: bigint;
+  userDeadline: number;
 };
 
 export type SignatureData = {
