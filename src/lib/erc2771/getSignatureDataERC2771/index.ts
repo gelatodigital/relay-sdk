@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 
 import {
   getProviderChainId,
+  isConcurrentRequest,
   isWallet,
   populateOptionalUserParameters,
   signTypedDataV4,
@@ -11,14 +12,14 @@ import { Config } from "../../types";
 import {
   SignatureData,
   CallWithERC2771Request,
-  CallWithERC2771RequestOptionalParameters,
   ERC2771Type,
+  CallWithConcurrentERC2771Request,
 } from "../types";
 import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const getSignatureDataERC2771 = async (
   payload: {
-    request: CallWithERC2771Request;
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     type: ERC2771Type;
   },
@@ -43,34 +44,65 @@ export const getSignatureDataERC2771 = async (
       );
     }
 
-    const parametersToOverride = await populateOptionalUserParameters<
-      CallWithERC2771Request,
-      CallWithERC2771RequestOptionalParameters
-    >({ request, type, walletOrProvider }, config);
-
-    const struct = await mapRequestToStruct(request, parametersToOverride);
-
-    const signature = await signTypedDataV4(
-      walletOrProvider,
-      request.user as string,
-      getPayloadToSign(
-        {
-          struct: {
-            ...struct,
-            chainId: struct.chainId.toString(),
-            userNonce: struct.userNonce.toString(),
-          },
-          type,
-          isWallet: isWallet(walletOrProvider),
-        },
+    if (isConcurrentRequest(request)) {
+      const concurrentType = type as
+        | ERC2771Type.ConcurrentCallWithSyncFee
+        | ERC2771Type.ConcurrentSponsoredCall;
+      const parametersToOverride = await populateOptionalUserParameters(
+        { request, type: concurrentType, walletOrProvider },
         config
-      )
-    );
+      );
+      const struct = await mapRequestToStruct(request, parametersToOverride);
+      const signature = await signTypedDataV4(
+        walletOrProvider,
+        request.user as string,
+        getPayloadToSign(
+          {
+            struct: {
+              ...struct,
+              chainId: struct.chainId.toString(),
+            },
+            type,
+            isWallet: isWallet(walletOrProvider),
+          },
+          config
+        )
+      );
+      return {
+        struct,
+        signature,
+      };
+    } else {
+      const nonConcurrentType = type as
+        | ERC2771Type.CallWithSyncFee
+        | ERC2771Type.SponsoredCall;
+      const parametersToOverride = await populateOptionalUserParameters(
+        { request, type: nonConcurrentType, walletOrProvider },
+        config
+      );
+      const struct = await mapRequestToStruct(request, parametersToOverride);
+      const signature = await signTypedDataV4(
+        walletOrProvider,
+        request.user as string,
+        getPayloadToSign(
+          {
+            struct: {
+              ...struct,
+              chainId: struct.chainId.toString(),
+              userNonce: struct.userNonce.toString(),
+            },
+            type,
+            isWallet: isWallet(walletOrProvider),
+          },
+          config
+        )
+      );
 
-    return {
-      struct,
-      signature,
-    };
+      return {
+        struct,
+        signature,
+      };
+    }
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 
 import {
   getProviderChainId,
+  isConcurrentRequest,
   isWallet,
   populateOptionalUserParameters,
   post,
@@ -10,14 +11,16 @@ import {
 import { isNetworkSupported } from "../../network";
 import {
   ApiKey,
+  ConcurrencyOptions,
   Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
 } from "../../types";
 import {
+  CallWithConcurrentERC2771Request,
+  CallWithConcurrentERC2771Struct,
   CallWithERC2771Request,
-  CallWithERC2771RequestOptionalParameters,
   CallWithERC2771Struct,
   ERC2771Type,
   UserAuthSignature,
@@ -26,7 +29,7 @@ import { getPayloadToSign, mapRequestToStruct } from "../utils";
 
 export const relayWithSponsoredCallERC2771 = async (
   payload: {
-    request: CallWithERC2771Request;
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     sponsorApiKey: string;
     options?: RelayRequestOptions;
@@ -38,7 +41,7 @@ export const relayWithSponsoredCallERC2771 = async (
 
 const sponsoredCallERC2771 = async (
   payload: {
-    request: CallWithERC2771Request;
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     sponsorApiKey: string;
     options?: RelayRequestOptions;
@@ -64,49 +67,97 @@ const sponsoredCallERC2771 = async (
       );
     }
 
-    const type = ERC2771Type.SponsoredCall;
-
-    const parametersToOverride = await populateOptionalUserParameters<
-      CallWithERC2771Request,
-      CallWithERC2771RequestOptionalParameters
-    >({ request, type, walletOrProvider }, config);
-
-    const struct = await mapRequestToStruct(request, parametersToOverride);
-
-    const signature = await signTypedDataV4(
-      walletOrProvider,
-      request.user as string,
-      getPayloadToSign(
-        {
-          struct: {
-            ...struct,
-            chainId: struct.chainId.toString(),
-            userNonce: struct.userNonce.toString(),
+    if (isConcurrentRequest(request)) {
+      const isConcurrent = true;
+      const type = ERC2771Type.ConcurrentSponsoredCall;
+      const parametersToOverride = await populateOptionalUserParameters(
+        { request, type, walletOrProvider },
+        config
+      );
+      const struct = await mapRequestToStruct(request, parametersToOverride);
+      const signature = await signTypedDataV4(
+        walletOrProvider,
+        request.user as string,
+        getPayloadToSign(
+          {
+            struct: {
+              ...struct,
+              chainId: struct.chainId.toString(),
+            },
+            type,
+            isWallet: isWallet(walletOrProvider),
           },
-          type,
-          isWallet: isWallet(walletOrProvider),
+          config
+        )
+      );
+      return await post<
+        CallWithConcurrentERC2771Struct &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ApiKey &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.SponsoredCallERC2771,
+          request: {
+            ...struct,
+            ...options,
+            userSignature: signature,
+            sponsorApiKey,
+            chainId: struct.chainId.toString(),
+            isConcurrent,
+          },
         },
         config
-      )
-    );
-
-    return await post<
-      CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
-      RelayResponse
-    >(
-      {
-        relayCall: RelayCall.SponsoredCallERC2771,
-        request: {
-          ...struct,
-          ...options,
-          userSignature: signature,
-          sponsorApiKey,
-          chainId: struct.chainId.toString(),
-          userNonce: struct.userNonce.toString(),
+      );
+    } else {
+      const isConcurrent = false;
+      const type = ERC2771Type.SponsoredCall;
+      const parametersToOverride = await populateOptionalUserParameters(
+        { request, type, walletOrProvider },
+        config
+      );
+      const struct = await mapRequestToStruct(request, parametersToOverride);
+      const signature = await signTypedDataV4(
+        walletOrProvider,
+        request.user as string,
+        getPayloadToSign(
+          {
+            struct: {
+              ...struct,
+              chainId: struct.chainId.toString(),
+              userNonce: struct.userNonce.toString(),
+            },
+            type,
+            isWallet: isWallet(walletOrProvider),
+          },
+          config
+        )
+      );
+      return await post<
+        CallWithERC2771Struct &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ApiKey &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.SponsoredCallERC2771,
+          request: {
+            ...struct,
+            ...options,
+            userSignature: signature,
+            sponsorApiKey,
+            chainId: struct.chainId.toString(),
+            userNonce: struct.userNonce.toString(),
+            isConcurrent,
+          },
         },
-      },
-      config
-    );
+        config
+      );
+    }
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
