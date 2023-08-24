@@ -6,8 +6,5 @@ import {
 export const isConcurrentRequest = (
   request: CallWithERC2771Request | CallWithConcurrentERC2771Request
 ): request is CallWithConcurrentERC2771Request => {
-  return (
-    (request as CallWithConcurrentERC2771Request).isConcurrent !== undefined &&
-    (request as CallWithConcurrentERC2771Request).isConcurrent === true
-  );
+  return !!(request as CallWithConcurrentERC2771Request).isConcurrent;
 };
