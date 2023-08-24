@@ -6,5 +6,5 @@ import {
 export const isConcurrentStruct = (
   struct: CallWithERC2771Struct | CallWithConcurrentERC2771Struct
 ): struct is CallWithConcurrentERC2771Struct => {
-  return (struct as CallWithConcurrentERC2771Struct).userSalt !== undefined;
+  return !!(struct as CallWithConcurrentERC2771Struct).userSalt;
 };
