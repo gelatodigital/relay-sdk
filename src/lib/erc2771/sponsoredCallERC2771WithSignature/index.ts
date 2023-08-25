@@ -1,17 +1,22 @@
-import { post } from "../../../utils";
+import { isConcurrentStruct, post } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
   ApiKey,
+  ConcurrencyOptions,
   Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
 } from "../../types";
-import { CallWithERC2771Struct, UserAuthSignature } from "../types";
+import {
+  CallWithConcurrentERC2771Struct,
+  CallWithERC2771Struct,
+  UserAuthSignature,
+} from "../types";
 
 export const sponsoredCallERC2771WithSignature = async (
   payload: {
-    struct: CallWithERC2771Struct;
+    struct: CallWithERC2771Struct | CallWithConcurrentERC2771Struct;
     signature: string;
     sponsorApiKey: string;
     options?: RelayRequestOptions;
@@ -29,23 +34,54 @@ export const sponsoredCallERC2771WithSignature = async (
       throw new Error(`Chain id [${struct.chainId}] is not supported`);
     }
 
-    return await post<
-      CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
-      RelayResponse
-    >(
-      {
-        relayCall: RelayCall.SponsoredCallERC2771,
-        request: {
-          ...struct,
-          ...options,
-          userSignature: signature,
-          sponsorApiKey,
-          chainId: struct.chainId.toString(),
-          userNonce: struct.userNonce.toString(),
+    if (isConcurrentStruct(struct)) {
+      const isConcurrent = true;
+      return await post<
+        CallWithConcurrentERC2771Struct &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ApiKey &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.SponsoredCallERC2771,
+          request: {
+            ...struct,
+            ...options,
+            userSignature: signature,
+            sponsorApiKey,
+            chainId: struct.chainId.toString(),
+            isConcurrent,
+          },
         },
-      },
-      config
-    );
+        config
+      );
+    } else {
+      const isConcurrent = false;
+      return await post<
+        CallWithERC2771Struct &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ApiKey &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.SponsoredCallERC2771,
+          request: {
+            ...struct,
+            ...options,
+            userSignature: signature,
+            sponsorApiKey,
+            chainId: struct.chainId.toString(),
+            userNonce: struct.userNonce.toString(),
+            isConcurrent,
+          },
+        },
+        config
+      );
+    }
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

@@ -4,6 +4,8 @@ import { SIGN_TYPED_DATA_V4 } from "../constants";
 import {
   CallWithSyncFeeERC2771PayloadToSign,
   SponsoredCallERC2771PayloadToSign,
+  SponsoredCallConcurrentERC2771PayloadToSign,
+  CallWithSyncFeeConcurrentERC2771PayloadToSign,
 } from "../lib/erc2771/types";
 
 import { isWallet } from "./isWallet";
@@ -14,6 +16,8 @@ export const signTypedDataV4 = async (
   payload:
     | SponsoredCallERC2771PayloadToSign
     | CallWithSyncFeeERC2771PayloadToSign
+    | SponsoredCallConcurrentERC2771PayloadToSign
+    | CallWithSyncFeeConcurrentERC2771PayloadToSign
 ): Promise<string> => {
   if (isWallet(walletOrProvider)) {
     return await walletOrProvider.signTypedData(

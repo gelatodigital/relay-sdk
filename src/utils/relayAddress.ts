@@ -22,6 +22,14 @@ export const getGelatoRelayERC2771Address = (
       return isZkSync(chainId)
         ? getAddress(config.contract.relay1BalanceERC2771zkSync)
         : getAddress(config.contract.relay1BalanceERC2771);
+    case ERC2771Type.ConcurrentCallWithSyncFee:
+      return isZkSync(chainId)
+        ? getAddress(config.contract.relayConcurrentERC2771zkSync)
+        : getAddress(config.contract.relayConcurrentERC2771);
+    case ERC2771Type.ConcurrentSponsoredCall:
+      return isZkSync(chainId)
+        ? getAddress(config.contract.relay1BalanceConcurrentERC2771zkSync)
+        : getAddress(config.contract.relay1BalanceConcurrentERC2771);
     default:
       // eslint-disable-next-line no-case-declarations
       const _exhaustiveCheck: never = type;

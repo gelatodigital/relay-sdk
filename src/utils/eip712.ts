@@ -32,6 +32,26 @@ export const getEIP712Domain = (
           config
         ),
       };
+    case ERC2771Type.ConcurrentCallWithSyncFee:
+      return {
+        name: "GelatoRelayConcurrentERC2771",
+        version: "1",
+        chainId: chainId.toString(),
+        verifyingContract: getGelatoRelayERC2771Address(
+          { chainId, type },
+          config
+        ),
+      };
+    case ERC2771Type.ConcurrentSponsoredCall:
+      return {
+        name: "GelatoRelay1BalanceConcurrentERC2771",
+        version: "1",
+        chainId: chainId.toString(),
+        verifyingContract: getGelatoRelayERC2771Address(
+          { chainId, type },
+          config
+        ),
+      };
     default:
       // eslint-disable-next-line no-case-declarations
       const _exhaustiveCheck: never = type;

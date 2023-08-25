@@ -14,6 +14,10 @@ export type RelayRequestOptions = {
   retries?: number;
 };
 
+export type ConcurrencyOptions = {
+  isConcurrent: boolean;
+};
+
 export type ApiKey = {
   sponsorApiKey: string;
 };
@@ -56,6 +60,10 @@ export type Config = {
     relay1BalanceERC2771: string;
     relayERC2771zkSync: string;
     relay1BalanceERC2771zkSync: string;
+    relayConcurrentERC2771: string;
+    relay1BalanceConcurrentERC2771: string;
+    relayConcurrentERC2771zkSync: string;
+    relay1BalanceConcurrentERC2771zkSync: string;
   };
 };
 

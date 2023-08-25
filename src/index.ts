@@ -8,6 +8,8 @@ import {
   CallWithERC2771Request,
   ERC2771Type,
   CallWithSyncFeeERC2771Request,
+  CallWithSyncFeeConcurrentERC2771Request,
+  CallWithConcurrentERC2771Request,
 } from "./lib/erc2771/types";
 import { TransactionStatusResponse } from "./lib/status/types";
 import {
@@ -21,7 +23,11 @@ import {
   GELATO_RELAY_1BALANCE_ERC2771_ZKSYNC_ADDRESS,
   GELATO_RELAY_ERC2771_ADDRESS,
   GELATO_RELAY_ERC2771_ZKSYNC_ADDRESS,
+  GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ADDRESS,
+  GELATO_RELAY_CONCURRENT_ERC2771_ADDRESS,
   GELATO_RELAY_URL,
+  GELATO_RELAY_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
+  GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
 } from "./constants";
 
 export {
@@ -35,6 +41,8 @@ export {
   ERC2771Type,
   CallWithSyncFeeERC2771Request,
   BaseCallWithSyncFeeParams,
+  CallWithSyncFeeConcurrentERC2771Request,
+  CallWithConcurrentERC2771Request,
   Config,
 };
 export class GelatoRelay {
@@ -66,6 +74,18 @@ export class GelatoRelay {
         relay1BalanceERC2771zkSync:
           config?.contract?.relay1BalanceERC2771zkSync ??
           GELATO_RELAY_1BALANCE_ERC2771_ZKSYNC_ADDRESS,
+        relayConcurrentERC2771:
+          config?.contract?.relayConcurrentERC2771 ??
+          GELATO_RELAY_CONCURRENT_ERC2771_ADDRESS,
+        relay1BalanceConcurrentERC2771:
+          config?.contract?.relay1BalanceConcurrentERC2771 ??
+          GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ADDRESS,
+        relayConcurrentERC2771zkSync:
+          config?.contract?.relayConcurrentERC2771zkSync ??
+          GELATO_RELAY_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
+        relay1BalanceConcurrentERC2771zkSync:
+          config?.contract?.relay1BalanceConcurrentERC2771zkSync ??
+          GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
       },
     };
   };
@@ -83,14 +103,16 @@ export class GelatoRelay {
     library.relayWithSyncFee({ request, options }, this.#config);
 
   /**
-   * @param {CallWithSyncFeeERC2771Request} request - CallWithSyncFeeERC2771 request to be relayed by Gelato Executors
+   * @param {CallWithSyncFeeERC2771Request | CallWithSyncFeeConcurrentERC2771Request} request - Call with sync fee: Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
    * @param {ethers.BrowserProvider | ethers.Wallet} walletOrProvider - BrowserProvider [front-end] or Wallet [back-end] to sign the payload
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
   callWithSyncFeeERC2771 = (
-    request: CallWithSyncFeeERC2771Request,
+    request:
+      | CallWithSyncFeeERC2771Request
+      | CallWithSyncFeeConcurrentERC2771Request,
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet,
     options?: RelayRequestOptions
   ): Promise<RelayResponse> =>
@@ -121,7 +143,7 @@ export class GelatoRelay {
     );
 
   /**
-   * @param {CallWithERC2771Request} request - CallWithERC2771Request to be relayed by Gelato Executors
+   * @param {CallWithERC2771Request | CallWithConcurrentERC2771Request} request - Sponsored: Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
    * @param {ethers.BrowserProvider | ethers.Wallet} walletOrProvider - BrowserProvider [front-end] or Wallet [back-end] to sign the payload
    * @param {string} sponsorApiKey - Sponsor API key
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
@@ -129,7 +151,7 @@ export class GelatoRelay {
    *
    */
   sponsoredCallERC2771 = (
-    request: CallWithERC2771Request,
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request,
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet,
     sponsorApiKey: string,
     options?: RelayRequestOptions
@@ -145,14 +167,14 @@ export class GelatoRelay {
     );
 
   /**
-   * @param {CallWithERC2771Request} request - CallWithERC2771Request to be relayed by Gelato Executors
+   * @param {CallWithERC2771Request | CallWithConcurrentERC2771Request} request - Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
    * @param {ethers.BrowserProvider | ethers.Wallet} walletOrProvider - BrowserProvider [front-end] or Wallet [back-end] to sign the payload
    * @param {ERC2771Type} type - ERC2771Type.CallWithSyncFee or ERC2771Type.SponsoredCall
    * @returns {Promise<SignatureData>} Response object with taskId parameter
    *
    */
   getSignatureDataERC2771 = (
-    request: CallWithERC2771Request,
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request,
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet,
     type: ERC2771Type
   ): Promise<SignatureData> =>
