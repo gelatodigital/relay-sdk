@@ -41,6 +41,7 @@ export function getPayloadToSign(
 ):
   | SponsoredCallConcurrentERC2771PayloadToSign
   | CallWithSyncFeeConcurrentERC2771PayloadToSign;
+
 export function getPayloadToSign(
   payload: {
     struct: SafeRequestPayload<

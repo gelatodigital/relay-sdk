@@ -1,11 +1,6 @@
 import { ethers } from "ethers";
 
-import {
-  getProviderChainId,
-  isConcurrentRequest,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { signTypedDataV4 } from "../../../utils";
 import { Config } from "../../types";
 import {
   SignatureData,
@@ -13,7 +8,7 @@ import {
   ERC2771Type,
   CallWithConcurrentERC2771Request,
 } from "../types";
-import { populatePayloadToSign } from "../utils";
+import { getDataToSignERC2771 } from "../getDataToSignERC2771/index.js";
 
 export const getSignatureDataERC2771 = async (
   payload: {
@@ -25,66 +20,22 @@ export const getSignatureDataERC2771 = async (
 ): Promise<SignatureData> => {
   try {
     const { request, walletOrProvider } = payload;
-    if (!walletOrProvider.provider) {
+    if (!walletOrProvider?.provider) {
       throw new Error(`Missing provider`);
     }
 
-    const { chainId } = request;
-    const isSupported = await isNetworkSupported({ chainId }, config);
-    if (!isSupported) {
-      throw new Error(`Chain id [${chainId.toString()}] is not supported`);
-    }
+    const { struct, typedData } = await getDataToSignERC2771(payload, config);
 
-    const providerChainId = await getProviderChainId(walletOrProvider);
-    if (chainId !== providerChainId) {
-      throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
-      );
-    }
+    const signature = await signTypedDataV4(
+      walletOrProvider,
+      request.user as string,
+      typedData
+    );
 
-    if (isConcurrentRequest(request)) {
-      const type = payload.type as
-        | ERC2771Type.ConcurrentCallWithSyncFee
-        | ERC2771Type.ConcurrentSponsoredCall;
-
-      const { struct, typedData } = await populatePayloadToSign(
-        {
-          request,
-          type,
-          walletOrProvider,
-        },
-        config
-      );
-
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        request.user as string,
-        typedData
-      );
-      return {
-        struct,
-        signature,
-      };
-    } else {
-      const type = payload.type as
-        | ERC2771Type.CallWithSyncFee
-        | ERC2771Type.SponsoredCall;
-
-      const { struct, typedData } = await populatePayloadToSign(
-        { request, type, walletOrProvider },
-        config
-      );
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        request.user as string,
-        typedData
-      );
-
-      return {
-        struct,
-        signature,
-      };
-    }
+    return {
+      struct,
+      signature,
+    };
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

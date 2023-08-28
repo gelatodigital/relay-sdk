@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
 
-import { getProviderChainId, post, signTypedDataV4 } from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { post } from "../../../utils";
 import {
   BaseCallWithSyncFeeParams,
   ConcurrencyOptions,
@@ -18,7 +17,7 @@ import {
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { populatePayloadToSign } from "../utils";
+import { getSignatureDataERC2771 } from "../getSignatureDataERC2771/index.js";
 
 export const relayWithCallWithSyncFeeERC2771 = async (
   payload: {
@@ -36,34 +35,17 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       throw new Error(`Missing provider`);
     }
 
-    const { chainId } = request;
-    const isSupported = await isNetworkSupported({ chainId }, config);
-    if (!isSupported) {
-      throw new Error(`Chain id [${chainId.toString()}] is not supported`);
-    }
-
-    const providerChainId = await getProviderChainId(walletOrProvider);
-    if (chainId !== providerChainId) {
-      throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
-      );
-    }
-
     if (request.isConcurrent) {
       const isConcurrent = true;
-      const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
+      const { isRelayContext, feeToken } = request;
       const type = ERC2771Type.ConcurrentCallWithSyncFee;
 
-      const { struct, typedData } = await populatePayloadToSign(
-        { request: callWithSyncFeeRequest, type, walletOrProvider },
+      const { struct, signature } = await getSignatureDataERC2771(
+        { request, walletOrProvider, type },
         config
       );
+      const concurrentStruct = struct as CallWithConcurrentERC2771Struct;
 
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        callWithSyncFeeRequest.user as string,
-        typedData
-      );
       return await post<
         CallWithConcurrentERC2771Struct &
           BaseCallWithSyncFeeParams &
@@ -75,12 +57,12 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...struct,
+            ...concurrentStruct,
             ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
-            chainId: struct.chainId.toString(),
+            chainId: concurrentStruct.chainId.toString(),
             isConcurrent,
           },
         },
@@ -88,19 +70,15 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       );
     } else {
       const isConcurrent = false;
-      const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
+      const { isRelayContext, feeToken } = request;
       const type = ERC2771Type.CallWithSyncFee;
 
-      const { struct, typedData } = await populatePayloadToSign(
-        { request: callWithSyncFeeRequest, type, walletOrProvider },
+      const { struct, signature } = await getSignatureDataERC2771(
+        { request, walletOrProvider, type },
         config
       );
+      const sequentialStruct = struct as CallWithERC2771Struct;
 
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        callWithSyncFeeRequest.user as string,
-        typedData
-      );
       return await post<
         CallWithERC2771Struct &
           BaseCallWithSyncFeeParams &
@@ -112,13 +90,13 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...struct,
+            ...sequentialStruct,
             ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
-            chainId: struct.chainId.toString(),
-            userNonce: struct.userNonce.toString(),
+            chainId: sequentialStruct.chainId.toString(),
+            userNonce: sequentialStruct.userNonce.toString(),
             isConcurrent,
           },
         },

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { isConcurrentRequest } from "../../../utils";
+import { getProviderChainId, isConcurrentRequest } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import { Config } from "../../types";
 import {
@@ -26,6 +26,15 @@ export const getDataToSignERC2771 = async (
     const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
       throw new Error(`Chain id [${chainId.toString()}] is not supported`);
+    }
+
+    if (walletOrProvider) {
+      const providerChainId = await getProviderChainId(walletOrProvider);
+      if (chainId !== providerChainId) {
+        throw new Error(
+          `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
+        );
+      }
     }
 
     if (isConcurrentRequest(request)) {
