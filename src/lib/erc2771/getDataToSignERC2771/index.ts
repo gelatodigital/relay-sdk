@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { isConcurrentRequest } from "../../../utils";
+import { getProviderChainId, isConcurrentRequest } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import { Config } from "../../types";
 import {
@@ -8,17 +8,48 @@ import {
   ERC2771Type,
   CallWithConcurrentERC2771Request,
   PayloadToSign,
+  SequentialPayloadToSign,
+  ConcurrentPayloadToSign,
 } from "../types";
 import { populatePayloadToSign } from "../utils";
 
-export const getDataToSignERC2771 = async (
+export async function getDataToSignERC2771(
   payload: {
-    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    request: CallWithERC2771Request;
+    type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
     walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
-    type: ERC2771Type;
   },
   config: Config
-): Promise<PayloadToSign> => {
+): Promise<SequentialPayloadToSign>;
+
+export async function getDataToSignERC2771(
+  payload: {
+    request: CallWithConcurrentERC2771Request;
+    type:
+      | ERC2771Type.ConcurrentCallWithSyncFee
+      | ERC2771Type.ConcurrentSponsoredCall;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+  },
+  config: Config
+): Promise<ConcurrentPayloadToSign>;
+
+export async function getDataToSignERC2771(
+  payload: {
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    type: ERC2771Type;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+  },
+  config: Config
+): Promise<PayloadToSign>;
+
+export async function getDataToSignERC2771(
+  payload: {
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    type: ERC2771Type;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+  },
+  config: Config
+): Promise<PayloadToSign> {
   try {
     const { request, walletOrProvider } = payload;
 
@@ -26,6 +57,15 @@ export const getDataToSignERC2771 = async (
     const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
       throw new Error(`Chain id [${chainId.toString()}] is not supported`);
+    }
+
+    if (walletOrProvider) {
+      const providerChainId = await getProviderChainId(walletOrProvider);
+      if (chainId !== providerChainId) {
+        throw new Error(
+          `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
+        );
+      }
     }
 
     if (isConcurrentRequest(request)) {
@@ -67,4 +107,4 @@ export const getDataToSignERC2771 = async (
       `GelatoRelaySDK/getDataToSignERC2771: Failed with error: ${errorMessage}`
     );
   }
-};
+}

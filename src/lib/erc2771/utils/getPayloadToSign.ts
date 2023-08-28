@@ -21,7 +21,6 @@ import {
 export function getPayloadToSign(
   payload: {
     struct: SafeRequestPayload<CallWithERC2771Struct>;
-
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
     isWallet?: boolean;
   },
@@ -31,7 +30,6 @@ export function getPayloadToSign(
 export function getPayloadToSign(
   payload: {
     struct: SafeRequestPayload<CallWithConcurrentERC2771Struct>;
-
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
@@ -41,12 +39,12 @@ export function getPayloadToSign(
 ):
   | SponsoredCallConcurrentERC2771PayloadToSign
   | CallWithSyncFeeConcurrentERC2771PayloadToSign;
+
 export function getPayloadToSign(
   payload: {
     struct: SafeRequestPayload<
       CallWithERC2771Struct | CallWithConcurrentERC2771Struct
     >;
-
     type: ERC2771Type;
     isWallet?: boolean;
   },

@@ -1,12 +1,6 @@
 import { ethers } from "ethers";
 
-import {
-  getProviderChainId,
-  isConcurrentRequest,
-  post,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { isConcurrentRequest, post } from "../../../utils";
 import {
   ApiKey,
   ConcurrencyOptions,
@@ -23,7 +17,7 @@ import {
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { populatePayloadToSign } from "../utils";
+import { getSignatureDataERC2771 } from "../getSignatureDataERC2771/index.js";
 
 export const relayWithSponsoredCallERC2771 = async (
   payload: {
@@ -52,32 +46,19 @@ const sponsoredCallERC2771 = async (
       throw new Error(`Missing provider`);
     }
 
-    const { chainId } = request;
-    const isSupported = await isNetworkSupported({ chainId }, config);
-    if (!isSupported) {
-      throw new Error(`Chain id [${chainId.toString()}] is not supported`);
-    }
-
-    const providerChainId = await getProviderChainId(walletOrProvider);
-    if (chainId !== providerChainId) {
-      throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
-      );
-    }
-
     if (isConcurrentRequest(request)) {
       const isConcurrent = true;
       const type = ERC2771Type.ConcurrentSponsoredCall;
-      const { struct, typedData } = await populatePayloadToSign(
-        { request, type, walletOrProvider },
+
+      const { struct, signature } = await getSignatureDataERC2771(
+        {
+          request,
+          walletOrProvider,
+          type,
+        },
         config
       );
 
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        request.user as string,
-        typedData
-      );
       return await post<
         CallWithConcurrentERC2771Struct &
           RelayRequestOptions &
@@ -102,16 +83,16 @@ const sponsoredCallERC2771 = async (
     } else {
       const isConcurrent = false;
       const type = ERC2771Type.SponsoredCall;
-      const { struct, typedData } = await populatePayloadToSign(
-        { request, type, walletOrProvider },
+
+      const { struct, signature } = await getSignatureDataERC2771(
+        {
+          request,
+          walletOrProvider,
+          type,
+        },
         config
       );
 
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        request.user as string,
-        typedData
-      );
       return await post<
         CallWithERC2771Struct &
           RelayRequestOptions &

@@ -27,7 +27,6 @@ export async function populatePayloadToSign(
       | ERC2771Type.ConcurrentSponsoredCall;
     walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
   },
-
   config: Config
 ): Promise<ConcurrentPayloadToSign>;
 
@@ -37,7 +36,6 @@ export async function populatePayloadToSign(
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
     walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
   },
-
   config: Config
 ): Promise<SequentialPayloadToSign>;
 
@@ -47,7 +45,6 @@ export async function populatePayloadToSign(
     type: ERC2771Type;
     walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
   },
-
   config: Config
 ): Promise<PayloadToSign> {
   const { request, walletOrProvider } = payload;
