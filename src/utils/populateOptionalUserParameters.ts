@@ -21,7 +21,7 @@ export async function populateOptionalUserParameters(
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
   },
 
   config: Config
@@ -31,7 +31,7 @@ export async function populateOptionalUserParameters(
   payload: {
     request: CallWithERC2771Request;
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
   },
 
   config: Config
@@ -41,7 +41,7 @@ export async function populateOptionalUserParameters(
   payload: {
     request: CallWithConcurrentERC2771Request | CallWithERC2771Request;
     type: ERC2771Type;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
   },
 
   config: Config
@@ -72,6 +72,9 @@ export async function populateOptionalUserParameters(
         calculateDeadline(DEFAULT_DEADLINE_GAP);
     }
     if (request.userNonce === undefined) {
+      if (!walletOrProvider) {
+        throw new Error("Missing provider.");
+      }
       parametersToOverride.userNonce = await getUserNonce(
         {
           account: request.user as string,

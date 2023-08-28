@@ -166,6 +166,22 @@ export type SignatureData = {
   signature: string;
 };
 
+export interface ConcurrentPayloadToSign {
+  struct: CallWithConcurrentERC2771Struct;
+  typedData:
+    | SponsoredCallConcurrentERC2771PayloadToSign
+    | CallWithSyncFeeConcurrentERC2771PayloadToSign;
+}
+
+export interface SequentialPayloadToSign {
+  struct: CallWithERC2771Struct;
+  typedData:
+    | SponsoredCallERC2771PayloadToSign
+    | CallWithSyncFeeERC2771PayloadToSign;
+}
+
+export type PayloadToSign = ConcurrentPayloadToSign | SequentialPayloadToSign;
+
 export enum ERC2771Type {
   CallWithSyncFee = "CallWithSyncFee",
   SponsoredCall = "SponsoredCall",

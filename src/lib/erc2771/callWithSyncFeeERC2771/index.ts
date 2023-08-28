@@ -1,12 +1,6 @@
 import { ethers } from "ethers";
 
-import {
-  getProviderChainId,
-  isWallet,
-  populateOptionalUserParameters,
-  post,
-  signTypedDataV4,
-} from "../../../utils";
+import { getProviderChainId, post, signTypedDataV4 } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
   BaseCallWithSyncFeeParams,
@@ -24,7 +18,7 @@ import {
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { populatePayloadToSign } from "../utils";
 
 export const relayWithCallWithSyncFeeERC2771 = async (
   payload: {
@@ -60,28 +54,15 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
       const type = ERC2771Type.ConcurrentCallWithSyncFee;
 
-      const parametersToOverride = await populateOptionalUserParameters(
+      const { struct, typedData } = await populatePayloadToSign(
         { request: callWithSyncFeeRequest, type, walletOrProvider },
         config
       );
-      const struct = await mapRequestToStruct(
-        callWithSyncFeeRequest,
-        parametersToOverride
-      );
+
       const signature = await signTypedDataV4(
         walletOrProvider,
         callWithSyncFeeRequest.user as string,
-        getPayloadToSign(
-          {
-            struct: {
-              ...struct,
-              chainId: struct.chainId.toString(),
-            },
-            type,
-            isWallet: isWallet(walletOrProvider),
-          },
-          config
-        )
+        typedData
       );
       return await post<
         CallWithConcurrentERC2771Struct &
@@ -110,29 +91,15 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
       const type = ERC2771Type.CallWithSyncFee;
 
-      const parametersToOverride = await populateOptionalUserParameters(
+      const { struct, typedData } = await populatePayloadToSign(
         { request: callWithSyncFeeRequest, type, walletOrProvider },
         config
       );
-      const struct = await mapRequestToStruct(
-        callWithSyncFeeRequest,
-        parametersToOverride
-      );
+
       const signature = await signTypedDataV4(
         walletOrProvider,
         callWithSyncFeeRequest.user as string,
-        getPayloadToSign(
-          {
-            struct: {
-              ...struct,
-              chainId: struct.chainId.toString(),
-              userNonce: struct.userNonce.toString(),
-            },
-            type,
-            isWallet: isWallet(walletOrProvider),
-          },
-          config
-        )
+        typedData
       );
       return await post<
         CallWithERC2771Struct &

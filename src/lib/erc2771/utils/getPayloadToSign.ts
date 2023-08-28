@@ -20,12 +20,35 @@ import {
 
 export function getPayloadToSign(
   payload: {
+    struct: SafeRequestPayload<CallWithERC2771Struct>;
+
+    type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
+    isWallet?: boolean;
+  },
+  config: Config
+): SponsoredCallERC2771PayloadToSign | CallWithSyncFeeERC2771PayloadToSign;
+
+export function getPayloadToSign(
+  payload: {
+    struct: SafeRequestPayload<CallWithConcurrentERC2771Struct>;
+
+    type:
+      | ERC2771Type.ConcurrentCallWithSyncFee
+      | ERC2771Type.ConcurrentSponsoredCall;
+    isWallet?: boolean;
+  },
+  config: Config
+):
+  | SponsoredCallConcurrentERC2771PayloadToSign
+  | CallWithSyncFeeConcurrentERC2771PayloadToSign;
+export function getPayloadToSign(
+  payload: {
     struct: SafeRequestPayload<
       CallWithERC2771Struct | CallWithConcurrentERC2771Struct
     >;
 
     type: ERC2771Type;
-    isWallet: boolean;
+    isWallet?: boolean;
   },
   config: Config
 ):

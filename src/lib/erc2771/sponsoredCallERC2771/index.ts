@@ -3,8 +3,6 @@ import { ethers } from "ethers";
 import {
   getProviderChainId,
   isConcurrentRequest,
-  isWallet,
-  populateOptionalUserParameters,
   post,
   signTypedDataV4,
 } from "../../../utils";
@@ -25,7 +23,7 @@ import {
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { populatePayloadToSign } from "../utils";
 
 export const relayWithSponsoredCallERC2771 = async (
   payload: {
@@ -70,25 +68,15 @@ const sponsoredCallERC2771 = async (
     if (isConcurrentRequest(request)) {
       const isConcurrent = true;
       const type = ERC2771Type.ConcurrentSponsoredCall;
-      const parametersToOverride = await populateOptionalUserParameters(
+      const { struct, typedData } = await populatePayloadToSign(
         { request, type, walletOrProvider },
         config
       );
-      const struct = await mapRequestToStruct(request, parametersToOverride);
+
       const signature = await signTypedDataV4(
         walletOrProvider,
         request.user as string,
-        getPayloadToSign(
-          {
-            struct: {
-              ...struct,
-              chainId: struct.chainId.toString(),
-            },
-            type,
-            isWallet: isWallet(walletOrProvider),
-          },
-          config
-        )
+        typedData
       );
       return await post<
         CallWithConcurrentERC2771Struct &
@@ -114,26 +102,15 @@ const sponsoredCallERC2771 = async (
     } else {
       const isConcurrent = false;
       const type = ERC2771Type.SponsoredCall;
-      const parametersToOverride = await populateOptionalUserParameters(
+      const { struct, typedData } = await populatePayloadToSign(
         { request, type, walletOrProvider },
         config
       );
-      const struct = await mapRequestToStruct(request, parametersToOverride);
+
       const signature = await signTypedDataV4(
         walletOrProvider,
         request.user as string,
-        getPayloadToSign(
-          {
-            struct: {
-              ...struct,
-              chainId: struct.chainId.toString(),
-              userNonce: struct.userNonce.toString(),
-            },
-            type,
-            isWallet: isWallet(walletOrProvider),
-          },
-          config
-        )
+        typedData
       );
       return await post<
         CallWithERC2771Struct &
