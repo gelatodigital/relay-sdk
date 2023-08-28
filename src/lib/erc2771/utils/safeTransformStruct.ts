@@ -8,9 +8,11 @@ import { isConcurrentStruct } from "../../../utils";
 export function safeTransformStruct(
   struct: CallWithERC2771Struct
 ): SafeRequestPayload<CallWithERC2771Struct>;
+
 export function safeTransformStruct(
   struct: CallWithConcurrentERC2771Struct
 ): SafeRequestPayload<CallWithConcurrentERC2771Struct>;
+
 export function safeTransformStruct(
   struct: CallWithERC2771Struct | CallWithConcurrentERC2771Struct
 ): SafeRequestPayload<CallWithERC2771Struct | CallWithConcurrentERC2771Struct> {

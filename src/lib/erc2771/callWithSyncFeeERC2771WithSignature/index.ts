@@ -13,6 +13,7 @@ import {
   CallWithERC2771Struct,
   UserAuthSignature,
 } from "../types";
+import { safeTransformStruct } from "../utils/safeTransformStruct.js";
 
 export const callWithSyncFeeERC2771WithSignature = async (
   payload: {
@@ -47,12 +48,11 @@ export const callWithSyncFeeERC2771WithSignature = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...struct,
+            ...safeTransformStruct(struct),
             ...syncFeeParams,
             ...options,
             isRelayContext: syncFeeParams.isRelayContext ?? true,
             userSignature: signature,
-            chainId: struct.chainId.toString(),
             isConcurrent,
           },
         },
@@ -71,13 +71,11 @@ export const callWithSyncFeeERC2771WithSignature = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...struct,
+            ...safeTransformStruct(struct),
             ...syncFeeParams,
             ...options,
             isRelayContext: syncFeeParams.isRelayContext ?? true,
             userSignature: signature,
-            chainId: struct.chainId.toString(),
-            userNonce: struct.userNonce.toString(),
             isConcurrent,
           },
         },
