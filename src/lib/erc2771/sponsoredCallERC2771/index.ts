@@ -59,7 +59,6 @@ const sponsoredCallERC2771 = async (
         config
       );
 
-      const concurrentStruct = struct as CallWithConcurrentERC2771Struct;
       return await post<
         CallWithConcurrentERC2771Struct &
           RelayRequestOptions &
@@ -71,11 +70,11 @@ const sponsoredCallERC2771 = async (
         {
           relayCall: RelayCall.SponsoredCallERC2771,
           request: {
-            ...concurrentStruct,
+            ...struct,
             ...options,
             userSignature: signature,
             sponsorApiKey,
-            chainId: concurrentStruct.chainId.toString(),
+            chainId: struct.chainId.toString(),
             isConcurrent,
           },
         },
@@ -93,7 +92,6 @@ const sponsoredCallERC2771 = async (
         },
         config
       );
-      const sequentialStruct = struct as CallWithERC2771Struct;
 
       return await post<
         CallWithERC2771Struct &
@@ -106,12 +104,12 @@ const sponsoredCallERC2771 = async (
         {
           relayCall: RelayCall.SponsoredCallERC2771,
           request: {
-            ...sequentialStruct,
+            ...struct,
             ...options,
             userSignature: signature,
             sponsorApiKey,
-            chainId: sequentialStruct.chainId.toString(),
-            userNonce: sequentialStruct.userNonce.toString(),
+            chainId: struct.chainId.toString(),
+            userNonce: struct.userNonce.toString(),
             isConcurrent,
           },
         },

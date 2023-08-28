@@ -8,17 +8,48 @@ import {
   ERC2771Type,
   CallWithConcurrentERC2771Request,
   PayloadToSign,
+  SequentialPayloadToSign,
+  ConcurrentPayloadToSign,
 } from "../types";
 import { populatePayloadToSign } from "../utils";
 
-export const getDataToSignERC2771 = async (
+export async function getDataToSignERC2771(
   payload: {
-    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    request: CallWithERC2771Request;
+    type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
     walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
-    type: ERC2771Type;
   },
   config: Config
-): Promise<PayloadToSign> => {
+): Promise<SequentialPayloadToSign>;
+
+export async function getDataToSignERC2771(
+  payload: {
+    request: CallWithConcurrentERC2771Request;
+    type:
+      | ERC2771Type.ConcurrentCallWithSyncFee
+      | ERC2771Type.ConcurrentSponsoredCall;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+  },
+  config: Config
+): Promise<ConcurrentPayloadToSign>;
+
+export async function getDataToSignERC2771(
+  payload: {
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    type: ERC2771Type;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+  },
+  config: Config
+): Promise<PayloadToSign>;
+
+export async function getDataToSignERC2771(
+  payload: {
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    type: ERC2771Type;
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+  },
+  config: Config
+): Promise<PayloadToSign> {
   try {
     const { request, walletOrProvider } = payload;
 
@@ -76,4 +107,4 @@ export const getDataToSignERC2771 = async (
       `GelatoRelaySDK/getDataToSignERC2771: Failed with error: ${errorMessage}`
     );
   }
-};
+}

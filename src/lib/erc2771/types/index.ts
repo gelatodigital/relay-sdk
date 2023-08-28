@@ -161,24 +161,31 @@ export type CallWithConcurrentERC2771RequestOptionalParameters = {
   userSalt: string;
 };
 
-export type SignatureData = {
-  struct: CallWithERC2771Struct | CallWithConcurrentERC2771Struct;
+export type ConcurrentSignatureData = {
+  struct: CallWithConcurrentERC2771Struct;
   signature: string;
 };
 
-export interface ConcurrentPayloadToSign {
+export type SequentialSignatureData = {
+  struct: CallWithERC2771Struct;
+  signature: string;
+};
+
+export type SignatureData = ConcurrentSignatureData | SequentialSignatureData;
+
+export type ConcurrentPayloadToSign = {
   struct: CallWithConcurrentERC2771Struct;
   typedData:
     | SponsoredCallConcurrentERC2771PayloadToSign
     | CallWithSyncFeeConcurrentERC2771PayloadToSign;
-}
+};
 
-export interface SequentialPayloadToSign {
+export type SequentialPayloadToSign = {
   struct: CallWithERC2771Struct;
   typedData:
     | SponsoredCallERC2771PayloadToSign
     | CallWithSyncFeeERC2771PayloadToSign;
-}
+};
 
 export type PayloadToSign = ConcurrentPayloadToSign | SequentialPayloadToSign;
 

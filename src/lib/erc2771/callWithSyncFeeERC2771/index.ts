@@ -44,7 +44,6 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         { request, walletOrProvider, type },
         config
       );
-      const concurrentStruct = struct as CallWithConcurrentERC2771Struct;
 
       return await post<
         CallWithConcurrentERC2771Struct &
@@ -57,12 +56,12 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...concurrentStruct,
+            ...struct,
             ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
-            chainId: concurrentStruct.chainId.toString(),
+            chainId: struct.chainId.toString(),
             isConcurrent,
           },
         },
@@ -77,7 +76,6 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         { request, walletOrProvider, type },
         config
       );
-      const sequentialStruct = struct as CallWithERC2771Struct;
 
       return await post<
         CallWithERC2771Struct &
@@ -90,13 +88,13 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...sequentialStruct,
+            ...struct,
             ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
-            chainId: sequentialStruct.chainId.toString(),
-            userNonce: sequentialStruct.userNonce.toString(),
+            chainId: struct.chainId.toString(),
+            userNonce: struct.userNonce.toString(),
             isConcurrent,
           },
         },
