@@ -3,6 +3,7 @@ export { relayWithSponsoredCall } from "./sponsoredCall";
 export {
   relayWithSponsoredCallERC2771,
   getSignatureDataERC2771,
+  getDataToSignERC2771,
   sponsoredCallERC2771WithSignature,
   callWithSyncFeeERC2771WithSignature,
   relayWithCallWithSyncFeeERC2771,

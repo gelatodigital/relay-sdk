@@ -1,13 +1,6 @@
 import { ethers } from "ethers";
 
-import {
-  getProviderChainId,
-  isWallet,
-  populateOptionalUserParameters,
-  post,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { post } from "../../../utils";
 import {
   BaseCallWithSyncFeeParams,
   ConcurrencyOptions,
@@ -24,7 +17,8 @@ import {
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { getSignatureDataERC2771 } from "../getSignatureDataERC2771/index.js";
+import { safeTransformStruct } from "../utils/safeTransformStruct.js";
 
 export const relayWithCallWithSyncFeeERC2771 = async (
   payload: {
@@ -42,47 +36,16 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       throw new Error(`Missing provider`);
     }
 
-    const { chainId } = request;
-    const isSupported = await isNetworkSupported({ chainId }, config);
-    if (!isSupported) {
-      throw new Error(`Chain id [${chainId.toString()}] is not supported`);
-    }
-
-    const providerChainId = await getProviderChainId(walletOrProvider);
-    if (chainId !== providerChainId) {
-      throw new Error(
-        `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
-      );
-    }
-
     if (request.isConcurrent) {
       const isConcurrent = true;
-      const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
+      const { isRelayContext, feeToken } = request;
       const type = ERC2771Type.ConcurrentCallWithSyncFee;
 
-      const parametersToOverride = await populateOptionalUserParameters(
-        { request: callWithSyncFeeRequest, type, walletOrProvider },
+      const { struct, signature } = await getSignatureDataERC2771(
+        { request, walletOrProvider, type },
         config
       );
-      const struct = await mapRequestToStruct(
-        callWithSyncFeeRequest,
-        parametersToOverride
-      );
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        callWithSyncFeeRequest.user as string,
-        getPayloadToSign(
-          {
-            struct: {
-              ...struct,
-              chainId: struct.chainId.toString(),
-            },
-            type,
-            isWallet: isWallet(walletOrProvider),
-          },
-          config
-        )
-      );
+
       return await post<
         CallWithConcurrentERC2771Struct &
           BaseCallWithSyncFeeParams &
@@ -94,12 +57,11 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...struct,
+            ...safeTransformStruct(struct),
             ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
-            chainId: struct.chainId.toString(),
             isConcurrent,
           },
         },
@@ -107,33 +69,14 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       );
     } else {
       const isConcurrent = false;
-      const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
+      const { isRelayContext, feeToken } = request;
       const type = ERC2771Type.CallWithSyncFee;
 
-      const parametersToOverride = await populateOptionalUserParameters(
-        { request: callWithSyncFeeRequest, type, walletOrProvider },
+      const { struct, signature } = await getSignatureDataERC2771(
+        { request, walletOrProvider, type },
         config
       );
-      const struct = await mapRequestToStruct(
-        callWithSyncFeeRequest,
-        parametersToOverride
-      );
-      const signature = await signTypedDataV4(
-        walletOrProvider,
-        callWithSyncFeeRequest.user as string,
-        getPayloadToSign(
-          {
-            struct: {
-              ...struct,
-              chainId: struct.chainId.toString(),
-              userNonce: struct.userNonce.toString(),
-            },
-            type,
-            isWallet: isWallet(walletOrProvider),
-          },
-          config
-        )
-      );
+
       return await post<
         CallWithERC2771Struct &
           BaseCallWithSyncFeeParams &
@@ -145,13 +88,11 @@ export const relayWithCallWithSyncFeeERC2771 = async (
         {
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
-            ...struct,
+            ...safeTransformStruct(struct),
             ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
-            chainId: struct.chainId.toString(),
-            userNonce: struct.userNonce.toString(),
             isConcurrent,
           },
         },

@@ -1,2 +1,1 @@
-export { getPayloadToSign } from "./getPayloadToSign";
-export { mapRequestToStruct } from "./mapRequestToStruct";
+export { populatePayloadToSign } from "./populatePayloadToSign";

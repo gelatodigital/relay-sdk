@@ -5,6 +5,7 @@ import { CallWithSyncFeeRequest } from "./lib/callWithSyncFee/types";
 import { SponsoredCallRequest } from "./lib/sponsoredCall/types";
 import {
   SignatureData,
+  PayloadToSign,
   CallWithERC2771Request,
   ERC2771Type,
   CallWithSyncFeeERC2771Request,
@@ -38,6 +39,7 @@ export {
   TransactionStatusResponse,
   RelayResponse,
   SignatureData,
+  PayloadToSign,
   ERC2771Type,
   CallWithSyncFeeERC2771Request,
   BaseCallWithSyncFeeParams,
@@ -170,7 +172,7 @@ export class GelatoRelay {
    * @param {CallWithERC2771Request | CallWithConcurrentERC2771Request} request - Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
    * @param {ethers.BrowserProvider | ethers.Wallet} walletOrProvider - BrowserProvider [front-end] or Wallet [back-end] to sign the payload
    * @param {ERC2771Type} type - ERC2771Type.CallWithSyncFee or ERC2771Type.SponsoredCall
-   * @returns {Promise<SignatureData>} Response object with taskId parameter
+   * @returns {Promise<SignatureData>} Response object with struct and signature
    *
    */
   getSignatureDataERC2771 = (
@@ -179,6 +181,23 @@ export class GelatoRelay {
     type: ERC2771Type
   ): Promise<SignatureData> =>
     library.getSignatureDataERC2771(
+      { request, walletOrProvider, type },
+      this.#config
+    );
+
+  /**
+   * @param {CallWithERC2771Request | CallWithConcurrentERC2771Request} request - Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
+   * @param {ethers.BrowserProvider | ethers.Wallet} [walletOrProvider] - Optional BrowserProvider [front-end] or Wallet [back-end] to sign the payload
+   * @param {ERC2771Type} type - ERC2771Type.CallWithSyncFee or ERC2771Type.SponsoredCall
+   * @returns {Promise<PayloadToSign>} Response object with struct and typed data
+   *
+   */
+  getDataToSignERC2771 = (
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request,
+    type: ERC2771Type,
+    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet
+  ): Promise<PayloadToSign> =>
+    library.getDataToSignERC2771(
       { request, walletOrProvider, type },
       this.#config
     );

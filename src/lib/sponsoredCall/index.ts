@@ -9,6 +9,7 @@ import {
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
+  SafeRequestPayload,
 } from "../types";
 
 import { SponsoredCallRequest } from "./types";
@@ -24,11 +25,11 @@ export const relayWithSponsoredCall = async (
   return await sponsoredCall(payload, config);
 };
 
-const mapRequestToStruct = async (
+const mapRequestToStruct = (
   request: SponsoredCallRequest
-): Promise<BaseRelayParams> => {
+): SafeRequestPayload<BaseRelayParams> => {
   return {
-    chainId: request.chainId,
+    chainId: request.chainId.toString(),
     target: getAddress(request.target as string),
     data: request.data,
   };
@@ -62,7 +63,6 @@ const sponsoredCall = async (
           ...struct,
           ...options,
           sponsorApiKey,
-          chainId: struct.chainId.toString(),
         },
       },
       config
