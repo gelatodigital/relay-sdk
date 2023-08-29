@@ -14,6 +14,9 @@
     "lint": "eslint --cache .",
     "prepare": "husky install"
   },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
