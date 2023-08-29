@@ -51,7 +51,7 @@ export async function getSignatureDataERC2771(
 ): Promise<SignatureData> {
   try {
     const { request, walletOrProvider } = payload;
-    if (!walletOrProvider?.provider) {
+    if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
 
