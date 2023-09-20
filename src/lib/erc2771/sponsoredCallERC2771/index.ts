@@ -1,32 +1,29 @@
 import { ethers } from "ethers";
 
-import {
-  isWallet,
-  populateOptionalUserParameters,
-  post,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { isConcurrentRequest, post } from "../../../utils";
 import {
   ApiKey,
+  ConcurrencyOptions,
   Config,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
 } from "../../types";
 import {
+  CallWithConcurrentERC2771Request,
+  CallWithConcurrentERC2771Struct,
   CallWithERC2771Request,
-  CallWithERC2771RequestOptionalParameters,
   CallWithERC2771Struct,
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { getSignatureDataERC2771 } from "../getSignatureDataERC2771/index.js";
+import { safeTransformStruct } from "../utils/safeTransformStruct.js";
 
 export const relayWithSponsoredCallERC2771 = async (
   payload: {
-    request: CallWithERC2771Request;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     sponsorApiKey: string;
     options?: RelayRequestOptions;
   },
@@ -37,8 +34,8 @@ export const relayWithSponsoredCallERC2771 = async (
 
 const sponsoredCallERC2771 = async (
   payload: {
-    request: CallWithERC2771Request;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     sponsorApiKey: string;
     options?: RelayRequestOptions;
   },
@@ -49,47 +46,74 @@ const sponsoredCallERC2771 = async (
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
-      config
-    );
-    if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
-    }
 
-    const parametersToOverride = await populateOptionalUserParameters<
-      CallWithERC2771Request,
-      CallWithERC2771RequestOptionalParameters
-    >({ request, walletOrProvider }, config);
-    const struct = await mapRequestToStruct(request, parametersToOverride);
-    const signature = await signTypedDataV4(
-      walletOrProvider,
-      request.user as string,
-      getPayloadToSign(
+    if (isConcurrentRequest(request)) {
+      const isConcurrent = true;
+      const type = ERC2771Type.ConcurrentSponsoredCall;
+
+      const { struct, signature } = await getSignatureDataERC2771(
         {
-          struct,
-          type: ERC2771Type.SponsoredCall,
-          isWallet: isWallet(walletOrProvider),
+          request,
+          walletOrProvider,
+          type,
         },
         config
-      )
-    );
+      );
 
-    return await post<
-      CallWithERC2771Struct & RelayRequestOptions & UserAuthSignature & ApiKey,
-      RelayResponse
-    >(
-      {
-        relayCall: RelayCall.SponsoredCallERC2771,
-        request: {
-          ...struct,
-          ...options,
-          userSignature: signature,
-          sponsorApiKey,
+      return await post<
+        CallWithConcurrentERC2771Struct &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ApiKey &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.SponsoredCallERC2771,
+          request: {
+            ...safeTransformStruct(struct),
+            ...options,
+            userSignature: signature,
+            sponsorApiKey,
+            isConcurrent,
+          },
         },
-      },
-      config
-    );
+        config
+      );
+    } else {
+      const isConcurrent = false;
+      const type = ERC2771Type.SponsoredCall;
+
+      const { struct, signature } = await getSignatureDataERC2771(
+        {
+          request,
+          walletOrProvider,
+          type,
+        },
+        config
+      );
+
+      return await post<
+        CallWithERC2771Struct &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ApiKey &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.SponsoredCallERC2771,
+          request: {
+            ...safeTransformStruct(struct),
+            ...options,
+            userSignature: signature,
+            sponsorApiKey,
+            isConcurrent,
+          },
+        },
+        config
+      );
+    }
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

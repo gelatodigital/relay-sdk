@@ -1,15 +1,10 @@
 import { ethers } from "ethers";
 
-import {
-  isWallet,
-  populateOptionalUserParameters,
-  post,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { post } from "../../../utils";
 import {
   ApiKey,
   BaseCallWithSyncFeeParams,
+  ConcurrencyOptions,
   Config,
   Optional,
   RelayCall,
@@ -17,19 +12,22 @@ import {
   RelayResponse,
 } from "../../types";
 import {
-  CallWithERC2771Request,
-  CallWithERC2771RequestOptionalParameters,
+  CallWithConcurrentERC2771Struct,
   CallWithERC2771Struct,
+  CallWithSyncFeeConcurrentERC2771Request,
   CallWithSyncFeeERC2771Request,
   ERC2771Type,
   UserAuthSignature,
 } from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { getSignatureDataERC2771 } from "../getSignatureDataERC2771/index.js";
+import { safeTransformStruct } from "../utils/safeTransformStruct.js";
 
 export const relayWithCallWithSyncFeeERC2771 = async (
   payload: {
-    request: CallWithSyncFeeERC2771Request;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    request:
+      | CallWithSyncFeeERC2771Request
+      | CallWithSyncFeeConcurrentERC2771Request;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     sponsorApiKey?: string;
     options?: RelayRequestOptions;
   },
@@ -40,56 +38,72 @@ export const relayWithCallWithSyncFeeERC2771 = async (
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
-      config
-    );
-    if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
-    }
-    const { isRelayContext, feeToken, ...callWithSyncFeeRequest } = request;
-    const parametersToOverride = await populateOptionalUserParameters<
-      CallWithERC2771Request,
-      CallWithERC2771RequestOptionalParameters
-    >({ request: callWithSyncFeeRequest, walletOrProvider }, config);
-    const struct = await mapRequestToStruct(
-      callWithSyncFeeRequest,
-      parametersToOverride
-    );
-    const signature = await signTypedDataV4(
-      walletOrProvider,
-      callWithSyncFeeRequest.user as string,
-      getPayloadToSign(
+
+    if (request.isConcurrent) {
+      const isConcurrent = true;
+      const { isRelayContext, feeToken } = request;
+      const type = ERC2771Type.ConcurrentCallWithSyncFee;
+
+      const { struct, signature } = await getSignatureDataERC2771(
+        { request, walletOrProvider, type },
+        config
+      );
+
+      return await post<
+        CallWithConcurrentERC2771Struct &
+          BaseCallWithSyncFeeParams &
+          RelayRequestOptions &
+          UserAuthSignature &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
         {
-          struct,
-          type: ERC2771Type.CallWithSyncFee,
-          isWallet: isWallet(walletOrProvider),
+          relayCall: RelayCall.CallWithSyncFeeERC2771,
+          request: {
+            ...safeTransformStruct(struct),
+            ...options,
+            feeToken,
+            isRelayContext: isRelayContext ?? true,
+            userSignature: signature,
+            isConcurrent,
+          },
         },
         config
-      )
-    );
+      );
+    } else {
+      const isConcurrent = false;
+      const { isRelayContext, feeToken } = request;
+      const type = ERC2771Type.CallWithSyncFee;
 
-    return await post<
-      CallWithERC2771Struct &
-        BaseCallWithSyncFeeParams &
-        RelayRequestOptions &
-        UserAuthSignature &
-        Optional<ApiKey, "sponsorApiKey">,
-      RelayResponse
-    >(
-      {
-        relayCall: RelayCall.CallWithSyncFeeERC2771,
-        request: {
-          ...struct,
-          ...options,
-          feeToken,
-          isRelayContext: isRelayContext ?? true,
-          userSignature: signature,
-          sponsorApiKey,
+      const { struct, signature } = await getSignatureDataERC2771(
+        { request, walletOrProvider, type },
+        config
+      );
+
+      return await post<
+        CallWithERC2771Struct &
+          BaseCallWithSyncFeeParams &
+          RelayRequestOptions &
+          UserAuthSignature &
+          Optional<ApiKey, "sponsorApiKey"> &
+          ConcurrencyOptions,
+        RelayResponse
+      >(
+        {
+          relayCall: RelayCall.CallWithSyncFeeERC2771,
+          request: {
+            ...safeTransformStruct(struct),
+            ...options,
+            feeToken,
+            isRelayContext: isRelayContext ?? true,
+            userSignature: signature,
+            isConcurrent,
+            sponsorApiKey,
+          },
         },
-      },
-      config
-    );
+        config
+      );
+    }
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(

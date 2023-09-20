@@ -1,4 +1,4 @@
-import { BigNumberish, BytesLike } from "ethers";
+import { BytesLike } from "ethers";
 
 export enum RelayCall {
   CallWithSyncFee,
@@ -10,8 +10,12 @@ export enum RelayCall {
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 export type RelayRequestOptions = {
-  gasLimit?: BigNumberish;
+  gasLimit?: bigint;
   retries?: number;
+};
+
+export type ConcurrencyOptions = {
+  isConcurrent: boolean;
 };
 
 export type ApiKey = {
@@ -25,7 +29,7 @@ export type RelayResponse = {
 export type EIP712Domain = {
   name: string;
   version: string;
-  chainId: number;
+  chainId: string;
   verifyingContract: string;
 };
 
@@ -39,7 +43,7 @@ export const EIP712_DOMAIN_TYPE_DATA = {
 };
 
 export type BaseRelayParams = {
-  chainId: BigNumberish;
+  chainId: bigint;
   target: string;
   data: BytesLike;
 };
@@ -53,5 +57,16 @@ export type Config = {
   url: string;
   contract: {
     relayERC2771: string;
+    relay1BalanceERC2771: string;
+    relayERC2771zkSync: string;
+    relay1BalanceERC2771zkSync: string;
+    relayConcurrentERC2771: string;
+    relay1BalanceConcurrentERC2771: string;
+    relayConcurrentERC2771zkSync: string;
+    relay1BalanceConcurrentERC2771zkSync: string;
   };
+};
+
+export type SafeRequestPayload<T> = {
+  [K in keyof T]: T[K] extends bigint ? string : T[K];
 };

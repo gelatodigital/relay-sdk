@@ -1,6 +1,4 @@
-import axios from "axios";
-
-import { getHttpErrorMessage } from "../../utils";
+import { axiosInstance, getHttpErrorMessage } from "../../utils";
 import { Config } from "../types";
 
 import { TransactionStatusResponse } from "./types";
@@ -10,8 +8,9 @@ export const getTaskStatus = async (
   config: Config
 ): Promise<TransactionStatusResponse | undefined> => {
   try {
-    return (await axios.get(`${config.url}/tasks/status/${payload.taskId}`))
-      .data.task;
+    return (
+      await axiosInstance.get(`${config.url}/tasks/status/${payload.taskId}`)
+    ).data.task;
   } catch (error) {
     throw new Error(
       `GelatoRelaySDK/getTaskStatus: Failed with error: ${getHttpErrorMessage(

@@ -1,62 +1,113 @@
 import { ethers } from "ethers";
 
-import {
-  isWallet,
-  populateOptionalUserParameters,
-  signTypedDataV4,
-} from "../../../utils";
-import { isNetworkSupported } from "../../network";
+import { isConcurrentRequest, signTypedDataV4 } from "../../../utils";
 import { Config } from "../../types";
 import {
   SignatureData,
   CallWithERC2771Request,
-  CallWithERC2771RequestOptionalParameters,
   ERC2771Type,
+  CallWithConcurrentERC2771Request,
+  SequentialSignatureData,
+  ConcurrentSignatureData,
 } from "../types";
-import { getPayloadToSign, mapRequestToStruct } from "../utils";
+import { getDataToSignERC2771 } from "../getDataToSignERC2771/index.js";
 
-export const getSignatureDataERC2771 = async (
+export async function getSignatureDataERC2771(
   payload: {
     request: CallWithERC2771Request;
-    walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
+  },
+  config: Config
+): Promise<SequentialSignatureData>;
+
+export async function getSignatureDataERC2771(
+  payload: {
+    request: CallWithConcurrentERC2771Request;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    type:
+      | ERC2771Type.ConcurrentCallWithSyncFee
+      | ERC2771Type.ConcurrentSponsoredCall;
+  },
+  config: Config
+): Promise<ConcurrentSignatureData>;
+
+export async function getSignatureDataERC2771(
+  payload: {
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
     type: ERC2771Type;
   },
   config: Config
-): Promise<SignatureData> => {
+): Promise<SignatureData>;
+
+export async function getSignatureDataERC2771(
+  payload: {
+    request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
+    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    type: ERC2771Type;
+  },
+  config: Config
+): Promise<SignatureData> {
   try {
-    const { request, type, walletOrProvider } = payload;
+    const { request, walletOrProvider } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
-      config
-    );
-    if (!isSupported) {
-      throw new Error(`Chain id [${request.chainId}] is not supported`);
-    }
 
-    const parametersToOverride = await populateOptionalUserParameters<
-      CallWithERC2771Request,
-      CallWithERC2771RequestOptionalParameters
-    >({ request, walletOrProvider }, config);
-    const struct = await mapRequestToStruct(request, parametersToOverride);
-    const signature = await signTypedDataV4(
-      walletOrProvider,
-      request.user as string,
-      getPayloadToSign(
-        { struct, type, isWallet: isWallet(walletOrProvider) },
+    if (isConcurrentRequest(request)) {
+      const type = payload.type as
+        | ERC2771Type.ConcurrentCallWithSyncFee
+        | ERC2771Type.ConcurrentSponsoredCall;
+
+      const { struct, typedData } = await getDataToSignERC2771(
+        {
+          request,
+          walletOrProvider,
+          type,
+        },
         config
-      )
-    );
-    return {
-      struct,
-      signature,
-    };
+      );
+
+      const signature = await signTypedDataV4(
+        walletOrProvider,
+        request.user as string,
+        typedData
+      );
+
+      return {
+        struct,
+        signature,
+      };
+    } else {
+      const type = payload.type as
+        | ERC2771Type.CallWithSyncFee
+        | ERC2771Type.SponsoredCall;
+
+      const { struct, typedData } = await getDataToSignERC2771(
+        {
+          request,
+          walletOrProvider,
+          type,
+        },
+        config
+      );
+
+      const signature = await signTypedDataV4(
+        walletOrProvider,
+        request.user as string,
+        typedData
+      );
+
+      return {
+        struct,
+        signature,
+      };
+    }
   } catch (error) {
     const errorMessage = (error as Error).message;
     throw new Error(
       `GelatoRelaySDK/getSignatureDataERC2771: Failed with error: ${errorMessage}`
     );
   }
-};
+}

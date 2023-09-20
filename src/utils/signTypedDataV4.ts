@@ -4,26 +4,30 @@ import { SIGN_TYPED_DATA_V4 } from "../constants";
 import {
   CallWithSyncFeeERC2771PayloadToSign,
   SponsoredCallERC2771PayloadToSign,
+  SponsoredCallConcurrentERC2771PayloadToSign,
+  CallWithSyncFeeConcurrentERC2771PayloadToSign,
 } from "../lib/erc2771/types";
 
 import { isWallet } from "./isWallet";
 
 export const signTypedDataV4 = async (
-  walletOrProvider: ethers.providers.Web3Provider | ethers.Wallet,
+  walletOrProvider: ethers.BrowserProvider | ethers.Wallet,
   address: string,
   payload:
     | SponsoredCallERC2771PayloadToSign
     | CallWithSyncFeeERC2771PayloadToSign
+    | SponsoredCallConcurrentERC2771PayloadToSign
+    | CallWithSyncFeeConcurrentERC2771PayloadToSign
 ): Promise<string> => {
   if (isWallet(walletOrProvider)) {
-    return await walletOrProvider._signTypedData(
+    return await walletOrProvider.signTypedData(
       payload.domain,
       payload.types,
       payload.message
     );
   }
   // Magic Connect accepts payload as an object
-  if ((walletOrProvider.provider as { isMagic: boolean }).isMagic) {
+  if ((walletOrProvider.provider as unknown as { isMagic: boolean }).isMagic) {
     return await walletOrProvider.send(SIGN_TYPED_DATA_V4, [address, payload]);
   }
   const signature = await walletOrProvider.send(SIGN_TYPED_DATA_V4, [

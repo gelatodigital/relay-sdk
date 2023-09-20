@@ -22,7 +22,7 @@ export const relayWithSyncFee = async (
   try {
     const { request, options, sponsorApiKey } = payload;
     const isSupported = await isNetworkSupported(
-      { chainId: Number(request.chainId) },
+      { chainId: request.chainId },
       config
     );
     if (!isSupported) {
@@ -41,6 +41,7 @@ export const relayWithSyncFee = async (
           isRelayContext: request.isRelayContext ?? true,
           ...options,
           sponsorApiKey,
+          chainId: request.chainId.toString(),
         },
       },
       config

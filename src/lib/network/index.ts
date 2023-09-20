@@ -1,11 +1,9 @@
-import axios from "axios";
-
-import { getHttpErrorMessage } from "../../utils";
+import { axiosInstance, getHttpErrorMessage } from "../../utils";
 import { Config } from "../types";
 
 export const isNetworkSupported = async (
   payload: {
-    chainId: number;
+    chainId: bigint;
   },
   config: Config
 ): Promise<boolean> => {
@@ -17,8 +15,9 @@ export const getSupportedNetworks = async (
   config: Config
 ): Promise<string[]> => {
   try {
-    return (await axios.get<{ relays: string[] }>(`${config.url}/relays/v2`))
-      .data.relays;
+    return (
+      await axiosInstance.get<{ relays: string[] }>(`${config.url}/relays/v2`)
+    ).data.relays;
   } catch (error) {
     throw new Error(
       `GelatoRelaySDK/getSupportedNetworks: Failed with error: ${getHttpErrorMessage(
