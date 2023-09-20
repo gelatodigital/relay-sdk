@@ -94,23 +94,23 @@ export class GelatoRelay {
 
   /**
    * @param {CallWithSyncFeeRequest} request - CallWithSyncFee request to be relayed by Gelato Executors
-   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
   callWithSyncFee = (
     request: CallWithSyncFeeRequest,
-    sponsorApiKey?: string,
-    options?: RelayRequestOptions
+    options?: RelayRequestOptions,
+    sponsorApiKey?: string
   ): Promise<RelayResponse> =>
     library.relayWithSyncFee({ request, sponsorApiKey, options }, this.#config);
 
   /**
    * @param {CallWithSyncFeeERC2771Request | CallWithSyncFeeConcurrentERC2771Request} request - Call with sync fee: Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
    * @param {ethers.BrowserProvider | ethers.Wallet} walletOrProvider - BrowserProvider [front-end] or Wallet [back-end] to sign the payload
-   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
@@ -119,8 +119,8 @@ export class GelatoRelay {
       | CallWithSyncFeeERC2771Request
       | CallWithSyncFeeConcurrentERC2771Request,
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet,
-    sponsorApiKey?: string,
-    options?: RelayRequestOptions
+    options?: RelayRequestOptions,
+    sponsorApiKey?: string
   ): Promise<RelayResponse> =>
     library.relayWithCallWithSyncFeeERC2771(
       {
