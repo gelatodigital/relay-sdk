@@ -39,9 +39,10 @@ export const relayWithSyncFee = async (
         request: {
           ...request,
           isRelayContext: request.isRelayContext ?? true,
-          ...options,
           sponsorApiKey,
           chainId: request.chainId.toString(),
+          gasLimit: options?.gasLimit ? options.gasLimit.toString() : undefined,
+          retries: options?.retries,
         },
       },
       config

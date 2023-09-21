@@ -61,11 +61,14 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
             ...safeTransformStruct(struct),
-            ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
@@ -93,12 +96,15 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
             ...safeTransformStruct(struct),
-            ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
             sponsorApiKey,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config

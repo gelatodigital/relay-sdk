@@ -50,10 +50,13 @@ export const callWithSyncFeeERC2771WithSignature = async (
           request: {
             ...safeTransformStruct(struct),
             ...syncFeeParams,
-            ...options,
             isRelayContext: syncFeeParams.isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
@@ -73,10 +76,13 @@ export const callWithSyncFeeERC2771WithSignature = async (
           request: {
             ...safeTransformStruct(struct),
             ...syncFeeParams,
-            ...options,
             isRelayContext: syncFeeParams.isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config

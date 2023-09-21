@@ -49,10 +49,13 @@ export const sponsoredCallERC2771WithSignature = async (
           relayCall: RelayCall.SponsoredCallERC2771,
           request: {
             ...safeTransformStruct(struct),
-            ...options,
             userSignature: signature,
             sponsorApiKey,
             isConcurrent,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
@@ -71,10 +74,13 @@ export const sponsoredCallERC2771WithSignature = async (
           relayCall: RelayCall.SponsoredCallERC2771,
           request: {
             ...safeTransformStruct(struct),
-            ...options,
             userSignature: signature,
             sponsorApiKey,
             isConcurrent,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
