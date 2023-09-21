@@ -243,7 +243,8 @@ export class GelatoRelay {
     struct: SignatureData["struct"],
     syncFeeParams: BaseCallWithSyncFeeParams,
     signature: SignatureData["signature"],
-    options?: RelayRequestOptions
+    options?: RelayRequestOptions,
+    sponsorApiKey?: string
   ): Promise<RelayResponse> =>
     library.callWithSyncFeeERC2771WithSignature(
       {
@@ -251,6 +252,7 @@ export class GelatoRelay {
         syncFeeParams,
         signature,
         options,
+        sponsorApiKey,
       },
       this.#config
     );

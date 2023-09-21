@@ -54,6 +54,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           BaseCallWithSyncFeeParams &
           RelayRequestOptions &
           UserAuthSignature &
+          Optional<ApiKey, "sponsorApiKey"> &
           ConcurrencyOptions,
         RelayResponse
       >(
@@ -65,6 +66,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            sponsorApiKey,
             gasLimit: options?.gasLimit
               ? options.gasLimit.toString()
               : undefined,
