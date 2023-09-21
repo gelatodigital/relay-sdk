@@ -95,19 +95,22 @@ export class GelatoRelay {
   /**
    * @param {CallWithSyncFeeRequest} request - CallWithSyncFee request to be relayed by Gelato Executors
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
   callWithSyncFee = (
     request: CallWithSyncFeeRequest,
-    options?: RelayRequestOptions
+    options?: RelayRequestOptions,
+    sponsorApiKey?: string
   ): Promise<RelayResponse> =>
-    library.relayWithSyncFee({ request, options }, this.#config);
+    library.relayWithSyncFee({ request, sponsorApiKey, options }, this.#config);
 
   /**
    * @param {CallWithSyncFeeERC2771Request | CallWithSyncFeeConcurrentERC2771Request} request - Call with sync fee: Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
    * @param {ethers.BrowserProvider | ethers.Wallet} walletOrProvider - BrowserProvider [front-end] or Wallet [back-end] to sign the payload
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
@@ -116,12 +119,14 @@ export class GelatoRelay {
       | CallWithSyncFeeERC2771Request
       | CallWithSyncFeeConcurrentERC2771Request,
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet,
-    options?: RelayRequestOptions
+    options?: RelayRequestOptions,
+    sponsorApiKey?: string
   ): Promise<RelayResponse> =>
     library.relayWithCallWithSyncFeeERC2771(
       {
         request,
         walletOrProvider,
+        sponsorApiKey,
         options,
       },
       this.#config
@@ -231,6 +236,7 @@ export class GelatoRelay {
    * @param {BaseCallWithSyncFeeParams} syncFeeParams - Call with Sync Fee parameters
    * @param {SignatureData["signature"]} signature - Signature that can be obtained from getSignatureDataERC2771
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
@@ -238,7 +244,8 @@ export class GelatoRelay {
     struct: SignatureData["struct"],
     syncFeeParams: BaseCallWithSyncFeeParams,
     signature: SignatureData["signature"],
-    options?: RelayRequestOptions
+    options?: RelayRequestOptions,
+    sponsorApiKey?: string
   ): Promise<RelayResponse> =>
     library.callWithSyncFeeERC2771WithSignature(
       {
@@ -246,6 +253,7 @@ export class GelatoRelay {
         syncFeeParams,
         signature,
         options,
+        sponsorApiKey,
       },
       this.#config
     );

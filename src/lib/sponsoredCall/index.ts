@@ -61,8 +61,9 @@ const sponsoredCall = async (
         relayCall: RelayCall.SponsoredCall,
         request: {
           ...struct,
-          ...options,
           sponsorApiKey,
+          gasLimit: options?.gasLimit ? options.gasLimit.toString() : undefined,
+          retries: options?.retries,
         },
       },
       config

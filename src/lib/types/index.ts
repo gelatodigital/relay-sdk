@@ -68,5 +68,11 @@ export type Config = {
 };
 
 export type SafeRequestPayload<T> = {
-  [K in keyof T]: T[K] extends bigint ? string : T[K];
+  [K in keyof T]: T[K] extends bigint
+    ? string
+    : T[K] extends bigint | undefined
+    ? string | undefined
+    : T[K] extends object
+    ? SafeRequestPayload<T[K]>
+    : T[K];
 };

@@ -1,9 +1,11 @@
 import { isConcurrentStruct, post } from "../../../utils";
 import { isNetworkSupported } from "../../network";
 import {
+  ApiKey,
   BaseCallWithSyncFeeParams,
   ConcurrencyOptions,
   Config,
+  Optional,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -21,11 +23,13 @@ export const callWithSyncFeeERC2771WithSignature = async (
     syncFeeParams: BaseCallWithSyncFeeParams;
     signature: string;
     options?: RelayRequestOptions;
+    sponsorApiKey?: string;
   },
   config: Config
 ): Promise<RelayResponse> => {
   try {
-    const { signature, struct, syncFeeParams, options } = payload;
+    const { signature, struct, syncFeeParams, options, sponsorApiKey } =
+      payload;
 
     const isSupported = await isNetworkSupported(
       { chainId: struct.chainId },
@@ -42,6 +46,7 @@ export const callWithSyncFeeERC2771WithSignature = async (
           BaseCallWithSyncFeeParams &
           RelayRequestOptions &
           UserAuthSignature &
+          Optional<ApiKey, "sponsorApiKey"> &
           ConcurrencyOptions,
         RelayResponse
       >(
@@ -50,10 +55,14 @@ export const callWithSyncFeeERC2771WithSignature = async (
           request: {
             ...safeTransformStruct(struct),
             ...syncFeeParams,
-            ...options,
             isRelayContext: syncFeeParams.isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            sponsorApiKey,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
@@ -65,6 +74,7 @@ export const callWithSyncFeeERC2771WithSignature = async (
           BaseCallWithSyncFeeParams &
           RelayRequestOptions &
           UserAuthSignature &
+          Optional<ApiKey, "sponsorApiKey"> &
           ConcurrencyOptions,
         RelayResponse
       >(
@@ -73,10 +83,14 @@ export const callWithSyncFeeERC2771WithSignature = async (
           request: {
             ...safeTransformStruct(struct),
             ...syncFeeParams,
-            ...options,
             isRelayContext: syncFeeParams.isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            sponsorApiKey,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config

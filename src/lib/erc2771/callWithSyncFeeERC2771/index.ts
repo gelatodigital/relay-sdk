@@ -2,9 +2,11 @@ import { ethers } from "ethers";
 
 import { post } from "../../../utils";
 import {
+  ApiKey,
   BaseCallWithSyncFeeParams,
   ConcurrencyOptions,
   Config,
+  Optional,
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
@@ -26,12 +28,13 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       | CallWithSyncFeeERC2771Request
       | CallWithSyncFeeConcurrentERC2771Request;
     walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    sponsorApiKey?: string;
     options?: RelayRequestOptions;
   },
   config: Config
 ): Promise<RelayResponse> => {
   try {
-    const { request, walletOrProvider, options } = payload;
+    const { request, walletOrProvider, options, sponsorApiKey } = payload;
     if (!walletOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
@@ -51,6 +54,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           BaseCallWithSyncFeeParams &
           RelayRequestOptions &
           UserAuthSignature &
+          Optional<ApiKey, "sponsorApiKey"> &
           ConcurrencyOptions,
         RelayResponse
       >(
@@ -58,11 +62,15 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
             ...safeTransformStruct(struct),
-            ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            sponsorApiKey,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
@@ -82,6 +90,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           BaseCallWithSyncFeeParams &
           RelayRequestOptions &
           UserAuthSignature &
+          Optional<ApiKey, "sponsorApiKey"> &
           ConcurrencyOptions,
         RelayResponse
       >(
@@ -89,11 +98,15 @@ export const relayWithCallWithSyncFeeERC2771 = async (
           relayCall: RelayCall.CallWithSyncFeeERC2771,
           request: {
             ...safeTransformStruct(struct),
-            ...options,
             feeToken,
             isRelayContext: isRelayContext ?? true,
             userSignature: signature,
             isConcurrent,
+            sponsorApiKey,
+            gasLimit: options?.gasLimit
+              ? options.gasLimit.toString()
+              : undefined,
+            retries: options?.retries,
           },
         },
         config
