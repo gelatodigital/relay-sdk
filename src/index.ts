@@ -236,6 +236,7 @@ export class GelatoRelay {
    * @param {BaseCallWithSyncFeeParams} syncFeeParams - Call with Sync Fee parameters
    * @param {SignatureData["signature"]} signature - Signature that can be obtained from getSignatureDataERC2771
    * @param {RelayRequestOptions} [options] - Optional Relay configuration
+   * @param {string} [sponsorApiKey] Optional Sponsor API key to be used for the call
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
