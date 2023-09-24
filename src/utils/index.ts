@@ -13,3 +13,5 @@ export * from "./axios";
 export * from "./isConcurrentStruct";
 export * from "./isConcurrentRequest";
 export * from "./generateSalt";
+export * from "./isFinalTaskState";
+export * from "./websocketHandler";
