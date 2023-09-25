@@ -12,6 +12,7 @@ import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";
 import { isConcurrentRequest } from "./isConcurrentRequest";
 import { generateSalt } from "./generateSalt";
+import { getProviderChainId } from "./getProviderChainId";
 
 export async function populateOptionalUserParameters(
   payload: {
@@ -72,6 +73,12 @@ export async function populateOptionalUserParameters(
     if (request.userNonce === undefined) {
       if (!signerOrProvider || !signerOrProvider.provider) {
         throw new Error("Missing provider.");
+      }
+      const providerChainId = await getProviderChainId(signerOrProvider);
+      if (request.chainId !== providerChainId) {
+        throw new Error(
+          `Request and provider chain id mismatch. Request: [${request.chainId.toString()}], provider: [${providerChainId.toString()}]`
+        );
       }
       parametersToOverride.userNonce = await getUserNonce(
         {
