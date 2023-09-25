@@ -1,8 +1,6 @@
-import { ethers } from "ethers";
-
-import { getProviderChainId, isConcurrentRequest } from "../../../utils";
+import { isConcurrentRequest } from "../../../utils";
 import { isNetworkSupported } from "../../network";
-import { Config } from "../../types";
+import { Config, SignerOrProvider } from "../../types";
 import {
   CallWithERC2771Request,
   ERC2771Type,
@@ -17,7 +15,7 @@ export async function getDataToSignERC2771(
   payload: {
     request: CallWithERC2771Request;
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<SequentialPayloadToSign>;
@@ -28,7 +26,7 @@ export async function getDataToSignERC2771(
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<ConcurrentPayloadToSign>;
@@ -37,7 +35,7 @@ export async function getDataToSignERC2771(
   payload: {
     request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
     type: ERC2771Type;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<PayloadToSign>;
@@ -46,26 +44,17 @@ export async function getDataToSignERC2771(
   payload: {
     request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
     type: ERC2771Type;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<PayloadToSign> {
   try {
-    const { request, walletOrProvider } = payload;
+    const { request, signerOrProvider } = payload;
 
     const { chainId } = request;
     const isSupported = await isNetworkSupported({ chainId }, config);
     if (!isSupported) {
       throw new Error(`Chain id [${chainId.toString()}] is not supported`);
-    }
-
-    if (walletOrProvider) {
-      const providerChainId = await getProviderChainId(walletOrProvider);
-      if (chainId !== providerChainId) {
-        throw new Error(
-          `Request and provider chain id mismatch. Request: [${chainId.toString()}], provider: [${providerChainId.toString()}]`
-        );
-      }
     }
 
     if (isConcurrentRequest(request)) {
@@ -77,7 +66,7 @@ export async function getDataToSignERC2771(
         {
           request,
           type,
-          walletOrProvider,
+          signerOrProvider,
         },
         config
       );
@@ -92,7 +81,7 @@ export async function getDataToSignERC2771(
         | ERC2771Type.SponsoredCall;
 
       const { struct, typedData } = await populatePayloadToSign(
-        { request, type, walletOrProvider },
+        { request, type, signerOrProvider },
         config
       );
 

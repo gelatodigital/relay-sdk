@@ -1,5 +1,3 @@
-import { ethers } from "ethers";
-
 import {
   CallWithConcurrentERC2771Request,
   CallWithERC2771Request,
@@ -8,10 +6,10 @@ import {
   PayloadToSign,
   SequentialPayloadToSign,
 } from "../types";
-import { Config } from "../../types";
+import { Config, SignerOrProvider } from "../../types";
 import {
   isConcurrentRequest,
-  isWallet,
+  isSigner,
   populateOptionalUserParameters,
 } from "../../../utils";
 
@@ -25,7 +23,7 @@ export async function populatePayloadToSign(
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<ConcurrentPayloadToSign>;
@@ -34,7 +32,7 @@ export async function populatePayloadToSign(
   payload: {
     request: CallWithERC2771Request;
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<SequentialPayloadToSign>;
@@ -43,11 +41,11 @@ export async function populatePayloadToSign(
   payload: {
     request: CallWithConcurrentERC2771Request | CallWithERC2771Request;
     type: ERC2771Type;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
   config: Config
 ): Promise<PayloadToSign> {
-  const { request, walletOrProvider } = payload;
+  const { request, signerOrProvider } = payload;
   if (isConcurrentRequest(request)) {
     const type = payload.type as
       | ERC2771Type.ConcurrentCallWithSyncFee
@@ -56,7 +54,7 @@ export async function populatePayloadToSign(
       {
         request,
         type,
-        walletOrProvider,
+        signerOrProvider,
       },
       config
     );
@@ -68,7 +66,7 @@ export async function populatePayloadToSign(
       {
         struct: safeStruct,
         type,
-        isWallet: walletOrProvider ? isWallet(walletOrProvider) : undefined,
+        isSigner: signerOrProvider ? isSigner(signerOrProvider) : undefined,
       },
       config
     );
@@ -84,7 +82,7 @@ export async function populatePayloadToSign(
       {
         request,
         type,
-        walletOrProvider,
+        signerOrProvider,
       },
       config
     );
@@ -96,7 +94,7 @@ export async function populatePayloadToSign(
       {
         struct: safeStruct,
         type,
-        isWallet: walletOrProvider ? isWallet(walletOrProvider) : undefined,
+        isSigner: signerOrProvider ? isSigner(signerOrProvider) : undefined,
       },
       config
     );
