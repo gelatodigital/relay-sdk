@@ -55,6 +55,7 @@ export type BaseCallWithSyncFeeParams = {
 
 export type Config = {
   url: string;
+  websocketUrl: string;
   contract: {
     relayERC2771: string;
     relay1BalanceERC2771: string;

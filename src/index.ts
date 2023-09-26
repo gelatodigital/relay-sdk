@@ -55,9 +55,7 @@ export class GelatoRelay {
 
   constructor(config?: Partial<Config>) {
     this.#config = this._getConfiguration(config);
-
-    const websocketUrl = this.#config.url.replace(/^http/, "ws");
-    this.#websocketHandler = new WebsocketHandler(websocketUrl);
+    this.#websocketHandler = new WebsocketHandler(this.#config.websocketUrl);
   }
 
   /**
@@ -68,8 +66,10 @@ export class GelatoRelay {
   };
 
   private _getConfiguration = (config?: Partial<Config>): Config => {
+    const url = config?.url ?? GELATO_RELAY_URL;
     return {
-      url: config?.url ?? GELATO_RELAY_URL,
+      url,
+      websocketUrl: url.replace(/^http/, "ws"),
       contract: {
         relayERC2771:
           config?.contract?.relayERC2771 ?? GELATO_RELAY_ERC2771_ADDRESS,
