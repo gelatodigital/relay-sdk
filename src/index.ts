@@ -56,10 +56,8 @@ export class GelatoRelay {
   constructor(config?: Partial<Config>) {
     this.#config = this._getConfiguration(config);
 
-    if (this.#config.useWebsocket) {
-      const websocketUrl = this.#config.url.replace(/^http/, "ws");
-      this.#websocketHandler = new WebsocketHandler(websocketUrl);
-    }
+    const websocketUrl = this.#config.url.replace(/^http/, "ws");
+    this.#websocketHandler = new WebsocketHandler(websocketUrl);
   }
 
   /**
@@ -97,7 +95,6 @@ export class GelatoRelay {
           config?.contract?.relay1BalanceConcurrentERC2771zkSync ??
           GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
       },
-      useWebsocket: config?.useWebsocket ?? true,
     };
   };
 

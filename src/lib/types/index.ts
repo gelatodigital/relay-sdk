@@ -65,7 +65,6 @@ export type Config = {
     relayConcurrentERC2771zkSync: string;
     relay1BalanceConcurrentERC2771zkSync: string;
   };
-  useWebsocket: boolean;
 };
 
 export type SafeRequestPayload<T> = {
