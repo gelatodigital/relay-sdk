@@ -3,17 +3,23 @@ import WebSocket from "isomorphic-ws";
 import { TransactionStatusResponse } from "../lib/status/types/index.js";
 
 import { isFinalTaskState } from "./isFinalTaskState.js";
-import { WebsocketEvent, WebsocketMessage } from "./websocketMessage.js";
+import {
+  ErrorWebsocketMessage,
+  UpdateWebsocketMessage,
+  WebsocketEvent,
+  WebsocketMessage,
+} from "./websocketMessage.js";
 
 export class WebsocketHandler {
   readonly #url: string;
   readonly #subscriptions: Set<string> = new Set();
-  #taskStatusHandlers: ((taskStatus: TransactionStatusResponse) => void)[] = [];
-  #webSocket?: WebSocket;
+  #updateHandlers: ((taskStatus: TransactionStatusResponse) => void)[] = [];
+  #errorHandlers: ((error: Error) => void)[] = [];
+  #websocket?: WebSocket;
   readonly #reconnectIntervalMillis = 1000;
 
   constructor(url: string) {
-    this.#url = url;
+    this.#url = `${url}/tasks/ws/status`;
   }
 
   public onUpdate(
@@ -23,11 +29,9 @@ export class WebsocketHandler {
       throw new Error("Callback handler is not provided");
     }
 
-    this.#taskStatusHandlers.push(handler);
+    this.#updateHandlers.push(handler);
 
-    if (!this.#webSocket) {
-      this._connectWebsocket(`${this.#url}/tasks/ws/status`);
-    }
+    this._connect();
   }
 
   public offUpdate(
@@ -37,14 +41,33 @@ export class WebsocketHandler {
       throw new Error("Callback handler is not provided");
     }
 
-    this.#taskStatusHandlers = this.#taskStatusHandlers.filter(
+    this.#updateHandlers = this.#updateHandlers.filter(
       (element) => element !== handler
     );
 
-    if (this.#taskStatusHandlers.length === 0 && this.#webSocket) {
-      this.#webSocket.close();
-      this.#webSocket = undefined;
+    this._disconnectIfUnused();
+  }
+
+  public onError(handler: (error: Error) => void): void {
+    if (!handler) {
+      throw new Error("Callback handler is not provided");
     }
+
+    this.#errorHandlers.push(handler);
+
+    this._connect();
+  }
+
+  public offError(handler: (error: Error) => void): void {
+    if (!handler) {
+      throw new Error("Callback handler is not provided");
+    }
+
+    this.#errorHandlers = this.#errorHandlers.filter(
+      (element) => element !== handler
+    );
+
+    this._disconnectIfUnused();
   }
 
   public subscribe(taskId: string) {
@@ -73,10 +96,14 @@ export class WebsocketHandler {
     });
   }
 
-  private _connectWebsocket(url: string) {
-    this.#webSocket = new WebSocket(url);
+  private _connect() {
+    if (this.#websocket) {
+      return;
+    }
 
-    this.#webSocket.onopen = () => {
+    this.#websocket = new WebSocket(this.#url);
+
+    this.#websocket.onopen = () => {
       this.#subscriptions.forEach((taskId) => {
         this._sendWebsocketMessage({
           action: "subscribe",
@@ -85,31 +112,62 @@ export class WebsocketHandler {
       });
     };
 
-    this.#webSocket.onclose = () => {
+    this.#websocket.onclose = () => {
       setTimeout(() => {
-        this._connectWebsocket(url);
+        this._connect();
       }, this.#reconnectIntervalMillis);
     };
 
-    this.#webSocket.onmessage = (data: WebSocket.MessageEvent) => {
-      const message = JSON.parse(data.data.toString()) as WebsocketMessage;
-      if (message.event === WebsocketEvent.UPDATE) {
-        const taskStatus = message.payload;
+    this.#websocket.onmessage = (data: WebSocket.MessageEvent) => {
+      const message = JSON.parse(
+        data.data.toString()
+      ) as WebsocketMessage<unknown>;
 
-        if (isFinalTaskState(taskStatus.taskState)) {
-          this.unsubscribe(taskStatus.taskId);
+      switch (message.event) {
+        case WebsocketEvent.ERROR: {
+          const errorWebsocketMessage = message as ErrorWebsocketMessage;
+          const error: Error = errorWebsocketMessage.payload;
+
+          this.#errorHandlers.forEach((handler) => {
+            handler(error);
+          });
+          break;
         }
+        case WebsocketEvent.UPDATE: {
+          const updateWebsocketMessage = message as UpdateWebsocketMessage;
+          const taskStatus: TransactionStatusResponse =
+            updateWebsocketMessage.payload;
 
-        this.#taskStatusHandlers.forEach((handler) => {
-          handler(taskStatus);
-        });
+          if (isFinalTaskState(taskStatus.taskState)) {
+            this.unsubscribe(taskStatus.taskId);
+          }
+
+          this.#updateHandlers.forEach((handler) => {
+            handler(taskStatus);
+          });
+          break;
+        }
+        default: {
+          break;
+        }
       }
     };
   }
 
   private _sendWebsocketMessage(message: unknown): void {
-    if (this.#webSocket && this.#webSocket.readyState === WebSocket.OPEN) {
-      this.#webSocket.send(JSON.stringify(message));
+    if (this.#websocket && this.#websocket.readyState === WebSocket.OPEN) {
+      this.#websocket.send(JSON.stringify(message));
+    }
+  }
+
+  private _disconnectIfUnused() {
+    if (
+      this.#updateHandlers.length === 0 &&
+      this.#errorHandlers.length === 0 &&
+      this.#websocket
+    ) {
+      this.#websocket.close();
+      this.#websocket = undefined;
     }
   }
 }

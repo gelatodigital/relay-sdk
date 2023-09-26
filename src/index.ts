@@ -378,7 +378,7 @@ export class GelatoRelay {
     library.getTaskStatus({ taskId }, this.#config);
 
   /**
-   * @param {callback} handler - Callback function to be called when the task status changes
+   * @param {callback} handler - Callback function to be called on every task status update
    *
    */
   onTaskStatusUpdate = (
@@ -389,11 +389,35 @@ export class GelatoRelay {
     }
   };
 
+  /**
+   * @param {callback} handler - Callback function to be unregistered from task status updates
+   *
+   */
   offTaskStatusUpdate = (
     handler: (taskStatus: TransactionStatusResponse) => void
   ): void => {
     if (this.#websocketHandler) {
       this.#websocketHandler.offUpdate(handler);
+    }
+  };
+
+  /**
+   * @param {callback} handler - Callback function to be called on error
+   *
+   */
+  onError = (handler: (error: Error) => void): void => {
+    if (this.#websocketHandler) {
+      this.#websocketHandler.onError(handler);
+    }
+  };
+
+  /**
+   * @param {callback} handler - Callback function to be unregistered as an error handler
+   *
+   */
+  offError = (handler: (error: Error) => void): void => {
+    if (this.#websocketHandler) {
+      this.#websocketHandler.offError(handler);
     }
   };
 }
