@@ -1,5 +1,3 @@
-import { ethers } from "ethers";
-
 import { DEFAULT_DEADLINE_GAP } from "../constants";
 import {
   CallWithConcurrentERC2771Request,
@@ -8,12 +6,13 @@ import {
   CallWithERC2771RequestOptionalParameters,
   ERC2771Type,
 } from "../lib/erc2771/types";
-import { Config } from "../lib/types";
+import { Config, SignerOrProvider } from "../lib/types";
 
 import { calculateDeadline } from "./calculateDeadline";
 import { getUserNonce } from "./getUserNonce";
 import { isConcurrentRequest } from "./isConcurrentRequest";
 import { generateSalt } from "./generateSalt";
+import { getProviderChainId } from "./getProviderChainId";
 
 export async function populateOptionalUserParameters(
   payload: {
@@ -21,7 +20,7 @@ export async function populateOptionalUserParameters(
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
 
   config: Config
@@ -31,7 +30,7 @@ export async function populateOptionalUserParameters(
   payload: {
     request: CallWithERC2771Request;
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
 
   config: Config
@@ -41,7 +40,7 @@ export async function populateOptionalUserParameters(
   payload: {
     request: CallWithConcurrentERC2771Request | CallWithERC2771Request;
     type: ERC2771Type;
-    walletOrProvider?: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider?: SignerOrProvider;
   },
 
   config: Config
@@ -64,7 +63,7 @@ export async function populateOptionalUserParameters(
     }
     return parametersToOverride;
   } else {
-    const { type, walletOrProvider, request } = payload;
+    const { type, signerOrProvider, request } = payload;
     const parametersToOverride: Partial<CallWithERC2771RequestOptionalParameters> =
       {};
     if (!request.userDeadline) {
@@ -72,14 +71,20 @@ export async function populateOptionalUserParameters(
         calculateDeadline(DEFAULT_DEADLINE_GAP);
     }
     if (request.userNonce === undefined) {
-      if (!walletOrProvider) {
+      if (!signerOrProvider || !signerOrProvider.provider) {
         throw new Error("Missing provider.");
+      }
+      const providerChainId = await getProviderChainId(signerOrProvider);
+      if (request.chainId !== providerChainId) {
+        throw new Error(
+          `Request and provider chain id mismatch. Request: [${request.chainId.toString()}], provider: [${providerChainId.toString()}]`
+        );
       }
       parametersToOverride.userNonce = await getUserNonce(
         {
           account: request.user as string,
           type,
-          walletOrProvider,
+          signerOrProvider,
         },
         config
       );

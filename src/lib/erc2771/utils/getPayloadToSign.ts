@@ -22,7 +22,7 @@ export function getPayloadToSign(
   payload: {
     struct: SafeRequestPayload<CallWithERC2771Struct>;
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
-    isWallet?: boolean;
+    isSigner?: boolean;
   },
   config: Config
 ): SponsoredCallERC2771PayloadToSign | CallWithSyncFeeERC2771PayloadToSign;
@@ -33,7 +33,7 @@ export function getPayloadToSign(
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
-    isWallet?: boolean;
+    isSigner?: boolean;
   },
   config: Config
 ):
@@ -46,7 +46,7 @@ export function getPayloadToSign(
       CallWithERC2771Struct | CallWithConcurrentERC2771Struct
     >;
     type: ERC2771Type;
-    isWallet?: boolean;
+    isSigner?: boolean;
   },
   config: Config
 ):
@@ -54,7 +54,7 @@ export function getPayloadToSign(
   | CallWithSyncFeeERC2771PayloadToSign
   | SponsoredCallConcurrentERC2771PayloadToSign
   | CallWithSyncFeeConcurrentERC2771PayloadToSign {
-  const { isWallet, struct, type } = payload;
+  const { isSigner, struct, type } = payload;
   const domain = getEIP712Domain(
     { chainId: BigInt(struct.chainId), type },
     config
@@ -62,7 +62,7 @@ export function getPayloadToSign(
 
   switch (type) {
     case ERC2771Type.SponsoredCall:
-      if (isWallet) {
+      if (isSigner) {
         return {
           domain,
           types: {
@@ -81,7 +81,7 @@ export function getPayloadToSign(
         message: struct as SafeRequestPayload<CallWithERC2771Struct>,
       };
     case ERC2771Type.CallWithSyncFee:
-      if (isWallet) {
+      if (isSigner) {
         return {
           domain,
           types: {
@@ -101,7 +101,7 @@ export function getPayloadToSign(
       };
 
     case ERC2771Type.ConcurrentSponsoredCall:
-      if (isWallet) {
+      if (isSigner) {
         return {
           domain,
           types: {
@@ -121,7 +121,7 @@ export function getPayloadToSign(
         message: struct as SafeRequestPayload<CallWithConcurrentERC2771Struct>,
       };
     case ERC2771Type.ConcurrentCallWithSyncFee:
-      if (isWallet) {
+      if (isSigner) {
         return {
           domain,
           types: {
