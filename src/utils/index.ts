@@ -5,7 +5,7 @@ export * from "./eip712";
 export * from "./getHttpErrorMessage";
 export * from "./populateOptionalUserParameters";
 export * from "./post";
-export * from "./isWallet";
+export * from "./isSigner";
 export * from "./relayAddress";
 export * from "./isZkSync";
 export * from "./getProviderChainId";

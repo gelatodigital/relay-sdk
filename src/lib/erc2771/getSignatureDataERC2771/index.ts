@@ -1,7 +1,5 @@
-import { ethers } from "ethers";
-
 import { isConcurrentRequest, signTypedDataV4 } from "../../../utils";
-import { Config } from "../../types";
+import { Config, SignerOrProvider } from "../../types";
 import {
   SignatureData,
   CallWithERC2771Request,
@@ -15,7 +13,7 @@ import { getDataToSignERC2771 } from "../getDataToSignERC2771/index.js";
 export async function getSignatureDataERC2771(
   payload: {
     request: CallWithERC2771Request;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider: SignerOrProvider;
     type: ERC2771Type.CallWithSyncFee | ERC2771Type.SponsoredCall;
   },
   config: Config
@@ -24,7 +22,7 @@ export async function getSignatureDataERC2771(
 export async function getSignatureDataERC2771(
   payload: {
     request: CallWithConcurrentERC2771Request;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider: SignerOrProvider;
     type:
       | ERC2771Type.ConcurrentCallWithSyncFee
       | ERC2771Type.ConcurrentSponsoredCall;
@@ -35,7 +33,7 @@ export async function getSignatureDataERC2771(
 export async function getSignatureDataERC2771(
   payload: {
     request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider: SignerOrProvider;
     type: ERC2771Type;
   },
   config: Config
@@ -44,16 +42,13 @@ export async function getSignatureDataERC2771(
 export async function getSignatureDataERC2771(
   payload: {
     request: CallWithERC2771Request | CallWithConcurrentERC2771Request;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider: SignerOrProvider;
     type: ERC2771Type;
   },
   config: Config
 ): Promise<SignatureData> {
   try {
-    const { request, walletOrProvider } = payload;
-    if (!walletOrProvider.provider) {
-      throw new Error(`Missing provider`);
-    }
+    const { request, signerOrProvider } = payload;
 
     if (isConcurrentRequest(request)) {
       const type = payload.type as
@@ -63,14 +58,14 @@ export async function getSignatureDataERC2771(
       const { struct, typedData } = await getDataToSignERC2771(
         {
           request,
-          walletOrProvider,
+          signerOrProvider,
           type,
         },
         config
       );
 
       const signature = await signTypedDataV4(
-        walletOrProvider,
+        signerOrProvider,
         request.user as string,
         typedData
       );
@@ -87,14 +82,14 @@ export async function getSignatureDataERC2771(
       const { struct, typedData } = await getDataToSignERC2771(
         {
           request,
-          walletOrProvider,
+          signerOrProvider,
           type,
         },
         config
       );
 
       const signature = await signTypedDataV4(
-        walletOrProvider,
+        signerOrProvider,
         request.user as string,
         typedData
       );

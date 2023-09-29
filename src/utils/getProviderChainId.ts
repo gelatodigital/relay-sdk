@@ -1,18 +1,20 @@
 import { ethers } from "ethers";
 
-import { isWallet } from "./isWallet";
+import { SignerOrProvider } from "../lib/types";
+
+import { isSigner } from "./isSigner";
 
 export const getProviderChainId = async (
-  walletOrProvider: ethers.BrowserProvider | ethers.Wallet
+  signerOrProvider: SignerOrProvider
 ): Promise<bigint> => {
   let provider: ethers.Provider;
-  if (isWallet(walletOrProvider)) {
-    if (!walletOrProvider.provider) {
+  if (isSigner(signerOrProvider)) {
+    if (!signerOrProvider.provider) {
       throw new Error(`Missing provider`);
     }
-    provider = walletOrProvider.provider;
+    provider = signerOrProvider.provider;
   } else {
-    provider = walletOrProvider;
+    provider = signerOrProvider;
   }
 
   const { chainId } = await provider.getNetwork();

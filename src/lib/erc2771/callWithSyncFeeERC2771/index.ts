@@ -1,5 +1,3 @@
-import { ethers } from "ethers";
-
 import { post } from "../../../utils";
 import {
   ApiKey,
@@ -10,6 +8,7 @@ import {
   RelayCall,
   RelayRequestOptions,
   RelayResponse,
+  SignerOrProvider,
 } from "../../types";
 import {
   CallWithConcurrentERC2771Struct,
@@ -27,17 +26,14 @@ export const relayWithCallWithSyncFeeERC2771 = async (
     request:
       | CallWithSyncFeeERC2771Request
       | CallWithSyncFeeConcurrentERC2771Request;
-    walletOrProvider: ethers.BrowserProvider | ethers.Wallet;
+    signerOrProvider: SignerOrProvider;
     sponsorApiKey?: string;
     options?: RelayRequestOptions;
   },
   config: Config
 ): Promise<RelayResponse> => {
   try {
-    const { request, walletOrProvider, options, sponsorApiKey } = payload;
-    if (!walletOrProvider.provider) {
-      throw new Error(`Missing provider`);
-    }
+    const { request, signerOrProvider, options, sponsorApiKey } = payload;
 
     if (request.isConcurrent) {
       const isConcurrent = true;
@@ -45,7 +41,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       const type = ERC2771Type.ConcurrentCallWithSyncFee;
 
       const { struct, signature } = await getSignatureDataERC2771(
-        { request, walletOrProvider, type },
+        { request, signerOrProvider, type },
         config
       );
 
@@ -81,7 +77,7 @@ export const relayWithCallWithSyncFeeERC2771 = async (
       const type = ERC2771Type.CallWithSyncFee;
 
       const { struct, signature } = await getSignatureDataERC2771(
-        { request, walletOrProvider, type },
+        { request, signerOrProvider, type },
         config
       );
 

@@ -1,4 +1,4 @@
-import { BytesLike } from "ethers";
+import { BytesLike, ethers } from "ethers";
 
 export enum RelayCall {
   CallWithSyncFee,
@@ -77,3 +77,5 @@ export type SafeRequestPayload<T> = {
     ? SafeRequestPayload<T[K]>
     : T[K];
 };
+
+export type SignerOrProvider = ethers.BrowserProvider | ethers.Signer;
