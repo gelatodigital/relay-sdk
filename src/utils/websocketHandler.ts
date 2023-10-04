@@ -17,6 +17,7 @@ export class WebsocketHandler {
   #errorHandlers: ((error: Error) => void)[] = [];
   #websocket?: WebSocket;
   readonly #reconnectIntervalMillis = 1000;
+  readonly #connectTimeoutMillis = 10000;
 
   constructor(url: string) {
     this.#url = `${url}/tasks/ws/status`;
@@ -70,30 +71,34 @@ export class WebsocketHandler {
     this._disconnectIfUnused();
   }
 
-  public subscribe(taskId: string) {
+  public async subscribe(taskId: string) {
     if (this.#subscriptions.has(taskId)) {
       return;
     }
 
     this.#subscriptions.add(taskId);
 
-    this._sendWebsocketMessage({
+    await this._sendWebsocketMessage({
       action: "subscribe",
       taskId,
     });
   }
 
-  public unsubscribe(taskId: string) {
+  public async unsubscribe(taskId: string) {
     if (!this.#subscriptions.has(taskId)) {
       return;
     }
 
     this.#subscriptions.delete(taskId);
 
-    this._sendWebsocketMessage({
+    await this._sendWebsocketMessage({
       action: "unsubscribe",
       taskId,
     });
+  }
+
+  public hasHandlers(): boolean {
+    return this.#updateHandlers.length > 0 || this.#errorHandlers.length > 0;
   }
 
   private _connect() {
@@ -103,7 +108,7 @@ export class WebsocketHandler {
 
     this.#websocket = new WebSocket(this.#url);
 
-    this.#websocket.onopen = () => {
+    this.#websocket.onopen = async () => {
       this.#subscriptions.forEach((taskId) => {
         this._sendWebsocketMessage({
           action: "subscribe",
@@ -114,11 +119,11 @@ export class WebsocketHandler {
 
     this.#websocket.onclose = () => {
       setTimeout(() => {
-        this._connect();
+        this._reconnect();
       }, this.#reconnectIntervalMillis);
     };
 
-    this.#websocket.onmessage = (data: WebSocket.MessageEvent) => {
+    this.#websocket.onmessage = async (data: WebSocket.MessageEvent) => {
       const message = JSON.parse(
         data.data.toString()
       ) as WebsocketMessage<unknown>;
@@ -138,13 +143,13 @@ export class WebsocketHandler {
           const taskStatus: TransactionStatusResponse =
             updateWebsocketMessage.payload;
 
-          if (isFinalTaskState(taskStatus.taskState)) {
-            this.unsubscribe(taskStatus.taskId);
-          }
-
           this.#updateHandlers.forEach((handler) => {
             handler(taskStatus);
           });
+
+          if (isFinalTaskState(taskStatus.taskState)) {
+            await this.unsubscribe(taskStatus.taskId);
+          }
           break;
         }
         default: {
@@ -154,20 +159,60 @@ export class WebsocketHandler {
     };
   }
 
-  private _sendWebsocketMessage(message: unknown): void {
-    if (this.#websocket && this.#websocket.readyState === WebSocket.OPEN) {
+  private async _sendWebsocketMessage(message: unknown): Promise<void> {
+    const isConnected = await this._ensureIsConnected();
+    if (isConnected) {
       this.#websocket.send(JSON.stringify(message));
     }
   }
 
-  private _disconnectIfUnused() {
+  private _disconnectIfUnused(): void {
     if (
       this.#updateHandlers.length === 0 &&
       this.#errorHandlers.length === 0 &&
       this.#websocket
     ) {
+      this._disconnect();
+    }
+  }
+
+  private _disconnect(): void {
+    if (this.#websocket) {
       this.#websocket.close();
       this.#websocket = undefined;
     }
+  }
+
+  private _reconnect(): void {
+    this._disconnect();
+    this._connect();
+  }
+
+  private async _ensureIsConnected(): Promise<boolean> {
+    if (!this.#websocket) {
+      this._connect();
+    } else if (this.#websocket.readyState !== WebSocket.OPEN) {
+      this._reconnect();
+    }
+    return await this._awaitConnection();
+  }
+
+  private async _awaitConnection(): Promise<boolean> {
+    const start = Date.now();
+    while (!this.#websocket || this.#websocket.readyState !== WebSocket.OPEN) {
+      const elapsed = Date.now() - start;
+      if (elapsed > this.#connectTimeoutMillis) {
+        const error = new Error(
+          `Timeout connecting to ${this.#url} after ${elapsed}ms`
+        );
+        this.#errorHandlers.forEach((handler) => {
+          handler(error);
+        });
+        return false;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    return true;
   }
 }

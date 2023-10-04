@@ -51,7 +51,7 @@ export {
 
 export class GelatoRelay {
   #config: Config;
-  readonly #websocketHandler?: WebsocketHandler;
+  readonly #websocketHandler: WebsocketHandler;
 
   constructor(config?: Partial<Config>) {
     this.#config = this._getConfiguration(config);
@@ -115,8 +115,8 @@ export class GelatoRelay {
       this.#config
     );
 
-    if (this.#websocketHandler) {
-      this.#websocketHandler.subscribe(response.taskId);
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
     }
 
     return response;
@@ -148,8 +148,8 @@ export class GelatoRelay {
       this.#config
     );
 
-    if (this.#websocketHandler) {
-      this.#websocketHandler.subscribe(response.taskId);
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
     }
 
     return response;
@@ -172,8 +172,8 @@ export class GelatoRelay {
       this.#config
     );
 
-    if (this.#websocketHandler) {
-      this.#websocketHandler.subscribe(response.taskId);
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
     }
 
     return response;
@@ -203,8 +203,8 @@ export class GelatoRelay {
       this.#config
     );
 
-    if (this.#websocketHandler) {
-      this.#websocketHandler.subscribe(response.taskId);
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
     }
 
     return response;
@@ -268,8 +268,8 @@ export class GelatoRelay {
       this.#config
     );
 
-    if (this.#websocketHandler) {
-      this.#websocketHandler.subscribe(response.taskId);
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
     }
 
     return response;
@@ -302,8 +302,8 @@ export class GelatoRelay {
       this.#config
     );
 
-    if (this.#websocketHandler) {
-      this.#websocketHandler.subscribe(response.taskId);
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
     }
 
     return response;
@@ -381,9 +381,7 @@ export class GelatoRelay {
   onTaskStatusUpdate = (
     handler: (taskStatus: TransactionStatusResponse) => void
   ): void => {
-    if (this.#websocketHandler) {
-      this.#websocketHandler.onUpdate(handler);
-    }
+    this.#websocketHandler.onUpdate(handler);
   };
 
   /**
@@ -393,9 +391,7 @@ export class GelatoRelay {
   offTaskStatusUpdate = (
     handler: (taskStatus: TransactionStatusResponse) => void
   ): void => {
-    if (this.#websocketHandler) {
-      this.#websocketHandler.offUpdate(handler);
-    }
+    this.#websocketHandler.offUpdate(handler);
   };
 
   /**
@@ -403,9 +399,7 @@ export class GelatoRelay {
    *
    */
   onError = (handler: (error: Error) => void): void => {
-    if (this.#websocketHandler) {
-      this.#websocketHandler.onError(handler);
-    }
+    this.#websocketHandler.onError(handler);
   };
 
   /**
@@ -413,8 +407,6 @@ export class GelatoRelay {
    *
    */
   offError = (handler: (error: Error) => void): void => {
-    if (this.#websocketHandler) {
-      this.#websocketHandler.offError(handler);
-    }
+    this.#websocketHandler.offError(handler);
   };
 }
