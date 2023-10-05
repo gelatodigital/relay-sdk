@@ -29,6 +29,7 @@ import {
   GELATO_RELAY_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
   GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
 } from "./constants";
+import { WebsocketHandler } from "./utils/index.js";
 
 export {
   CallWithSyncFeeRequest,
@@ -47,11 +48,14 @@ export {
   Config,
   SignerOrProvider,
 };
+
 export class GelatoRelay {
   #config: Config;
+  readonly #websocketHandler: WebsocketHandler;
 
   constructor(config?: Partial<Config>) {
     this.#config = this._getConfiguration(config);
+    this.#websocketHandler = new WebsocketHandler(this.#config.websocketUrl);
   }
 
   /**
@@ -62,8 +66,10 @@ export class GelatoRelay {
   };
 
   private _getConfiguration = (config?: Partial<Config>): Config => {
+    const url = config?.url ?? GELATO_RELAY_URL;
     return {
-      url: config?.url ?? GELATO_RELAY_URL,
+      url,
+      websocketUrl: url.replace(/^http/, "ws"),
       contract: {
         relayERC2771:
           config?.contract?.relayERC2771 ?? GELATO_RELAY_ERC2771_ADDRESS,
@@ -99,12 +105,22 @@ export class GelatoRelay {
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
-  callWithSyncFee = (
+  callWithSyncFee = async (
     request: CallWithSyncFeeRequest,
     options?: RelayRequestOptions,
     sponsorApiKey?: string
-  ): Promise<RelayResponse> =>
-    library.relayWithSyncFee({ request, sponsorApiKey, options }, this.#config);
+  ): Promise<RelayResponse> => {
+    const response = await library.relayWithSyncFee(
+      { request, sponsorApiKey, options },
+      this.#config
+    );
+
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
+    }
+
+    return response;
+  };
 
   /**
    * @param {CallWithSyncFeeERC2771Request | CallWithSyncFeeConcurrentERC2771Request} request - Call with sync fee: Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
@@ -114,15 +130,15 @@ export class GelatoRelay {
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
-  callWithSyncFeeERC2771 = (
+  callWithSyncFeeERC2771 = async (
     request:
       | CallWithSyncFeeERC2771Request
       | CallWithSyncFeeConcurrentERC2771Request,
     signerOrProvider: SignerOrProvider,
     options?: RelayRequestOptions,
     sponsorApiKey?: string
-  ): Promise<RelayResponse> =>
-    library.relayWithCallWithSyncFeeERC2771(
+  ): Promise<RelayResponse> => {
+    const response = await library.relayWithCallWithSyncFeeERC2771(
       {
         request,
         signerOrProvider,
@@ -132,6 +148,13 @@ export class GelatoRelay {
       this.#config
     );
 
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
+    }
+
+    return response;
+  };
+
   /**
    * @param {SponsoredCallRequest} request SponsoredCallRequest to be relayed by the Gelato Executors.
    * @param {string} sponsorApiKey Sponsor API key to be used for the call
@@ -139,15 +162,22 @@ export class GelatoRelay {
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
-  sponsoredCall = (
+  sponsoredCall = async (
     request: SponsoredCallRequest,
     sponsorApiKey: string,
     options?: RelayRequestOptions
-  ): Promise<RelayResponse> =>
-    library.relayWithSponsoredCall(
+  ): Promise<RelayResponse> => {
+    const response = await library.relayWithSponsoredCall(
       { request, sponsorApiKey, options },
       this.#config
     );
+
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
+    }
+
+    return response;
+  };
 
   /**
    * @param {CallWithERC2771Request | CallWithConcurrentERC2771Request} request - Sponsored: Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
@@ -157,13 +187,13 @@ export class GelatoRelay {
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
-  sponsoredCallERC2771 = (
+  sponsoredCallERC2771 = async (
     request: CallWithERC2771Request | CallWithConcurrentERC2771Request,
     signerOrProvider: SignerOrProvider,
     sponsorApiKey: string,
     options?: RelayRequestOptions
-  ): Promise<RelayResponse> =>
-    library.relayWithSponsoredCallERC2771(
+  ): Promise<RelayResponse> => {
+    const response = await library.relayWithSponsoredCallERC2771(
       {
         request,
         signerOrProvider,
@@ -172,6 +202,13 @@ export class GelatoRelay {
       },
       this.#config
     );
+
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
+    }
+
+    return response;
+  };
 
   /**
    * @param {CallWithERC2771Request | CallWithConcurrentERC2771Request} request - Sequential ERC2771 or Concurrent ERC2771 request to be relayed by Gelato Executors
@@ -215,13 +252,13 @@ export class GelatoRelay {
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
-  sponsoredCallERC2771WithSignature = (
+  sponsoredCallERC2771WithSignature = async (
     struct: SignatureData["struct"],
     signature: SignatureData["signature"],
     sponsorApiKey: string,
     options?: RelayRequestOptions
-  ): Promise<RelayResponse> =>
-    library.sponsoredCallERC2771WithSignature(
+  ): Promise<RelayResponse> => {
+    const response = await library.sponsoredCallERC2771WithSignature(
       {
         struct,
         signature,
@@ -230,6 +267,13 @@ export class GelatoRelay {
       },
       this.#config
     );
+
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
+    }
+
+    return response;
+  };
 
   /**
    * @param {SignatureData["struct"]} struct - Struct that can be obtained from getSignatureDataERC2771
@@ -240,14 +284,14 @@ export class GelatoRelay {
    * @returns {Promise<RelayResponse>} Response object with taskId parameter
    *
    */
-  callWithSyncFeeERC2771WithSignature = (
+  callWithSyncFeeERC2771WithSignature = async (
     struct: SignatureData["struct"],
     syncFeeParams: BaseCallWithSyncFeeParams,
     signature: SignatureData["signature"],
     options?: RelayRequestOptions,
     sponsorApiKey?: string
-  ): Promise<RelayResponse> =>
-    library.callWithSyncFeeERC2771WithSignature(
+  ): Promise<RelayResponse> => {
+    const response = await library.callWithSyncFeeERC2771WithSignature(
       {
         struct,
         syncFeeParams,
@@ -257,6 +301,13 @@ export class GelatoRelay {
       },
       this.#config
     );
+
+    if (this.#websocketHandler.hasHandlers()) {
+      await this.#websocketHandler.subscribe(response.taskId);
+    }
+
+    return response;
+  };
 
   /**
    * @param {bigint} chainId - Chain Id
@@ -322,4 +373,40 @@ export class GelatoRelay {
     taskId: string
   ): Promise<TransactionStatusResponse | undefined> =>
     library.getTaskStatus({ taskId }, this.#config);
+
+  /**
+   * @param {callback} handler - Callback function to be called on every task status update
+   *
+   */
+  onTaskStatusUpdate = (
+    handler: (taskStatus: TransactionStatusResponse) => void
+  ): void => {
+    this.#websocketHandler.onUpdate(handler);
+  };
+
+  /**
+   * @param {callback} handler - Callback function to be unregistered from task status updates
+   *
+   */
+  offTaskStatusUpdate = (
+    handler: (taskStatus: TransactionStatusResponse) => void
+  ): void => {
+    this.#websocketHandler.offUpdate(handler);
+  };
+
+  /**
+   * @param {callback} handler - Callback function to be called on error
+   *
+   */
+  onError = (handler: (error: Error) => void): void => {
+    this.#websocketHandler.onError(handler);
+  };
+
+  /**
+   * @param {callback} handler - Callback function to be unregistered as an error handler
+   *
+   */
+  offError = (handler: (error: Error) => void): void => {
+    this.#websocketHandler.offError(handler);
+  };
 }

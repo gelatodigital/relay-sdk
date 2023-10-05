@@ -8,15 +8,15 @@ export type TransactionStatusResponse = {
   transactionHash?: string;
   blockNumber?: number;
   executionDate?: string;
+  gasUsed?: string;
+  effectiveGasPrice?: string;
 };
 
-enum TaskState {
+export enum TaskState {
   CheckPending = "CheckPending",
   ExecPending = "ExecPending",
+  WaitingForConfirmation = "WaitingForConfirmation",
   ExecSuccess = "ExecSuccess",
   ExecReverted = "ExecReverted",
-  WaitingForConfirmation = "WaitingForConfirmation",
-  Blacklisted = "Blacklisted",
   Cancelled = "Cancelled",
-  NotFound = "NotFound",
 }
