@@ -123,6 +123,12 @@ export class WebsocketHandler {
       }, this.#reconnectIntervalMillis);
     };
 
+    this.#websocket.onerror = (error: WebSocket.ErrorEvent) => {
+      this.#errorHandlers.forEach((handler) => {
+        handler(error);
+      });
+    };
+
     this.#websocket.onmessage = async (data: WebSocket.MessageEvent) => {
       const message = JSON.parse(
         data.data.toString()
