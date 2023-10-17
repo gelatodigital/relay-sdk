@@ -124,9 +124,7 @@ export class WebsocketHandler {
     };
 
     this.#websocket.onerror = (error: WebSocket.ErrorEvent) => {
-      this.#errorHandlers.forEach((handler) => {
-        handler(error);
-      });
+      this._handleError(error);
     };
 
     this.#websocket.onmessage = async (data: WebSocket.MessageEvent) => {
@@ -139,9 +137,8 @@ export class WebsocketHandler {
           const errorWebsocketMessage = message as ErrorWebsocketMessage;
           const error: Error = errorWebsocketMessage.payload;
 
-          this.#errorHandlers.forEach((handler) => {
-            handler(error);
-          });
+          this._handleError(error);
+
           break;
         }
         case WebsocketEvent.UPDATE: {
@@ -197,7 +194,10 @@ export class WebsocketHandler {
   private async _ensureIsConnected(): Promise<boolean> {
     if (!this.#websocket) {
       this._connect();
-    } else if (this.#websocket.readyState !== WebSocket.OPEN) {
+    } else if (
+      this.#websocket.readyState !== WebSocket.CONNECTING &&
+      this.#websocket.readyState !== WebSocket.OPEN
+    ) {
       this._reconnect();
     }
     return await this._awaitConnection();
@@ -208,17 +208,21 @@ export class WebsocketHandler {
     while (!this.#websocket || this.#websocket.readyState !== WebSocket.OPEN) {
       const elapsed = Date.now() - start;
       if (elapsed > this.#connectTimeoutMillis) {
-        const error = new Error(
-          `Timeout connecting to ${this.#url} after ${elapsed}ms`
+        this._handleError(
+          new Error(`Timeout connecting to ${this.#url} after ${elapsed}ms`)
         );
-        this.#errorHandlers.forEach((handler) => {
-          handler(error);
-        });
+
         return false;
       }
 
       await new Promise((resolve) => setTimeout(resolve, 10));
     }
     return true;
+  }
+
+  private _handleError(error: Error) {
+    this.#errorHandlers.forEach((handler) => {
+      handler(error);
+    });
   }
 }
