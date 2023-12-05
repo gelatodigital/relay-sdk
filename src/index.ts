@@ -409,4 +409,20 @@ export class GelatoRelay {
   offError = (handler: (error: Error) => void): void => {
     this.#websocketHandler.offError(handler);
   };
+
+  /**
+   * @param {string} taskId - Task Id
+   *
+   */
+  subscribeTaskStatusUpdate = async (taskId: string): Promise<void> => {
+    await this.#websocketHandler.subscribe(taskId);
+  };
+
+  /**
+   * @param {string} taskId - Task Id
+   *
+   */
+  unsubscribeTaskStatusUpdate = async (taskId: string): Promise<void> => {
+    await this.#websocketHandler.unsubscribe(taskId);
+  };
 }
