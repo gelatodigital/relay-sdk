@@ -10,7 +10,7 @@ import {
   CallWithSyncFeeConcurrentERC2771Request,
   CallWithConcurrentERC2771Request,
 } from "./lib/erc2771/types";
-import { TransactionStatusResponse } from "./lib/status/types";
+import { TransactionStatusResponse, TaskState } from "./lib/status/types";
 import {
   BaseCallWithSyncFeeParams,
   Config,
@@ -47,6 +47,7 @@ export {
   CallWithConcurrentERC2771Request,
   Config,
   SignerOrProvider,
+  TaskState,
 };
 
 export class GelatoRelay {
