@@ -20,6 +20,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "homepage": "https://github.com/gelatodigital/relay-sdk#readme",
   "devDependencies": {
     "@tsconfig/recommended": "1.0.2",
     "@types/node": "16.18.25",
