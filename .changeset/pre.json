@@ -1,0 +1,8 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@gelatonetwork/relay-sdk": "5.5.5"
+  },
+  "changesets": []
+}

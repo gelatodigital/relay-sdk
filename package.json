@@ -47,5 +47,6 @@
   "lint-staged": {
     "*.{js,json,md,ts}": "yarn format",
     "*.{ts,js}": "yarn lint"
-  }
+  },
+  "packageManager": "yarn@4.1.0"
 }
