@@ -1,9 +1,9 @@
-import { ethers } from "ethers";
+import { Signer } from "ethers";
 
 import { SignerOrProvider } from "../lib/types";
 
 export const isSigner = (
   signerOrProvider: SignerOrProvider
-): signerOrProvider is ethers.Signer => {
+): signerOrProvider is Signer => {
   return "signTransaction" in signerOrProvider;
 };

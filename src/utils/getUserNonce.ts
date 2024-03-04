@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { Contract } from "ethers";
 
 import { USER_NONCE_ABI } from "../constants";
 import { Config, SignerOrProvider } from "../lib/types";
@@ -22,7 +22,7 @@ export const getUserNonce = async (
 
   const chainId = await getProviderChainId(signerOrProvider);
 
-  const contract = new ethers.Contract(
+  const contract = new Contract(
     getGelatoRelayERC2771Address({ chainId, type }, config),
     USER_NONCE_ABI,
     signerOrProvider
