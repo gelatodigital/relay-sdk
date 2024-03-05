@@ -4,5 +4,5 @@
   "initialVersions": {
     "@gelatonetwork/relay-sdk": "5.5.5"
   },
-  "changesets": []
+  "changesets": ["brave-weeks-add"]
 }

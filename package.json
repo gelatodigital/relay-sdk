@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/relay-sdk",
-  "version": "5.5.5",
+  "version": "5.5.6-next.0",
   "description": "SDK to integrate with Gelato Relay",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rm -rf dist && npx tsc",
     "format:check": "prettier --check \"*/**/*.{js,json,md,ts}\"",
-    "format": "prettier --write */**/*.{js,json,md,ts}",
+    "format": "prettier --write \"*/**/*.{js,json,md,ts}\"",
     "lint": "eslint --cache .",
     "prepare": "husky install"
   },
@@ -22,6 +22,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@tsconfig/recommended": "1.0.2",
     "@types/node": "16.18.25",
     "@typescript-eslint/eslint-plugin": "^5.59.1",
