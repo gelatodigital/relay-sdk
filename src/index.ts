@@ -28,6 +28,10 @@ import {
   GELATO_RELAY_URL,
   GELATO_RELAY_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
   GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
+  GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ABSTRACT_ADDRESS,
+  GELATO_RELAY_1BALANCE_ERC2771_ABSTRACT_ADDRESS,
+  GELATO_RELAY_CONCURRENT_ERC2771_ABSTRACT_ADDRESS,
+  GELATO_RELAY_ERC2771_ABSTRACT_ADDRESS,
 } from "./constants";
 import { WebsocketHandler } from "./utils/index.js";
 
@@ -80,9 +84,15 @@ export class GelatoRelay {
         relayERC2771zkSync:
           config?.contract?.relayERC2771zkSync ??
           GELATO_RELAY_ERC2771_ZKSYNC_ADDRESS,
+        relayERC2771Abstract:
+          config?.contract?.relayERC2771Abstract ??
+          GELATO_RELAY_ERC2771_ABSTRACT_ADDRESS,
         relay1BalanceERC2771zkSync:
           config?.contract?.relay1BalanceERC2771zkSync ??
           GELATO_RELAY_1BALANCE_ERC2771_ZKSYNC_ADDRESS,
+        relay1BalanceERC2771Abstract:
+          config?.contract?.relay1BalanceERC2771Abstract ??
+          GELATO_RELAY_1BALANCE_ERC2771_ABSTRACT_ADDRESS,
         relayConcurrentERC2771:
           config?.contract?.relayConcurrentERC2771 ??
           GELATO_RELAY_CONCURRENT_ERC2771_ADDRESS,
@@ -92,9 +102,15 @@ export class GelatoRelay {
         relayConcurrentERC2771zkSync:
           config?.contract?.relayConcurrentERC2771zkSync ??
           GELATO_RELAY_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
+        relayConcurrentERC2771Abstract:
+          config?.contract?.relayConcurrentERC2771Abstract ??
+          GELATO_RELAY_CONCURRENT_ERC2771_ABSTRACT_ADDRESS,
         relay1BalanceConcurrentERC2771zkSync:
           config?.contract?.relay1BalanceConcurrentERC2771zkSync ??
           GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ZKSYNC_ADDRESS,
+        relay1BalanceConcurrentERC2771Abstract:
+          config?.contract?.relay1BalanceConcurrentERC2771Abstract ??
+          GELATO_RELAY_1BALANCE_CONCURRENT_ERC2771_ABSTRACT_ADDRESS,
       },
     };
   };

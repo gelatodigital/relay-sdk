@@ -60,11 +60,15 @@ export type Config = {
     relayERC2771: string;
     relay1BalanceERC2771: string;
     relayERC2771zkSync: string;
+    relayERC2771Abstract: string;
     relay1BalanceERC2771zkSync: string;
+    relay1BalanceERC2771Abstract: string;
     relayConcurrentERC2771: string;
     relay1BalanceConcurrentERC2771: string;
     relayConcurrentERC2771zkSync: string;
+    relayConcurrentERC2771Abstract: string;
     relay1BalanceConcurrentERC2771zkSync: string;
+    relay1BalanceConcurrentERC2771Abstract: string;
   };
 };
 
