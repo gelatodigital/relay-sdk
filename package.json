@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/relay-sdk",
-  "version": "5.5.6",
+  "version": "5.6.0",
   "description": "SDK to integrate with Gelato Relay",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,10 +40,10 @@
     "typescript": "5.0.4"
   },
   "dependencies": {
-    "axios": "0.27.2",
+    "axios": "0.29.0",
     "ethers": "6.7.0",
     "isomorphic-ws": "^5.0.0",
-    "ws": "^8.5.0"
+    "ws": "^8.18.0"
   },
   "lint-staged": {
     "*.{js,json,md,ts}": "yarn format",
