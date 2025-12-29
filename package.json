@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/relay-sdk",
-  "version": "5.6.0",
+  "version": "5.6.1",
   "description": "SDK to integrate with Gelato Relay",
   "homepage": "https://github.com/gelatodigital/relay-sdk#readme",
   "repository": {
