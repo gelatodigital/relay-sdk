@@ -1,3 +1,7 @@
+console.warn(
+  "[@gelatonetwork/relay-sdk] This package is deprecated. Please migrate to @gelatocloud/gasless. See https://www.npmjs.com/package/@gelatocloud/gasless"
+);
+
 import * as library from "./lib";
 import { CallWithSyncFeeRequest } from "./lib/callWithSyncFee/types";
 import { SponsoredCallRequest } from "./lib/sponsoredCall/types";
