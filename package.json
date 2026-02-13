@@ -1,7 +1,8 @@
 {
   "name": "@gelatonetwork/relay-sdk",
-  "version": "5.6.1",
-  "description": "SDK to integrate with Gelato Relay",
+  "version": "5.7.0",
+  "description": "[DEPRECATED] SDK to integrate with Gelato Relay. Use @gelatocloud/gasless instead.",
+  "deprecated": "This package is deprecated. Use @gelatocloud/gasless instead.",
   "homepage": "https://github.com/gelatodigital/relay-sdk#readme",
   "repository": {
     "type": "git",
